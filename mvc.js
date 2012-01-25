@@ -24,6 +24,7 @@ function bootApplication(app) {
 
   // Example 500 page
   app.use(function(err, req, res, next){
+    console.log(err);
     res.render('500.jade', {layout: false});
   });
 
@@ -51,9 +52,13 @@ function bootApplication(app) {
     messages: function(req){
       return function(){
         var msgs = req.flash();
-        return Object.keys(msgs).reduce(function(arr, type){
+        console.log('msgs = ', msgs);        
+        var result = Object.keys(msgs).reduce(function(arr, type){
+          console.log(msgs[type]);
           return arr.concat(msgs[type]);
         }, []);
+        console.log('result ', result);
+        return result;
       }
     }
   });
@@ -91,7 +96,6 @@ function bootController(app, file) {
       
     fn.push( controllerAction(name, plural, action, routeFn) );
     
-    console.log('fn.length = ', fn.length);
     switch(action) {
       case 'index':
         app.get(prefix, fn);
@@ -116,7 +120,6 @@ function bootController(app, file) {
         break;
       default:        
         methods.forEach( function(method) {
-          console.log('Path ', path, ' action ', realaction, ' method ', method);
           switch (method) {
             case 'POST':
               app.post(path, fn);
@@ -146,7 +149,6 @@ function controllerAction(name, plural, action, fn) {
       , format = req.params.format
       , path = __dirname + '/views/' + name + '/' + action + '.jade';      
     res.render = function(obj, options, fn){
-      console.log('render invoked ', obj, options);
       res.render = render;
       // Template path
       if (typeof obj === 'string') {
@@ -171,7 +173,7 @@ function controllerAction(name, plural, action, fn) {
       } else {
         options[name] = obj;
       }
-      console.log('render path', path);
+      console.log(options);
       return res.render(path, options, fn);
     };
     fn.apply(this, arguments);
@@ -181,7 +183,6 @@ function controllerAction(name, plural, action, fn) {
 
 // Check authenticated 
 function restrict(req, res, next) {
-  console.log('hi');
   if (req.session.user) {
     next();
   } else {

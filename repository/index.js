@@ -1,8 +1,9 @@
 GLOBAL.DEBUG = true;
 
-var Db = require('mongodb').Db,
-    Connection = require('mongodb').Connection,
-    Server = require('mongodb').Server;
+var Db = require('mongodb').Db
+    , Connection = require('mongodb').Connection
+    , Server = require('mongodb').Server
+    , dbName = 'wifefoosdb';
   
 var host = process.env['MONGO_NODE_DRIVER_HOST'] != null ? process.env['MONGO_NODE_DRIVER_HOST'] : 'localhost';
 var port = process.env['MONGO_NODE_DRIVER_PORT'] != null ? process.env['MONGO_NODE_DRIVER_PORT'] : Connection.DEFAULT_PORT;
@@ -19,7 +20,7 @@ function checkErrorFn(error, errorFn, next) {
 
 
 exports.getUser = function(username, callback) {
-  var db = new Db('scrumtrakdb', new Server(host, port, {}), {native_parser:false}),
+  var db = new Db(dbName, new Server(host, port, {}), {native_parser:false}),
       errorFn = function(error) {
         db.close();
         callback.call(this, error);
@@ -31,7 +32,7 @@ exports.getUser = function(username, callback) {
     checkErrorFn(error, errorFn, function() {    
       db.collection('users', function(error, collection) {
         checkErrorFn(error, errorFn, function() {
-          collection.find({username: username}, function(error, cursor) {
+          collection.find( {username: username} , function(error, cursor) {
             checkErrorFn(error, errorFn, function() {
               cursor.nextObject(function(error, doc) {
                 checkErrorFn(error, errorFn, function() {
@@ -51,7 +52,7 @@ exports.getUser = function(username, callback) {
 
 
 exports.insertUser = function(user, callback) {
-  var db = new Db('scrumtrakdb', new Server(host, port, {}), {native_parser:false}),
+  var db = new Db(dbName, new Server(host, port, {}), {native_parser:false}),
       errorFn = function(error) {
         db.close();
         callback.call(this, error);
@@ -65,8 +66,11 @@ exports.insertUser = function(user, callback) {
         
           collection.insert([user], {safe: true}, function(error, docs) {
             checkErrorFn(error, errorFn, function() {
-              console.log(docs);
-              callback.call(this, null, docs);
+              if (!docs || !docs.length) {
+                callback.call(this, 'Inserting user failed');
+              } else {
+                callback.call(this, null, docs[0]);
+              }
               db.close();
             });
           });

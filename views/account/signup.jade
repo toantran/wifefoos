@@ -1,22 +1,38 @@
-#main
+- var firstname = '', lastname = '', email = '', password = '', confirmpass = '';
+- if (typeof account !== 'undefined')
+  - firstname = account.firstname
+  - lastname = account.lastname
+  - email = account.username
+  - password = account.password
+  - confirmpass = account.passwordconfirm
+#main.signup-panel
   #formbox-signup.formbox
     .title
-      h1 ScrumTrak Sign Up
+      h1 W.I.F.E Sign Up
+    != partial('../messages')
     form#form-signup.login-form(method='POST')
       fieldset
         input#form-signup-validation(name='validation', type='hidden')
         ol
           li
-            label(for='form-signup-username') User name (email address)
-            input#form-signup-username.text(maxlength='255', name='username', size='25', type='text')
-            .vError Please enter your user name
+            label(for='form-signup-firstname') First name
+            input#form-signup-firstname.text(maxlength='255', name='firstname', size='25', type='text', value=firstname)
+            .vError Please enter your first name
+          li
+            label(for='form-signup-lastname') Last name
+            input#form-signup-lastname.text(maxlength='255', name='lastname', size='25', type='text', value=lastname)
+            .vError Please enter your last name
+          li
+            label(for='form-signup-username') Email address
+            input#form-signup-username.text(maxlength='255', name='username', size='25', type='text', value=email)
+            .vError Please enter your email address
           li
             label(for='form-signup-password') Password
-            input#form-signup-password.text(maxlength='16', name='password', size='25', type='password')
+            input#form-signup-password.text(maxlength='16', name='password', size='25', type='password', value=password)
             .vError Please enter your password
           li
             label(for='form-signup-password') Confirm Password
-            input#form-signup-password.text(maxlength='16', name='passwordconfirm', size='25', type='password')
+            input#form-signup-password.text(maxlength='16', name='passwordconfirm', size='25', type='password', value=confirmpass)
             .vError Please enter your password
           li#signup_in
             input.submit(type='submit', value='Sign Up')

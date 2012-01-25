@@ -86,11 +86,11 @@ a {
 }
 
 .masterpage-header-menu .menu-item-last {
-  padding-right: 0;
+  padding-right: 10px;
 }
 
 .masterpage-header-menu .menu-item-first {
-  padding-left: 0;
+  padding-left: 10px;
 }
 
 .menu-item a {
@@ -109,6 +109,10 @@ a {
   -moz-box-shadow: 0 0 5px 5px #bbb;
   -webkit-box-shadow: 0 0 5px 5px#bbb;
   box-shadow: 0 0 5px 5px #bbb;
+}
+
+#main.signup-panel {
+  height: 500px;
 }
 
 .formbox {
@@ -168,4 +172,8 @@ form fieldset ol li {
 form#form-login fieldset ol li {
   border-top: none;
   clear: both;
+}
+
+#messages {
+  color: red;
 }

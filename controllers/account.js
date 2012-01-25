@@ -7,7 +7,7 @@ var crypto = require('crypto');
 exports.login = function(req, res) {
   console.log('login');
   res.render(null, {
-    title: 'ScrumTrak - Log in',
+    title: 'W.I.F.E - Log in',
     layout: true
   });
 }
@@ -36,7 +36,7 @@ exports.logout.methods = ['GET', 'POST'];
 exports.authenticate = function(req, res) {  
   var username = req.param('username', '')
       , password = req.param('password', '')
-      , returnUrl = req.param('returnurl', '/');
+      , returnUrl = req.param('returnurl', 'profile');
   
   authenticate(username, password, function(error, authenticated, user) {
     if (error) {
@@ -67,10 +67,11 @@ exports.authenticate.action = 'login';
   URL  /account/signup
 */
 exports.signup = function(req, res) {
-  res.render(null, {
-    title: 'ScrumTrak - Sign up',
+  res.render(req.session.insertuser, {
+    title: 'W.I.F.E - Sign up',
     layout: true
   });
+  delete req.session.insertuser;
 }
 exports.signup.methods = ['GET'];
 
@@ -78,17 +79,51 @@ exports.signup.methods = ['GET'];
   POST
   URL /account/signup
 */
-exports.insertuser = function(req, res) {
+exports.insertuser = function(req, res, next) {
   var username = req.param('username', '')
-    , password = req.param('password', '');
+    , password = req.param('password', '')
+    , firstname = req.param('firstname', '')
+    , lastname = req.param('lastname', '')
+    , passwordconfirm = req.param('passwordconfirm', '');
+    
+  req.session.insertuser = req.body; 
   
-  insertUser(username, password, function(error, user) {
+  if (!username) {
+    req.flash('error', 'Email address cannot be empty');
+    res.redirect('back');
+    return;
+  }
+  
+  if (password !== passwordconfirm) {
+    req.flash('error', 'Passwords not match!');
+    res.redirect('back');
+    return;
+  }
+  
+  insertUser({
+    firstname: firstname
+    , lastname: lastname
+    , username: username
+    , password: password
+  }, function(error, user) {
     if (error) {
-      res.send('FAILED ' + error);
+      req.flash('error', error);
+      res.redirect('back');
     } else if (user){
-      res.redirect('/');
+      // Regenerate session when signing in
+      // to prevent fixation 
+      req.session.regenerate( function() {
+        // Store the user's primary key 
+        // in the session store to be retrieved,
+        // or in this case the entire user object
+        req.session.user = user;
+        
+        // return to the original url or home page        
+        res.redirect('profile');
+      } );
     } else {
-      res.send('FAILED user empty');
+      req.flash('error', 'Creating user failed');
+      res.redirect('back');
     }
   });
 }
@@ -101,7 +136,7 @@ exports.insertuser.action = 'signup';
 */
 exports.profile = function(req, res) {
   res.render('', {
-    title: 'ScrumTrak - Profile',
+    title: 'W.I.F.E - Profile',
     user: req.session.user,
     layout: true
   });
@@ -113,19 +148,19 @@ exports.profile.authenticated = true;
 /*
   insert a user record into the DB
 */
-function insertUser(username, password, callback) {
+function insertUser(user, callback) {
   var repo = require('../repository'),
-      encryptedPassword = hash(password, 'a little dog'),
-      user = {username: username, password: encryptedPassword},
-      result = repo.insertUser(user, function(error, savedUser) {
-        if (error) {
-          console.log(error);
-          callback(error);
-        } else {
-          callback(null, savedUser);
-        }
-      });
-  
+      encryptedPassword = hash(user.password, 'a little dog');
+
+  user.password = encryptedPassword;
+  repo.insertUser(user, function(error, savedUser) {
+    if (error) {
+      callback(error);
+    } else {
+      callback(null, savedUser);
+    }
+  });
+
   return true;
 }
 

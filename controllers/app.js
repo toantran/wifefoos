@@ -2,7 +2,7 @@
   // URL /
 exports.index = function(req, res) {
   res.render(null, {
-    title: 'ScrumTrak',
+    title: 'W.I.F.E',
   	user: req.session.user,
   	layout: true
   });
