@@ -36,11 +36,12 @@ exports.logout.methods = ['GET', 'POST'];
 exports.authenticate = function(req, res) {  
   var username = req.param('username', '')
       , password = req.param('password', '')
-      , returnUrl = req.param('returnurl', 'profile');
+      , returnUrl = req.param('returnurl', '/account/profile');
   
   authenticate(username, password, function(error, authenticated, user) {
     if (error) {
-      res.send('FAILED ' + error);
+      req.flash('error', error);
+      res.redirect('back');
     } else if (authenticated){
       // Regenerate session when signing in
       // to prevent fixation 
@@ -50,11 +51,14 @@ exports.authenticate = function(req, res) {
         // or in this case the entire user object
         req.session.user = user;
         
-        // return to the original url or home page        
+        // return to the original url or home page   
+        console.log(returnUrl);     
+        
         res.redirect(returnUrl);
       } );
     } else {
-      res.send('FAILED Password unmatched');
+      req.flash('error', 'Wrong password');
+      res.redirect('back');
     }
   });  
 }
@@ -119,7 +123,7 @@ exports.insertuser = function(req, res, next) {
         req.session.user = user;
         
         // return to the original url or home page        
-        res.redirect('profile');
+        res.redirect('/account/profile');
       } );
     } else {
       req.flash('error', 'Creating user failed');
@@ -135,7 +139,7 @@ exports.insertuser.action = 'signup';
   URL /account/profile
 */
 exports.profile = function(req, res) {
-  res.render('', {
+  res.render(null, {
     title: 'W.I.F.E - Profile',
     user: req.session.user,
     layout: true
@@ -151,16 +155,27 @@ exports.profile.authenticated = true;
 function insertUser(user, callback) {
   var repo = require('../repository'),
       encryptedPassword = hash(user.password, 'a little dog');
-
-  user.password = encryptedPassword;
-  repo.insertUser(user, function(error, savedUser) {
+  
+  repo.getUser(user.username, function(error, existingUser) {
     if (error) {
-      callback(error);
+      console.log(error);
+      callback.call(this, error);
+    } else if (existingUser){
+      callback.call(this, 'Email address registered');
     } else {
-      callback(null, savedUser);
+
+      user.password = encryptedPassword;
+      repo.insertUser(user, function(error, savedUser) {
+        if (error) {
+          callback(error);
+        } else {
+          callback(null, savedUser);
+        }
+      });
+
     }
   });
-
+  
   return true;
 }
 

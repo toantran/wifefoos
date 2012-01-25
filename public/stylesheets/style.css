@@ -22,7 +22,6 @@ a {
 
 .masterpage-header {
   color: white;
-  width: 100%;
   padding: 3px;
   background-color: #5C94FF;
   clear: both;
@@ -112,7 +111,7 @@ a {
 }
 
 #main.signup-panel {
-  height: 500px;
+  height: 550px;
 }
 
 .formbox {
@@ -146,6 +145,10 @@ a {
   float: left;  
 }
 
+.login-form fieldset {
+  border: none;
+}
+
 form fieldset ol li label {
   color: #555;
   display: block;
@@ -167,6 +170,7 @@ form#form-login fieldset ol li label, form#form-signup fieldset ol li label {
 form fieldset ol li {
   clear: left;
   padding: 7px 0;
+  display: block;
 }
 
 form#form-login fieldset ol li {
