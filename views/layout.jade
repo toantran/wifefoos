@@ -1,0 +1,36 @@
+!!!
+html
+  head
+    title #{title}
+    link(rel='stylesheet', href='/javascripts/ext/resources/css/ext-all.css')    
+    link(rel='stylesheet', href='/stylesheets/style.css')
+    script(type='text/javascript', src='/javascripts/ext/ext-all-debug.js')
+  body
+    .masterpage
+      .masterpage-header
+        .masterpage-header-title 
+          a(href='/') ScrumTrak
+        .masterpage-header-subtitle a project management tool
+        - if (typeof user !== "undefined")
+          - var firstName = user.firstName || ''
+          - var lastName = user.lastName || ''
+          - var fullName = firstName && lastName ? firstName + ', ' + lastName : firstName ? lastName : lastName ? firstName : user.username
+          .masterpage-header-user Welcome,&nbsp;
+            a(href='profile')=fullName
+          .masterpage-header-menu
+            .menu-item.menu-item-last
+              a(href='/logout') Logout
+            .separator              
+            .menu-item.menu-item-first
+              a(href='/projects') Projects
+        - else 
+          .masterpage-header-user &nbsp;
+          .masterpage-header-menu
+            .menu-item
+              a(href='/account/login') Login   
+            .separator         
+            .menu-item
+              a(href='/account/signup') Sign Up
+        .clear-float
+      .masterpage-body
+        != body

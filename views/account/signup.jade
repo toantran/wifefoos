@@ -1,0 +1,23 @@
+#main
+  #formbox-signup.formbox
+    .title
+      h1 ScrumTrak Sign Up
+    form#form-signup.login-form(method='POST')
+      fieldset
+        input#form-signup-validation(name='validation', type='hidden')
+        ol
+          li
+            label(for='form-signup-username') User name (email address)
+            input#form-signup-username.text(maxlength='255', name='username', size='25', type='text')
+            .vError Please enter your user name
+          li
+            label(for='form-signup-password') Password
+            input#form-signup-password.text(maxlength='16', name='password', size='25', type='password')
+            .vError Please enter your password
+          li
+            label(for='form-signup-password') Confirm Password
+            input#form-signup-password.text(maxlength='16', name='passwordconfirm', size='25', type='password')
+            .vError Please enter your password
+          li#signup_in
+            input.submit(type='submit', value='Sign Up')
+script(type='text/javascript', src='/javascripts/app/signup.js')

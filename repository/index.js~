@@ -1,0 +1,8 @@
+
+
+exports.getUser = function(username) {
+  return {
+    username: 'scott',
+    password: '088381f650ca03199a807ec7977b7027c20dbadac54c790143f0a11214f8de18'
+  };
+}

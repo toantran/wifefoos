@@ -1,0 +1,171 @@
+body {
+  background-color: #f0f0f0;
+  font: 11px "Lucida Grande", Helvetica, Arial, sans-serif;
+  background-image: url('/images/background.png');
+	background-repeat : repeat-x;
+	background-position : top;
+}
+
+a {
+  color: #00B7FF;
+}
+
+.masterpage {
+  margin: 3px auto 2px auto;
+  width: 1024px;
+  height: 850px;
+  background-color: #fafafa;
+	border-width : 1px;
+	border-color : #D5D5D5;
+	border-style : solid;
+}
+
+.masterpage-header {
+  color: white;
+  width: 100%;
+  padding: 3px;
+  background-color: #5C94FF;
+  clear: both;
+}
+
+.masterpage-header-title {
+  font-size: 2.5em;
+  font-weight: bolder;
+  float: left;
+  margin-left: 3px;
+}
+
+.masterpage-header-title a {
+  color: white;
+  text-decoration: none;
+}
+
+.masterpage-header-subtitle {
+  font-size: 1.1em;
+  float: left;
+  margin-left: 7px;
+  margin-top: 12px;
+  font-variant : small-caps;
+}
+
+.masterpage-header-user {
+  margin-top: 3px;
+}
+
+.masterpage-header-user a {
+  color: #33FFFF;
+  cursor: pointer;
+}
+
+.masterpage-header-user, .masterpage-header-menu {
+  float: right;
+  clear: right;  
+}
+
+.masterpage-header-menu {
+  background-color: #D87900;
+  margin-top: 3px;
+  margin-bottom: -3px;
+  padding: 2px;
+}
+
+.masterpage-header-menu div {
+  float: right;
+}
+
+.masterpage-header-menu .separator {
+  height: 14px;
+  width: 2px;
+  background-color: #f4b15a;
+	border-left: 1px #b86b08 solid;
+}
+
+.masterpage-header-menu .menu-item {
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+.masterpage-header-menu .menu-item-last {
+  padding-right: 0;
+}
+
+.masterpage-header-menu .menu-item-first {
+  padding-left: 0;
+}
+
+.menu-item a {
+  color: #33FFFF;
+  text-decoration: none;
+}
+
+.clear-float {
+  clear: both;
+}
+
+#main {
+  margin: 40px auto 40px auto;
+  width: 550px;
+  height: 350px;
+  -moz-box-shadow: 0 0 5px 5px #bbb;
+  -webkit-box-shadow: 0 0 5px 5px#bbb;
+  box-shadow: 0 0 5px 5px #bbb;
+}
+
+.formbox {
+  padding: 20px;
+}
+
+.formbox .title {
+  margin-bottom: 20px;
+  font-size: 1.8em;
+  font-weight: bolder;
+}
+
+.title span {
+  top: 0;
+  left: 0;
+	background-repeat : no-repeat;
+	background-position : 0 0;
+}
+
+#formbox-login .title span {
+  background-image: url('../../images/titles.png');
+  background-position: 0 -300px;
+}
+
+.tips {
+  margin-top: 15px;
+  float: right;
+}
+
+.login-form {
+  float: left;  
+}
+
+form fieldset ol li label {
+  color: #555;
+  display: block;
+  float: left;
+  font-weight: bold;
+  line-height: 1;
+  margin: 8px 10px 0 0;
+  text-align: right;
+  width: 250px;
+}
+
+form#form-login fieldset ol li label, form#form-signup fieldset ol li label {
+  float: none;
+  line-height: normal;
+  text-align: left;
+  height: 18px;
+}
+
+form fieldset ol li {
+  clear: left;
+  padding: 7px 0;
+}
+
+form#form-login fieldset ol li {
+  border-top: none;
+  clear: both;
+}
