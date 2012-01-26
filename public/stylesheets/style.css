@@ -179,8 +179,3 @@ form#form-login fieldset ol li {
 #messages {
   color: red;
 }
-
-#player-picture img {
-  max-height: 100px;
-  max-width: 100px;
-}

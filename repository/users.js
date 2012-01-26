@@ -117,21 +117,20 @@ exports.insertUser = function(user, callback) {
         db.close();
         callback.call(this, error);
       };
-      
-  console.log('connecting to db at ', host, ':', port);
-  
-  getCollection('users', function(error, collection) {
+        
+  getCollection( db, function(error, collection) {
     checkErrorFn(error, errorFn, function() {
     
-      collection.insert([user], {safe: true}, function(error, docs) {
-        checkErrorFn(error, errorFn, function() {
-          if (!docs || !docs.length) {
-            callback.call(this, 'Inserting user failed');
-          } else {
-            callback.call(this, null, docs[0]);
-          }
-          db.close();
-        });
+      collection.insert([user], {safe: true}, 
+        function(error, docs) {
+          checkErrorFn(error, errorFn, function() {
+            if (!docs || !docs.length) {
+              callback.call(this, 'Inserting user failed');
+            } else {
+              callback.call(this, null, docs[0]);
+            }
+            db.close();
+          });
       });
     });       
   });

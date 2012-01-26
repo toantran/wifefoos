@@ -1,8 +1,17 @@
+link(rel='stylesheet', href='/stylesheets/profile.css')
 #profile-main
   #personal-info
+    #player-name.player-nickname!= profile.nickname
     #player-picture
       img(src='../../images/player.jpg', maxheight=100, maxwidth= 100)
-    #player-name!= profile.nickname
-    #player-record Record #{profile.win || 0}-#{profile.loss || 0}
+    #player-picture-change
+      a Change your profile picture
+    #player-team
+      label Team
+      span!= profile.team      
+    #player-record Record #{profile.stats.wins || 0}-#{profile.stats.losses || 0}
     #player-rank Rank ##{profile.rank || 'N/A'}
   #personal-wall
+    #personal-status!= profile.statustext
+  .clear-float
+script()
