@@ -104,14 +104,12 @@ a {
 #main {
   margin: 40px auto 40px auto;
   width: 550px;
-  height: 350px;
   -moz-box-shadow: 0 0 5px 5px #bbb;
   -webkit-box-shadow: 0 0 5px 5px#bbb;
   box-shadow: 0 0 5px 5px #bbb;
 }
 
 #main.signup-panel {
-  height: 550px;
 }
 
 .formbox {
@@ -180,4 +178,9 @@ form#form-login fieldset ol li {
 
 #messages {
   color: red;
+}
+
+#player-picture img {
+  max-height: 100px;
+  max-width: 100px;
 }

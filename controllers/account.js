@@ -88,6 +88,7 @@ exports.insertuser = function(req, res, next) {
     , password = req.param('password', '')
     , firstname = req.param('firstname', '')
     , lastname = req.param('lastname', '')
+    , nickname = req.param('nickname', '')
     , passwordconfirm = req.param('passwordconfirm', '');
     
   req.session.insertuser = req.body; 
@@ -109,6 +110,7 @@ exports.insertuser = function(req, res, next) {
     , lastname: lastname
     , username: username
     , password: password
+    , nickname: nickname
   }, function(error, user) {
     if (error) {
       req.flash('error', error);
@@ -139,11 +141,14 @@ exports.insertuser.action = 'signup';
   URL /account/profile
 */
 exports.profile = function(req, res) {
+  res.redirect('/profile');
+  /*
   res.render(null, {
     title: 'W.I.F.E - Profile',
     user: req.session.user,
     layout: true
   });
+  */
 }
 exports.profile.methods = ['GET'];
 exports.profile.authenticated = true;
@@ -153,7 +158,7 @@ exports.profile.authenticated = true;
   insert a user record into the DB
 */
 function insertUser(user, callback) {
-  var repo = require('../repository'),
+  var repo = require('../repository/users'),
       encryptedPassword = hash(user.password, 'a little dog');
   
   repo.getUser(user.username, function(error, existingUser) {
@@ -184,7 +189,7 @@ function insertUser(user, callback) {
   Authenticate user login  
 */
 function authenticate(username, password, callback) {
-  var repo = require('../repository'),
+  var repo = require('../repository/users'),
       encryptedPassword = hash(password, 'a little dog'),
       user = repo.getUser(username, function(error, user) {
         if (error) {

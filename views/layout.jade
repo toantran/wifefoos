@@ -11,12 +11,10 @@ html
         .masterpage-header-title 
           a(href='/') W . I . F . E
         .masterpage-header-subtitle Wheels IT Foosball Event
-        - if (typeof user !== "undefined")
-          - var firstName = user.firstname || ''
-          - var lastName = user.lastname || ''
-          - var fullName = firstName && lastName ? firstName + ' ' + lastName : firstName ? lastName : lastName ? firstName : user.username
+        - if (typeof request.session.user !== "undefined")
+          - var nickname = request.session.user.nickname || request.session.user.username
           .masterpage-header-user Welcome,&nbsp; 
-            a(href='profile')= fullName
+            a(href='profile')= nickname
           .masterpage-header-menu
             .menu-item.menu-item-last
               a(href='/logout') Logout

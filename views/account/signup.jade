@@ -1,7 +1,8 @@
-- var firstname = '', lastname = '', email = '', password = '', confirmpass = '';
+- var firstname = '', lastname = '', email = '', password = '', confirmpass = '', nickname = '';
 - if (typeof account !== 'undefined')
   - firstname = account.firstname
   - lastname = account.lastname
+  - nickname = account.nickname || ''
   - email = account.username
   - password = account.password
   - confirmpass = account.passwordconfirm
@@ -15,13 +16,17 @@
         input#form-signup-validation(name='validation', type='hidden')
         ol
           li
-            label(for='form-signup-firstname') First name
-            input#form-signup-firstname.text(maxlength='255', name='firstname', size='25', type='text', value=firstname)
-            .vError Please enter your first name
-          li
-            label(for='form-signup-lastname') Last name
-            input#form-signup-lastname.text(maxlength='255', name='lastname', size='25', type='text', value=lastname)
-            .vError Please enter your last name
+            label(for='form-signup-nickname') Name (real or nick name)
+            input#form-signup-nickname.text(maxlength='255', name='nickname', size='25', type='text', value=nickname)
+            .vError Please enter your name
+          //li
+          //  label(for='form-signup-firstname') First name
+          //  input#form-signup-firstname.text(maxlength='255', name='firstname', size='25', type='text', value=firstname)
+          //  .vError Please enter your first name
+          //li
+          //  label(for='form-signup-lastname') Last name
+          //  input#form-signup-lastname.text(maxlength='255', name='lastname', size='25', type='text', value=lastname)
+          //  .vError Please enter your last name
           li
             label(for='form-signup-username') Email address
             input#form-signup-username.text(maxlength='255', name='username', size='25', type='text', value=email)
@@ -36,4 +41,5 @@
             .vError Please enter your password
           li#signup_in
             input.submit(type='submit', value='Sign Up')
+    .clear-float
 script(type='text/javascript', src='/javascripts/app/signup.js')
