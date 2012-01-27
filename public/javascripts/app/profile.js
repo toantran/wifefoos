@@ -8,9 +8,16 @@ profile.createTeamClick = function(e) {
 };
 
 
+profile.recruitClick = function(e) {
+  console.log();
+};
+
+
 $(document).ready( function() {
 
   $('input#createteambtn').click(profile.createTeamClick);  
+  
+  $('input#recruitbtn').click(profile.recruitClick);
   
 } );
 
