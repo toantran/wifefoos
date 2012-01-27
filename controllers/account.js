@@ -7,7 +7,7 @@ var crypto = require('crypto');
 exports.login = function(req, res) {
   console.log('login');
   res.render(null, {
-    title: 'W.I.F.E - Log in',
+    title: 'Wheels Foosball League (WFL) - Log in',
     layout: true
   });
 }
@@ -57,7 +57,7 @@ exports.authenticate = function(req, res) {
         res.redirect(returnUrl);
       } );
     } else {
-      req.flash('error', 'Wrong password');
+      req.flash('error', 'That Aint Your Password, Homeboy!');
       res.redirect('back');
     }
   });  
@@ -72,7 +72,7 @@ exports.authenticate.action = 'login';
 */
 exports.signup = function(req, res) {
   res.render(req.session.insertuser, {
-    title: 'W.I.F.E - Sign up',
+    title: 'Wheels Foosball League (WFL) - Sign up',
     layout: true
   });
   delete req.session.insertuser;
@@ -94,13 +94,13 @@ exports.insertuser = function(req, res, next) {
   req.session.insertuser = req.body; 
   
   if (!username) {
-    req.flash('error', 'Email address cannot be empty');
+    req.flash('error', 'We Need Your Email Address, Sucka!');
     res.redirect('back');
     return;
   }
   
   if (password !== passwordconfirm) {
-    req.flash('error', 'Passwords not match!');
+    req.flash('error', 'Your Passwords Do Not Match, Jack!');
     res.redirect('back');
     return;
   }
@@ -128,7 +128,7 @@ exports.insertuser = function(req, res, next) {
         res.redirect('/account/profile');
       } );
     } else {
-      req.flash('error', 'Creating user failed');
+      req.flash('error', 'Creating user failed...Whats Up With That?');
       res.redirect('back');
     }
   });
@@ -166,7 +166,7 @@ function insertUser(user, callback) {
       console.log(error);
       callback.call(this, error);
     } else if (existingUser){
-      callback.call(this, 'Email address registered');
+      callback.call(this, 'You Chose an Email Address That is Already Registered, You Hacker!');
     } else {
 
       user.password = encryptedPassword;
