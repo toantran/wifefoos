@@ -1,5 +1,4 @@
 
-
 exports.add = function(req, res, next) {
   var userId = req.params.id || req.session.user._id;
   
@@ -8,7 +7,7 @@ exports.add = function(req, res, next) {
     layout: true
     , user: req.session.user
     , userId: userId
-    , title: 'W.I.F.E - Create new team'
+    , title: 'Wheels Foosball League (WFL) - Create new team'
   });
 }
 exports.add.authenticated = true;
@@ -53,7 +52,7 @@ exports.show = function(req, res, next) {
     
     res.render(team, {
       layout: true
-      , title: 'W.I.F.E'
+      , title: 'Wheels Foosball League (WFL)'
       , user: req.session.user
     })
   }); 
