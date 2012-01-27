@@ -1,8 +1,7 @@
-
   // URL /
 exports.index = function(req, res) {
   res.render(null, {
-    title: 'W.I.F.E',
+    title: 'Wheels Foosball League (WFL)',
   	user: req.session.user,
   	layout: true
   });
