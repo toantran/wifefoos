@@ -45,6 +45,10 @@ function getDb() {
 }
 
 
+//////////////////////////////////////////////////////////////
+// Public functions begin
+//////////////////////////////////////////////////////////////
+
 exports.getUser = function(username, callback) {
   var db = getDb(),
       errorFn = function(error) {
@@ -64,6 +68,7 @@ exports.getUser = function(username, callback) {
       , password: 1
       , firstname: 1
       , lastname: 1
+      , team: 1
       } , function(error, cursor) {
         checkErrorFn(error, errorFn, function() {
           cursor.nextObject(function(error, doc) {
@@ -111,6 +116,35 @@ exports.getFullUser = function(userId, callback) {
 };
 
 
+exports.getAllUsers = function (callback) {
+  var db = getDb()
+    , errorFn = function (error) {
+      db.close();
+      callback.call(this, error);
+    };
+    
+  getCollection( db, function(err, collection) {
+  
+    checkErrorFn(err, errorFn, function() {
+      var cursor = collection.find( {}, {
+        nickname: 1
+        , pictureurl: 1
+        , stats: 1
+        , team: 1        
+        , statustext: 1
+        , username: 1
+      }).toArray( function(err, users) {
+        checkErrorFn(err, errorFn, function() {
+          callback.call(this, null, users);
+          db.close();
+        });
+      });
+    });
+    
+  });
+}
+
+
 exports.insertUser = function(user, callback) {
   var db = getDb(),
       errorFn = function(error) {
@@ -120,7 +154,10 @@ exports.insertUser = function(user, callback) {
         
   getCollection( db, function(error, collection) {
     checkErrorFn(error, errorFn, function() {
-    
+      
+      user.pictureurl = user.pictureurl || '../../images/player.jpg';
+      user.statustext = user.statustext || 'Ready for some foos!';
+      
       collection.insert([user], {safe: true}, 
         function(error, docs) {
           checkErrorFn(error, errorFn, function() {
@@ -137,3 +174,8 @@ exports.insertUser = function(user, callback) {
 
   return true;
 }
+
+//////////////////////////////////////////////////////////////
+// Public functions end
+//////////////////////////////////////////////////////////////
+

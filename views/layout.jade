@@ -1,7 +1,7 @@
 !!!
 html
   head
-    title #{title}
+    title #{title || 'W.I.F.E'}
     //link(rel='stylesheet', href='/javascripts/ext/resources/css/ext-all.css')    
     link(rel='stylesheet', href='/stylesheets/style.css')
     //script(type='text/javascript', src='/javascripts/ext/ext-all-debug.js')
@@ -14,7 +14,7 @@ html
         - if (typeof request.session.user !== "undefined")
           - var nickname = request.session.user.nickname || request.session.user.username
           .masterpage-header-user Welcome,&nbsp; 
-            a(href='profile')= nickname
+            a(href='/account/profile')= nickname
           .masterpage-header-menu
             .menu-item.menu-item-last
               a(href='/logout') Logout
@@ -41,3 +41,6 @@ html
         .clear-float
       .masterpage-body
         != body
+        .clear-float
+    .page-footer
+      | Written and designed by Toan Tran.  All rights reserved.  Contact toantran@comcast.net

@@ -25,8 +25,8 @@
 }
 
 .player-nickname {
-  color : #222222;
-	font-size : 1.8em;
+  color : #00406C;
+	font-size : 2.2em;
 	font-weight : bold;
 	font-variant : small-caps;
 	line-height : 120%;
@@ -38,5 +38,55 @@
 
 #personal-wall {
   margin-left: 20px;
+  border-left: solid 1px #aaaaaa;
+  padding-left: 20px;
+  padding-right: 20px;
+  min-height: 500px;
   float: left;
+}
+
+#personal-info ol {
+  list-style-type: none;
+  -webkit-padding-start: 0;
+}
+
+#personal-info ol li {
+  display: block;
+  margin-top: 3px;
+  margin-bottom: 5px;
+  clear: both;
+}
+
+.personal-info-item {
+  font-size: 14px;
+}
+
+.personal-info-item-label {
+  float: left;
+}
+
+.personal-info-item-value {
+  float: right;
+}
+
+.todo-section {
+  float: right;
+  border-left: solid 1px #aaaaaa;
+  min-height: 500px;
+  padding-left: 10px;
+  padding-right: 10px;
+  width: 200px;
+}
+
+.todo-section div {
+  margin-bottom: 5px;
+}
+
+.todo-noteam {
+  -webkit-border-radius: 3px;
+  -moz-border-radius: 3px;
+  border-radius: 3px;
+  background-color: #C6FFB0;
+  border: 1px solid #a2a0FF;
+  padding: 5px;
 }

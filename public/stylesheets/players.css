@@ -1,0 +1,68 @@
+.players-list {
+  width: 500px;
+  margin: 20px auto 20px auto;
+  padding: 25px;
+  font-size: 14px;
+  -moz-box-shadow: 0 0 5px 5px #bbb;
+  -webkit-box-shadow: 0 0 5px 5px#bbb;
+  box-shadow: 0 0 5px 5px #bbb;
+}
+
+.player-info {
+  width: 485px;
+  margin-bottom: 10px;
+  border: 1px solid #B9B9B9;
+  background-color: #f0f0f0;
+  padding: 5px;
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  border-radius: 5px;
+}
+
+.player-detail {
+  float: left;
+}
+
+.picture img {
+  max-height: 50px;
+  max-width: 50px;
+}
+
+.nickname {
+  color : #00406C;
+	font-size : 2em;
+	font-weight : bold;
+	font-variant : small-caps;
+	line-height : 90%;
+	text-align : left;
+	text-decoration : none;
+	display : block;
+	margin-bottom: 5px;
+}
+
+.nickname a {
+  text-decoration: none;
+  color: inherit;  
+}
+
+.info {
+  margin-left: 15px;
+  width: 300px;
+}
+
+.stats {
+  margin-left: 5px;
+  width: 100px;  
+}
+
+.stats-detail {
+  color : #005DC8;
+	font-size : 18pt;
+	font-weight : bold;
+	background-color : transparent;	
+}
+
+.stats .buttons {
+  margin-left: auto;
+  margin-right: auto;  
+}

@@ -1,17 +1,35 @@
 link(rel='stylesheet', href='/stylesheets/profile.css')
 #profile-main
   #personal-info
-    #player-name.player-nickname!= profile.nickname
+    #player-name.player-nickname= profile.nickname
+    #player-status= profile.statustext
     #player-picture
-      img(src='../../images/player.jpg', maxheight=100, maxwidth= 100)
+      img(src='#{profile.pictureurl || '../../images/player.jpg'}', maxheight=100, maxwidth= 100)
     #player-picture-change
       a Change your profile picture
-    #player-team
-      label Team
-      span!= profile.team      
-    #player-record Record #{profile.stats.wins || 0}-#{profile.stats.losses || 0}
-    #player-rank Rank ##{profile.rank || 'N/A'}
+    ol
+      li#player-team.personal-info-item            
+        .personal-info-item-label Team:
+        .personal-info-item-value #{profile.team || 'None'}
+        .clear-float
+      li.personal-info-item            
+        .personal-info-item-label Team record:
+        #team-record.personal-info-item-value
+        .clear-float
+      li.personal-info-item            
+        .personal-info-item-label Individual record:
+        .personal-info-item-value #{(profile.stats && profile.stats.wins) || 0}-#{(profile.stats && profile.stats.losses) || 0}
+        .clear-float
+      li.personal-info-item            
+        .personal-info-item-label Rank:
+        .personal-info-item-value #{profile.rank || 'N/A'}
+        .clear-float
   #personal-wall
-    #personal-status!= profile.statustext
+    div This is the wall
+    #personal-challenges
+      != partial('playerchallenge', profile.challenges)
+  .todo-section
+    != partial('todoteam')
+    != partial('todorecruit')
   .clear-float
 script()

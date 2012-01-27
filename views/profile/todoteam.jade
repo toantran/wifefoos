@@ -1,0 +1,8 @@
+- if ((typeof profile !== 'undefined') && (typeof user !== 'undefined') && (profile._id == user._id))
+  - if (typeof profile.team == 'undefined')
+    .todo-noteam
+      | You don't have a team yet
+      .buttons
+        input#createteambtn(type='button', value='Create your team')
+        input#jointeambtn(type='button', value='Find a team')        
+

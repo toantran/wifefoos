@@ -20,6 +20,11 @@ a {
 	border-style : solid;
 }
 
+.page-footer {
+  margin: 3px auto 2px auto;
+  width: 1024px;
+}
+
 .masterpage-header {
   color: white;
   padding: 3px;

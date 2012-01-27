@@ -1,0 +1,13 @@
+.player-info
+  .player-detail.picture
+    img(src='#{player.pictureurl || '../../images/player.jpg'}')
+  .player-detail.info
+    .nickname
+      a(href='/profile/#{player._id}')= player.nickname || player.username
+    .team Team: #{player.team || 'None'}
+  .player-detail.stats
+    .stats-detail #{(player.stats && player.stats.wins) || '0'}-#{(player.stats && player.stats.losses) || '0'}
+    .buttons
+      input(type='button', value='Challenge!')      
+  .clear-float
+
