@@ -1,0 +1,7 @@
+- if ((typeof profile !== 'undefined') && (typeof user !== 'undefined') && (profile._id == user._id))
+  - if (typeof profile.team !== 'undefined' && profile.team && profile.team._id)
+    - if (profile.team.members && (!profile.team.members.length || profile.team.members.length <= 1))
+      .todo-nomate
+        | You don't have a teammate
+        .buttons
+          input#recruitbtn(type='button', value='Recruit')        

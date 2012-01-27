@@ -173,7 +173,32 @@ exports.insertUser = function(user, callback) {
   });
 
   return true;
-}
+};
+
+
+exports.saveUser = function(user, callback) {
+  var db = getDb(),
+      errorFn = function(error) {
+        db.close();
+        callback.call(this, error);
+        return false;
+      };
+        
+  getCollection( db, function(error, collection) {
+    checkErrorFn(error, errorFn, function() {
+      
+      collection.save(user, 
+        function(error, docs) {
+          checkErrorFn(error, errorFn, function() {
+            callback.call(this, error, user);
+            db.close();
+          });
+      });
+    });       
+  });
+
+  return true;
+}; 
 
 //////////////////////////////////////////////////////////////
 // Public functions end

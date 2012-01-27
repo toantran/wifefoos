@@ -1,0 +1,17 @@
+.teamcreate-formpanel, .teamcreate-logo {
+  float: left;
+}
+
+.teamcreate-formpanel {
+  width: 250px;
+  margin-top: -25px;
+}
+
+.teamcreate-logo {
+  width: 100px;
+}
+
+.teamcreate-logo img {
+  max-height: 100px;
+  max-width: 100px;  
+}

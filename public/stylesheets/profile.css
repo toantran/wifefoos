@@ -45,6 +45,10 @@
   float: left;
 }
 
+#personal-wall {
+  width: 467px;
+}
+
 #personal-info ol {
   list-style-type: none;
   -webkit-padding-start: 0;
@@ -76,6 +80,7 @@
   padding-left: 10px;
   padding-right: 10px;
   width: 200px;
+  font-size: 14px;
 }
 
 .todo-section div {
@@ -89,4 +94,56 @@
   background-color: #C6FFB0;
   border: 1px solid #a2a0FF;
   padding: 5px;
+}
+
+.todo-nomate {
+  -webkit-border-radius: 3px;
+  -moz-border-radius: 3px;
+  border-radius: 3px;
+  background-color: #C6FFB0;
+  border: 1px solid #a2a0FF;
+  padding: 5px;
+}
+
+#teamname a {
+  text-decoration: none;
+}
+
+.new-post {
+  width: 100%;
+}
+
+.new-post form label {
+  display: block;
+}
+
+.new-post form label {
+  display: block;
+}
+
+.new-post form post-text {
+  width: 100%;
+}
+
+.post-panel {
+  border: 1px solid #dddddd;
+  margin: 10px 0 5px 0;
+  padding: 5px;
+}
+
+.post-panel .post-item {
+  float: left;
+}
+
+.poster-picture {
+  width: 20px;
+}
+
+.poster-picture img {
+  max-height: 20px;
+  max-width: 20px;
+}
+
+.poster-name, .post-comment {
+  margin-left: 10px;
 }

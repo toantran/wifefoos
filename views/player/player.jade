@@ -4,7 +4,11 @@
   .player-detail.info
     .nickname
       a(href='/profile/#{player._id}')= player.nickname || player.username
-    .team Team: #{player.team || 'None'}
+    - if ((typeof player.team !== 'undefined') && player.team.teamname)
+      .team Team:
+        a(href='/team/#{player.team._id}')= player.team.teamname
+    - else 
+      .team Team: None
   .player-detail.stats
     .stats-detail #{(player.stats && player.stats.wins) || '0'}-#{(player.stats && player.stats.losses) || '0'}
     .buttons

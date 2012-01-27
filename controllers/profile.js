@@ -60,9 +60,33 @@ function getUser(userId, callback) {
       console.log(error);
       callback(error);
     } else {
-      callback(null, user);
+      loadTeamForUser(user, function(user) {
+        callback(null, user);
+      });
+      //callback(null, user);
     }
   });
   
   return true;
-}
+};
+
+
+/*
+  Load team object for user
+*/
+function loadTeamForUser(user, callback) {
+  if (user && user.team && user.team._id) {
+    var repo = require('../repository/teams');
+    
+    repo.getFullTeam(String(user.team._id), function(error, team) {
+      if (team) {
+        console.log(team);
+        user.team = team;
+      }
+      callback(user);
+    });
+  } else {
+    callback(user);
+  }
+};
+

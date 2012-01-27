@@ -1,0 +1,9 @@
+- if (typeof post !== 'undefined')
+  .post-panel(postid='#{post.id}')
+    .post-item.poster-picture
+      img
+    .post-item Post Id #{post.id}
+    .post-item User Id #{post.userId}
+    .post-item.poster-name    
+    .post-item.post-comment= post.comment
+    .clear-float    

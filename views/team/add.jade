@@ -1,0 +1,21 @@
+link(rel='stylesheet', href='/stylesheets/team.css')
+#main.createteam-panel
+  #formbox-createteam.formbox
+    .title Create your team
+      //h1 W.I.F.E Log In
+      span
+    != partial('../messages')
+    .teamcreate-logo
+      img(src='../../images/teamcreate.jpg')
+    .teamcreate-formpanel
+      form#form-teamcreate.createteam-form(method='POST', action='/team/#{userId}')
+        fieldset
+          input#form-teamcreate-validation(name='validation', type='hidden')
+          ol
+            li
+              label(for='form-teamcreate-username') Your awesome team name
+              input#form-teamcreate-teamname.text(maxlength='255', name='teamname', size='50', type='text')
+            li#create-team-btn
+              input.submit(type='submit', value='Create')
+    .clear-float
+script(type='text/javascript', src='/javascripts/app/team.js')

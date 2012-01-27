@@ -148,7 +148,7 @@ a {
   float: left;  
 }
 
-.login-form fieldset {
+fieldset {
   border: none;
 }
 
@@ -163,7 +163,7 @@ form fieldset ol li label {
   width: 250px;
 }
 
-form#form-login fieldset ol li label, form#form-signup fieldset ol li label {
+form fieldset ol li label {
   float: none;
   line-height: normal;
   text-align: left;

@@ -8,13 +8,18 @@ link(rel='stylesheet', href='/stylesheets/profile.css')
     #player-picture-change
       a Change your profile picture
     ol
+      - var team = profile.team;
       li#player-team.personal-info-item            
         .personal-info-item-label Team:
-        .personal-info-item-value #{profile.team || 'None'}
+        .personal-info-item-value#teamname
+          - if (team && team._id)
+            a(href='/team/#{team._id}') #{(team && team.teamname) || 'None'}
+          - else 
+            #{(team && team.teamname) || 'None'}
         .clear-float
       li.personal-info-item            
         .personal-info-item-label Team record:
-        #team-record.personal-info-item-value
+        #team-record.personal-info-item-value #{(team && team.stats && team.stats.wins) || 0}-#{(team && team.stats && team.stats.losses) || 0}
         .clear-float
       li.personal-info-item            
         .personal-info-item-label Individual record:
@@ -25,11 +30,15 @@ link(rel='stylesheet', href='/stylesheets/profile.css')
         .personal-info-item-value #{profile.rank || 'N/A'}
         .clear-float
   #personal-wall
-    div This is the wall
-    #personal-challenges
-      != partial('playerchallenge', profile.challenges)
+    .new-post
+      form#form-newpost
+        label(for='form-newpost-post') Write something
+        textarea.post-text(cols='55')
+        br
+        input.post-btn(type='button', value='Post')
+    != partial('post', profile.posts)
   .todo-section
     != partial('todoteam')
     != partial('todorecruit')
   .clear-float
-script()
+script(type='text/javascript', src='/javascripts/app/profile.js')
