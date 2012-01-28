@@ -1,4 +1,34 @@
 
+
+exports.index = function(req, res, next) {
+  var availableOnly = req.param('available');
+  
+  getAllTeams( function(error, teams) {
+    console.log('All teams ', teams);
+    if (error || !teams || typeof(teams.length) === 'undefined') {
+      res.send({success: false});
+    } else {    
+      if (availableOnly) {
+        var availableTeams = [];
+        for(var i = 0; i < teams.length; i++) {
+          var team = teams[i];
+          if (!team.members || (team.members.length <= 1)) {
+            availableTeams.push(team);
+          }
+        }      
+        res.send(availableTeams);
+      } else {
+        res.render(teams, {
+          layout: true
+          , title: 'Wheels Foosball League (WFL) - Teams'
+          , user: req.session.user
+        });
+      }
+    }
+  });
+}
+
+
 exports.add = function(req, res, next) {
   var userId = req.params.id || req.session.user._id;
   
@@ -60,28 +90,47 @@ exports.show = function(req, res, next) {
 exports.show.authenticated = true; 
 
 
+exports.available = function (req, res) {
+  getAllTeams( function(error, teams) {
+    if (error || !teams || typeof(teams.length) === 'undefined') {
+      res.send({success: false});
+    } else {
+      var availableTeams = [];
+      for(team in teams) {
+        if (!team.members || (team.members.length <= 1)) {
+          availableTeams.push(team);
+        }
+      }
+      
+      res.send(availableTeams);
+    }
+  });
+}
+exports.available.methods = ['GET'];
+exports.available.authenticated = true;
+
 
 function createNewTeamPost(user, team, callback) {
   var repo = require('../repository/users')
     , mongo = require('mongodb');
   
-  repo.getFullUser(String(user._id), function(error, user) {
+  repo.getFullUser(String(user._id), function(error, fullUser) {
     if (error) {
       console.log(error);
       callback(error);
     } else {
-      var posts = user.posts || [];
+      var posts = fullUser.posts || [];
       posts.push({
         id: new mongo.ObjectID()
-        , userId: String(user._id)
+        , userId: String(fullUser._id)
         , comment: 'You have just created a team!'
-        , ccreatedAt: new mongo.Timestamp()
+        , createdAt: new mongo.Timestamp()
       });
       
-      user.posts = posts;
+      fullUser.posts = posts;
       
-      repo.saveUser(user, function( error, user) {
-        callback(error, user);
+      repo.saveUser(fullUser, function( error, savedUser) {
+        callback(error, savedUser);
       });
     }
   });
@@ -97,9 +146,10 @@ function getTeam(teamId, callback) {
 function createTeam(teamname, ownerId, callback) {
   var repo = require('../repository/teams')
     , team = {
-      teamname: teamname,
-      owner: ownerId,
-      members: [ownerId]
+      teamname: teamname
+      , owner: ownerId
+      , pictureurl: '/images/the-a-team.jpg'
+      , members: [ownerId]
     };
   
   repo.insertTeam(team, callback);  
@@ -118,6 +168,18 @@ function assignTeamToUser(team, userId, callback) {
       repo.saveUser(user, function( error, user) {
         callback(error, user);
       });
+    }
+  });
+}
+
+function getAllTeams(callback) {
+  var repo = require('../repository/teams');
+  
+  repo.getAll( function(error, teams) {
+    if (error) {
+      callback(error);
+    } else {
+      callback(null, teams);
     }
   });
 }

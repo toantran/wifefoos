@@ -1,8 +1,30 @@
 - if ((typeof profile !== 'undefined') && (typeof user !== 'undefined') && (profile._id == user._id))
   - if (typeof profile.team == 'undefined' || !profile.team || !profile.team._id)
     .todo-noteam
-      | You don't have a team yet
+      .todo-noteam-text You don't have a team yet
       .buttons
-        input#createteambtn(type='button', value='Create your team', profileid='#{user._id}')
-        input#jointeambtn(type='button', value='Find a team')        
-
+        button#createteambtn(width=100, profileid='#{user._id}') Create your team
+        button#jointeambtn(width=100, profileid='#{user._id}') Find a team
+      #todo-noteam-create.dialog(title='Create your team')
+        .createteam-panel
+          #formbox-createteam.formbox
+            .title Create your team
+              span
+            != partial('../messages')
+            .teamcreate-logo
+              img(src='../../images/teamcreate.jpg')
+            .teamcreate-formpanel
+              form#form-teamcreate.createteam-form(method='POST', action='/team/#{user._id}')
+                fieldset
+                  input#form-teamcreate-validation(name='validation', type='hidden')
+                  ol
+                    li
+                      label(for='form-teamcreate-username') Your awesome team name
+                      input#form-teamcreate-teamname.text(maxlength='255', name='teamname', size='40', type='text')
+            .clear-float      
+      #todo-noteam-join.dialog(title='Find your team')
+        .title Find your team
+          span
+        .team-list
+    script(type='text/javascript', src='/javascripts/profile/todoteam.js')
+    link(rel='stylesheet', href='/stylesheets/team.css')

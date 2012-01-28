@@ -15,3 +15,39 @@
   max-height: 100px;
   max-width: 100px;  
 }
+
+.team-info {
+  margin-bottom: 10px;
+  border: 1px solid #B9B9B9;
+  background-color: #f0f0f0;
+  padding: 5px;
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  border-radius: 5px;
+}
+
+.team-detail {
+  float: left;
+}
+
+.team-picture img {
+  max-height: 50px;
+  max-width: 50px;
+}
+
+.team-name {
+  color : #00406C;
+	font-size : 2em;
+	font-weight : bold;
+	font-variant : small-caps;
+	line-height : 90%;
+	text-align : left;
+	text-decoration : none;
+	display : block;
+	margin-bottom: 5px;
+}
+
+.team-name, .team-creator {
+  margin-left: 10px;
+  width: 75%
+}

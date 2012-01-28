@@ -60,9 +60,8 @@ function bootApplication(app) {
         console.log('result ', result);
         return result;
       }
-    },
+    }
     
-    getPlayerPictureUrl: function(req)
   });
 }
 

@@ -120,6 +120,25 @@ exports.insertTeam = function(team, callback) {
   });
 };
 
+
+exports.getAll = function ( callback ) {
+  var db = getDb()
+    , errorFn = function(error) {
+        db.close();
+        callback.call(this, error);
+      };
+      
+  getCollection( db, function(error, collection) {
+    checkErrorFn(error, errorFn, function() {
+      var cursor = collection.find()
+      .toArray( function(error, teams) {
+        callback(error, teams);
+        db.close();
+      });      
+    });
+  } );
+}
+
 //////////////////////////////////////////////////////////////
 // Public functions end
 //////////////////////////////////////////////////////////////

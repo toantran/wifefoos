@@ -15,9 +15,9 @@ profile.recruitClick = function(e) {
 
 $(document).ready( function() {
 
-  $('input#createteambtn').click(profile.createTeamClick);  
+  //$('input#createteambtn').click(profile.createTeamClick);  
   
-  $('input#recruitbtn').click(profile.recruitClick);
+  //$('input#recruitbtn').click(profile.recruitClick);
   
 } );
 

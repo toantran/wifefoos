@@ -1,6 +1,7 @@
 body {
   background-color: #f0f0f0;
   font: 11px "Lucida Grande", Helvetica, Arial, sans-serif;
+  color: #2a2a2a;
   background-image: url('/images/background.png');
 	background-repeat : repeat-x;
 	background-position : top;
@@ -10,10 +11,18 @@ a {
   color: #00B7FF;
 }
 
+input.text {
+  border: 1px solid #c0c0c0;
+}
+
+input.error {
+  border: 1px solid red;
+}
+
 .masterpage {
   margin: 3px auto 2px auto;
   width: 1024px;
-  height: 850px;
+  min-height: 650px;
   background-color: #fafafa;
 	border-width : 1px;
 	border-color : #D5D5D5;
@@ -183,4 +192,8 @@ form#form-login fieldset ol li {
 
 #messages {
   color: red;
+}
+
+.ui-widget {
+  font-size: 1em;
 }

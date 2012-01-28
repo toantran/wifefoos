@@ -80,7 +80,7 @@
   padding-left: 10px;
   padding-right: 10px;
   width: 200px;
-  font-size: 14px;
+  font-size: 12px;
 }
 
 .todo-section div {
@@ -94,6 +94,14 @@
   background-color: #C6FFB0;
   border: 1px solid #a2a0FF;
   padding: 5px;
+}
+
+.todo-noteam button {
+  width: 100%;
+}
+
+.todo-noteam-text {
+  line-height: 200%;
 }
 
 .todo-nomate {

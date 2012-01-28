@@ -3,6 +3,7 @@ html
   head
     title #{title || 'W.I.F.E'}
     //link(rel='stylesheet', href='/javascripts/ext/resources/css/ext-all.css')    
+    link(href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/jquery-ui.css", rel="stylesheet", type="text/css")
     link(rel='stylesheet', href='/stylesheets/style.css')
     script(type='text/javascript', src='https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js')
     script(type='text/javascript', src='https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js')    
@@ -10,8 +11,8 @@ html
     .masterpage
       .masterpage-header
         .masterpage-header-title 
-          a(href='/') W . I . F . E
-        .masterpage-header-subtitle Wheels IT Foosball Event
+          a(href='/') W F L
+        .masterpage-header-subtitle Wheels Foosball League
         - if (typeof request.session.user !== "undefined")
           - var nickname = request.session.user.nickname || request.session.user.username
           .masterpage-header-user Welcome,&nbsp; 
