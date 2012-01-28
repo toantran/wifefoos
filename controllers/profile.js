@@ -1,4 +1,3 @@
-
 /*
   GET
   URL /profile
@@ -23,11 +22,11 @@ exports.show = function(req, res, next) {
   var userId = req.params.id || null;
   
   if (!userId) {
-    req.flash('error', 'player id is empty');
+    req.flash('error', 'player id is empty...playa');
     next();
     //res.render(null, {
     //  layout: true
-    //  , title: 'W.I.F.E - Profile'
+    //  , title: 'Wheels Foosball League (WFL) - Profile'
     //});
     return;
   }
@@ -39,7 +38,7 @@ exports.show = function(req, res, next) {
     } else {
       res.render( user, {
         layout: true
-        , title: 'W.I.F.E - Profile'
+        , title: 'Wheels Foosball League (WFL) - Profile'
         , user: req.session.user
       });
     }
