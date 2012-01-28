@@ -1,5 +1,4 @@
 
-
 exports.index = function (req, res, next) {
   getAllPlayers( function(err, players) {
     
@@ -11,7 +10,7 @@ exports.index = function (req, res, next) {
     
     res.render(players, {
       layout: true
-      , title: 'W.I.F.E - Players'
+      , title: 'Wheels Foosball League (WFL) - Players'
     });
   });
 }
