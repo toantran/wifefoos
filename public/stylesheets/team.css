@@ -27,7 +27,16 @@
 }
 
 .team-detail {
+  width: 
+}
+
+.team-picture, .team-detail {
   float: left;
+}
+
+.team-record {
+  float: right;
+  padding-top: 5px;
 }
 
 .team-picture img {
@@ -49,5 +58,44 @@
 
 .team-name, .team-creator {
   margin-left: 10px;
-  width: 75%
+}
+
+.dialog .title {
+  padding: 5px 0 10px 0;
+  font-size: 2em;
+  font-weight: bold;
+}
+
+a.team-join-button {  
+  cursor: pointer;
+  color: #005DC8;
+  padding: 3px 10px 3px 10px;  
+  border: 1px solid #B9B9B9;
+  -webkit-border-radius: 3px;
+  -moz-border-radius: 3px;
+  border-radius: 3px;  
+}
+
+a.team-join-button:link {
+}
+
+a.team-join-button:visited {
+}
+
+a.team-join-button:hover {
+  background-color: #e0e0e0;
+}
+
+.dialog .dialog-body {
+  padding: 10px;
+  font-size: 12px;
+}
+
+.dialog-body img {
+  max-height: 50px;
+  float: left;
+  margin-right: 20px;
+}
+
+.dialog-body div {
 }

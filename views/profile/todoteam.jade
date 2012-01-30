@@ -22,9 +22,21 @@
                       label(for='form-teamcreate-username') Your awesome team name
                       input#form-teamcreate-teamname.text(maxlength='255', name='teamname', size='40', type='text')
             .clear-float      
-      #todo-noteam-join.dialog(title='Find your team')
-        .title Find your team
+      #todo-noteam-join.dialog(title='Find your team', userid='#{profile._id}')
+        .title Available teams
           span
         .team-list
-    script(type='text/javascript', src='/javascripts/profile/todoteam.js')
-    link(rel='stylesheet', href='/stylesheets/team.css')
+      #todo-noteam-join-confirm.dialog(title='Team request')
+        .dialog-body
+          img(src='/images/addme.jpg')
+          div Your joining request has been sent!  Hone your foos skill while waiting for the acceptance.
+          .clear-float
+  - else
+    - if (profile.team.joinrequests && profile.team.joinrequests.length)
+      .todo-noteam
+        .todo-noteam-text Somebody wants to join your team!!!
+        .buttons
+          button#gototeambtn(width=100, teamid='#{profile.team._id}') See your team
+  script(type='text/javascript', src='/javascripts/profile/todoteam.js')
+  link(rel='stylesheet', href='/stylesheets/team.css')
+

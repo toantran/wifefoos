@@ -27,6 +27,7 @@ exports.index = function(req, res, next) {
     }
   });
 }
+exports.index.authenticated = true;
 
 
 exports.add = function(req, res, next) {
@@ -112,8 +113,19 @@ exports.available.authenticated = true;
 
 function createNewTeamPost(user, team, callback) {
   var repo = require('../repository/users')
-    , mongo = require('mongodb');
-  
+    , mongo = require('mongodb')
+    , post = {
+      type: 'newteam'
+      , data: {
+        teamid: team._id
+      }
+    };
+    
+  repo.addPost(String(user._id), post, function(error, savedUser) {
+    callback(error, savedUser);
+  });
+    
+  /*
   repo.getFullUser(String(user._id), function(error, fullUser) {
     if (error) {
       console.log(error);
@@ -124,7 +136,7 @@ function createNewTeamPost(user, team, callback) {
         id: new mongo.ObjectID()
         , userId: String(fullUser._id)
         , comment: 'You have just created a team!'
-        , createdAt: new mongo.Timestamp()
+        , createdat: new mongo.Timestamp(new Date())
       });
       
       fullUser.posts = posts;
@@ -134,6 +146,9 @@ function createNewTeamPost(user, team, callback) {
       });
     }
   });
+  */
+  
+  return true;
 }
 
 
@@ -163,11 +178,7 @@ function assignTeamToUser(team, userId, callback) {
       console.log(error);
       callback(error);
     } else {
-      user.team = team;
-      
-      repo.saveUser(user, function( error, user) {
-        callback(error, user);
-      });
+      repo.setTeam( userId, team, callback );
     }
   });
 }

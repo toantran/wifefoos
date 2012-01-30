@@ -4,4 +4,10 @@
       .todo-nomate
         | You don't have a teammate
         .buttons
-          button#recruitbtn(type='button', value='Recruit')
+          button#recruitbtn Recruit
+      #todo-nomate-recruit.dialog(title='Find your teammate', userid='#{profile._id}')
+        .title Available players
+          span
+        #player-list
+  script(type='text/javascript', src='/javascripts/profile/todorecruit.js')
+  link(rel='stylesheet', href='/stylesheets/players.css')

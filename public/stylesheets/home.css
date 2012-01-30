@@ -50,3 +50,25 @@
   text-decoration: none;
   color: inherit;
 }
+
+.rules-panel {
+  width: 600px;
+  height: 845px;
+  margin: 50px auto 0 auto;
+  background-image: url('/images/rulesbg.jpg');
+  background-position: top letft;
+  background-repeat: no-repeat; 
+}
+
+.rules-header {
+  display: block;
+  font-family: cursive;
+  width: 100%;
+  text-align: center;
+  padding: 40px 0px 0px 0px;  
+}
+
+.rules-body {
+  font-family: cursive;
+  font-size: 12px;
+}

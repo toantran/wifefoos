@@ -1,9 +1,11 @@
 GLOBAL.DEBUG = true;
 
-var Db = require('mongodb').Db
-    , ObjectId = require('mongodb').ObjectID
-    , Connection = require('mongodb').Connection
-    , Server = require('mongodb').Server
+var mongo = require('mongodb')
+    , Db = mongo.Db
+    , ObjectId = mongo.ObjectID
+    , Timestamp = mongo.Timestamp
+    , Connection = mongo.Connection
+    , Server = mongo.Server
     , dbName = 'wifefoosdb'
     , collectionName = 'users'
     , host = process.env['MONGO_NODE_DRIVER_HOST'] != null ? process.env['MONGO_NODE_DRIVER_HOST'] : 'localhost'
@@ -14,6 +16,8 @@ function getCollection(db, callback) {
   var errorFn = function(error) {        
         callback.call(this, error);
       };
+  
+  callback = callback || function() {};
   
   db.open( function(error, db) {    
     checkErrorFn(error, errorFn, function() {        
@@ -55,8 +59,8 @@ exports.getUser = function(username, callback) {
         db.close();
         callback.call(this, error);
       };
-      
-  console.log('connecting to db at ', host, ':', port);
+  
+  callback = callback || function() {};    
   
   getCollection( db, function(error, collection) {
     checkErrorFn(error, errorFn, function() {
@@ -93,8 +97,8 @@ exports.getFullUser = function(userId, callback) {
         callback.call(this, error);
       };
       
-  console.log('connecting to db at ', host, ':', port);
-  
+  callback = callback || function() {};
+    
   getCollection( db, function(error, collection) {
     checkErrorFn(error, errorFn, function() {
       collection.find( {
@@ -122,6 +126,8 @@ exports.getAllUsers = function (callback) {
       db.close();
       callback.call(this, error);
     };
+
+  callback = callback || function() {};
     
   getCollection( db, function(err, collection) {
   
@@ -142,6 +148,8 @@ exports.getAllUsers = function (callback) {
     });
     
   });
+  
+  return true;
 }
 
 
@@ -151,11 +159,16 @@ exports.insertUser = function(user, callback) {
         db.close();
         callback.call(this, error);
       };
-        
+  
+  callback = callback || function() {};
+  
+  user = user || {};
+  user.createdat = new Date();
+   
   getCollection( db, function(error, collection) {
     checkErrorFn(error, errorFn, function() {
       
-      user.pictureurl = user.pictureurl || '../../images/player.jpg';
+      user.pictureurl = user.pictureurl || '/images/player.jpg';
       user.statustext = user.statustext || 'Ready for some foos!';
       
       collection.insert([user], {safe: true}, 
@@ -183,6 +196,8 @@ exports.saveUser = function(user, callback) {
         callback.call(this, error);
         return false;
       };
+  
+  callback = callback || function() {};
         
   getCollection( db, function(error, collection) {
     checkErrorFn(error, errorFn, function() {
@@ -198,7 +213,75 @@ exports.saveUser = function(user, callback) {
   });
 
   return true;
-}; 
+};
+
+
+exports.setTeam = function (userid, team, callback) {
+  var db = getDb(),
+      errorFn = function(error) {
+        db.close();
+        callback.call(this, error);
+        return false;
+      };
+  
+  callback = callback || function() {};
+      
+  getCollection( db, function(error, collection) {
+    checkErrorFn(error, errorFn, function() {
+      collection.update({
+        _id: new ObjectId(userid)
+      }, {
+        $set: {
+          team: team
+          , updatedat: new Date()
+        }
+      });
+    });
+  });
+  
+  return true;
+}
+
+
+exports.addPost = function (userid, post, callback) {
+  var db = getDb()
+    , errorFn = function(error) {
+        db.close();
+        callback.call(this, error);
+        return false;
+      };
+  
+  callback = callback || function() {};
+  
+  post = post || {};
+  post.createdat = new Date();
+  post.id = new ObjectId();
+      
+  getCollection( db, function(error, collection) {
+    checkErrorFn(error, errorFn, function() {
+      
+      collection.update({
+        _id: new ObjectId(userid)
+      }, {
+        $addToSet: {
+          posts: post
+        }
+        , $set: {
+          updatedat: new Date()
+        }
+      }, {
+        safe: true
+      }, function(error, docs) {
+        checkErrorFn(error, errorFn, function() {
+          callback.call(this, error, docs);
+          db.close();
+        });
+      });
+    });       
+  });
+
+  return true;
+}
 
 //////////////////////////////////////////////////////////////
 // Public functions end

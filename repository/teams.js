@@ -1,9 +1,11 @@
 GLOBAL.DEBUG = true;
 
-var Db = require('mongodb').Db
-    , ObjectId = require('mongodb').ObjectID
-    , Connection = require('mongodb').Connection
-    , Server = require('mongodb').Server
+var mongo = require('mongodb')
+    , Db = mongo.Db
+    , ObjectId = mongo.ObjectID
+    , Timestamp = mongo.Timestamp
+    , Connection = mongo.Connection
+    , Server = mongo.Server
     , dbName = 'wifefoosdb'
     , collectionName = 'teams'
     , host = process.env['MONGO_NODE_DRIVER_HOST'] != null ? process.env['MONGO_NODE_DRIVER_HOST'] : 'localhost'
@@ -14,6 +16,8 @@ function getCollection(db, callback) {
   var errorFn = function(error) {        
         callback.call(this, error);
       };
+  
+  callback = callback || function() {};
   
   db.open( function(error, db) {    
     checkErrorFn(error, errorFn, function() {        
@@ -55,6 +59,8 @@ exports.getTeamByName = function(teamname, callback) {
         db.close();
         callback.call(this, error);
       };
+  
+  callback = callback || function() {};
       
   getCollection(db, function(error, collection) {
     checkErrorFn(error, errorFn, function () {
@@ -79,21 +85,20 @@ exports.getFullTeam = function(teamId, callback) {
         callback.call(this, error);
       };
       
+  callback = callback || function() {};
+  
   getCollection(db, function(error, collection) {
     checkErrorFn(error, errorFn, function () {
       
       console.log('Team Id = ', teamId, ' type ', typeof teamId);
-      collection.findOne({_id: new ObjectId(teamId)}, function (team) {
-        if (team) {
-          callback(null, team);
-        } else {
-          callback('Team not found');
-        }
+      collection.findOne({_id: new ObjectId(teamId)}, function (error, team) {
+        callback(error, team);
         db.close();
       });
     } );
   });
   
+  return true;
 }
 
 
@@ -103,7 +108,12 @@ exports.insertTeam = function(team, callback) {
         db.close();
         callback.call(this, error);
       };
+  
+  callback = callback || function() {};
       
+  team = team || {};
+  team.createdat = new Date();
+  
   getCollection( db, function(error, collection) {
     checkErrorFn(error, errorFn, function() {
       collection.insert(team, {safe: true}, function(error, docs) {
@@ -118,6 +128,8 @@ exports.insertTeam = function(team, callback) {
       });
     });
   });
+  
+  return true;
 };
 
 
@@ -127,6 +139,8 @@ exports.getAll = function ( callback ) {
         db.close();
         callback.call(this, error);
       };
+  
+  callback = callback || function() {};
       
   getCollection( db, function(error, collection) {
     checkErrorFn(error, errorFn, function() {
@@ -137,6 +151,50 @@ exports.getAll = function ( callback ) {
       });      
     });
   } );
+  
+  return true;
+}
+
+
+exports.addJoinRequest = function (teamid, request, callback) {
+  var db = getDb()
+    , errorFn = function(error) {
+      db.close();
+      callback.call(this, error);
+    }
+    , timestamp = new Date()
+    , post= {
+      id: new ObjectId()
+      , type: 'join'
+      , data: {
+        userid: request.requestor
+      }
+      , createdat: timestamp
+    };
+  
+  callback = callback || function() {};
+    
+  request = request || {};
+  //request.createdat = timestamp;
+    
+  getCollection( db, function(error, collection) {
+    checkErrorFn(error, errorFn, function() {
+      collection.update({
+        _id: new ObjectId(teamid)
+      }, {
+        $addToSet: {
+          joinrequests: request
+          , posts: post
+        }
+      }, {
+        safe: true
+      }, function(error) {
+        callback(error);
+      });
+    });
+  });
+  
+  return true;
 }
 
 //////////////////////////////////////////////////////////////

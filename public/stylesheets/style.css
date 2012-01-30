@@ -11,6 +11,10 @@ a {
   color: #00B7FF;
 }
 
+div {
+  white-space: normal;
+}
+
 input.text {
   border: 1px solid #c0c0c0;
 }

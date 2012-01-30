@@ -59,8 +59,9 @@ function getUser(userId, callback) {
       console.log(error);
       callback(error);
     } else {
-      loadTeamForUser(user, function(user) {
-        callback(null, user);
+      loadTeamForUser(user, function(userwTeam) {
+        console.log(userwTeam);
+        callback(null, userwTeam);
       });
       //callback(null, user);
     }
@@ -78,8 +79,8 @@ function loadTeamForUser(user, callback) {
     var repo = require('../repository/teams');
     
     repo.getFullTeam(String(user.team._id), function(error, team) {
+      console.log('error ', error, ' team ', team);      
       if (team) {
-        console.log(team);
         user.team = team;
       }
       callback(user);

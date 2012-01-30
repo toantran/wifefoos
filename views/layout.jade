@@ -30,8 +30,11 @@ html
             .menu-item
               a(href='/team') Teams
             .separator              
-            .menu-item.menu-item-first
+            .menu-item
               a(href='/player') Players
+            .separator              
+            .menu-item.menu-item-first
+              a(href='/rules') Rules
         - else 
           .masterpage-header-user &nbsp;
           .masterpage-header-menu
@@ -40,6 +43,9 @@ html
             .separator         
             .menu-item
               a(href='/account/signup') Sign Up
+            .separator              
+            .menu-item.menu-item-first
+              a(href='/rules') Rules
         .clear-float
       .masterpage-body
         != body

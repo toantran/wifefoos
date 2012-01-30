@@ -96,12 +96,12 @@
   padding: 5px;
 }
 
-.todo-noteam button {
+.todo-noteam button, .todo-nomate button {
   width: 100%;
 }
 
 .todo-noteam-text {
-  line-height: 200%;
+  /*line-height: 200%;&*/
 }
 
 .todo-nomate {
