@@ -1,7 +1,8 @@
 - if (typeof post !== 'undefined')
   .post-panel(postid='#{post.id}')
     .post-item.poster-picture
-      img(src='#{post.pictureurl}')
+      - if (post.pictureurl)
+        img(src='#{post.pictureurl}')
     .post-item!= post.desc
     .post-item.postmark on #{post.createdat}
     .post-item.post-comment= post.comment

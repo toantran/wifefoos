@@ -1,0 +1,19 @@
+.team-info
+  .team-picture
+    - if (team.pictureurl)
+      img(src='#{team.pictureurl}')
+  .team-detail.info
+    .team-name
+      a(href='/team/#{team._id}')= team.teamname
+    - if (team.members && team.members.length)
+      .member-list
+        each member in team.members
+          .member-name(memberid='#{member}')
+  .team-buttons
+    - if ((!team.members || team.members.length <= 1) && (!user.team))
+      a Join team
+    - if (user.team && (user.team._id != team._id))
+      a Challenge
+  .team-record.stats
+    .stats-detail #{(team.stats && team.stats.wins) || '0'}-#{(team.stats && team.stats.losses) || '0'}
+  .clear-float

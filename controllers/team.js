@@ -56,10 +56,14 @@ exports.create = function(req, res, next) {
       req.flash('error', 'DB error');
       res.redirect('back');
     } else {
-      assignTeamToUser(team, userId, function(error, user) {
-        if (!error) {
-          createNewTeamPost(userId, team, function() {
+      assignTeamToUser(team, userId, function(error, user) {      
+        if (!error) {          
+          createNewTeamPost(userId, team, function() {                   
           });
+          
+          if (user && req.session.user._id == user._id) {
+            req.session.user = user;
+          }
         }
         res.redirect('/team/' + team._id);      
       });

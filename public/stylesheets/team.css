@@ -16,6 +16,16 @@
   max-width: 100px;  
 }
 
+.teams-list {
+  width: 600px;
+  margin: 20px auto 20px auto;
+  padding: 25px;
+  font-size: 14px;
+  -moz-box-shadow: 0 0 5px 5px #bbb;
+  -webkit-box-shadow: 0 0 5px 5px#bbb;
+  box-shadow: 0 0 5px 5px #bbb;
+}
+
 .team-info {
   margin-bottom: 10px;
   border: 1px solid #B9B9B9;
@@ -27,16 +37,40 @@
 }
 
 .team-detail {
-  width: 
 }
 
 .team-picture, .team-detail {
   float: left;
 }
 
-.team-record {
+.team-record, .team-buttons {
   float: right;
   padding-top: 5px;
+}
+
+.stats {
+  margin-left: 5px;
+}
+
+.stats-detail {
+  color : red;
+	font-size : 24pt;
+	font-weight : bold;
+	background-color : transparent;	
+}
+
+.team-buttons {
+  font-size: 11px;
+  padding-left: 5px;
+  width: 100px;
+}
+
+.team-buttons a {
+  width: 100%;
+}
+
+.team-picture {
+  margin-right: 10px;
 }
 
 .team-picture img {
@@ -56,8 +90,16 @@
 	margin-bottom: 5px;
 }
 
-.team-name, .team-creator {
+.team-name a {
+  text-decoration: none;
+}
+
+.team-name, .team-creator, .member-list {
   margin-left: 10px;
+}
+
+.member-list {
+  
 }
 
 .dialog .title {
