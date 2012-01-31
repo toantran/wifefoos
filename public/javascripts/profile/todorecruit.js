@@ -74,8 +74,8 @@ var nomate = {
       , invitorid: invitorid
     })
     .success( function(data, status, res) {
-      console.log(data);
       nomate.playerlistdialog.dialog('close');
+      window.location.href = window.location.href;
     })
     .error( function(res, status) {
       console.log(status);

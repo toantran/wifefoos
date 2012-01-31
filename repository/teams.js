@@ -61,24 +61,29 @@ exports.getTeamByName = function(teamname, callback) {
       };
   
   callback = callback || function() {};
-      
-  getCollection(db, function(error, collection) {
-    checkErrorFn(error, errorFn, function () {
-      collection.findOne({teamname: teamname}, function (team) {
-        if (team) {
-          callback(null, team);
-        } else {
-          callback('Team not found');
-        }
-        db.close();
-      });
-    } );
-  });
   
+  try {    
+    getCollection(db, function(error, collection) {
+      checkErrorFn(error, errorFn, function () {
+        collection.findOne({teamname: teamname}, function (team) {
+          if (team) {
+            callback(null, team);
+          } else {
+            callback('Team not found');
+          }
+          db.close();
+        });
+      } );
+    });
+  } catch(e) {
+    callback(e);
+  }
+  
+  return true;
 };
 
 
-exports.getFullTeam = function(teamId, callback) {
+exports.getFullTeam = function(teamid, callback) {
   var db = getDb()
     , errorFn = function(error) {
         db.close();
@@ -87,15 +92,24 @@ exports.getFullTeam = function(teamId, callback) {
       
   callback = callback || function() {};
   
-  getCollection(db, function(error, collection) {
-    checkErrorFn(error, errorFn, function () {
-      
-      collection.findOne({_id: new ObjectId(teamId)}, function (error, team) {
-        callback(error, team);
-        db.close();
-      });
-    } );
-  });
+  if (!teamid || typeof teamid !== 'string') {
+    errorFn('Id is invalid ', teamid);
+    return;
+  }
+  
+  try {
+    getCollection(db, function(error, collection) {
+      checkErrorFn(error, errorFn, function () {
+        
+        collection.findOne({_id: new ObjectId(teamid)}, function (error, team) {
+          callback(error, team);
+          db.close();
+        });
+      } );
+    });
+  } catch(e) {
+    callback(e);
+  }
   
   return true;
 }
@@ -113,20 +127,24 @@ exports.insertTeam = function(team, callback) {
   team = team || {};
   team.createdat = new Date();
   
-  getCollection( db, function(error, collection) {
-    checkErrorFn(error, errorFn, function() {
-      collection.insert(team, {safe: true}, function(error, docs) {
-        checkErrorFn(error, errorFn, function() {
-          if (!docs || !docs.length) {
-            callback.call(this, 'Inserting team failed');
-          } else {
-            callback.call(this, null, docs[0]);
-          }
-          db.close();
+  try {
+    getCollection( db, function(error, collection) {
+      checkErrorFn(error, errorFn, function() {
+        collection.insert(team, {safe: true}, function(error, docs) {
+          checkErrorFn(error, errorFn, function() {
+            if (!docs || !docs.length) {
+              callback.call(this, 'Inserting team failed');
+            } else {
+              callback.call(this, null, docs[0]);
+            }
+            db.close();
+          });
         });
       });
     });
-  });
+  } catch(e) {
+    callback(e);
+  }
   
   return true;
 };
@@ -140,16 +158,20 @@ exports.getAll = function ( callback ) {
       };
   
   callback = callback || function() {};
-      
-  getCollection( db, function(error, collection) {
-    checkErrorFn(error, errorFn, function() {
-      var cursor = collection.find()
-      .toArray( function(error, teams) {
-        callback(error, teams);
-        db.close();
-      });      
-    });
-  } );
+  
+  try {    
+    getCollection( db, function(error, collection) {
+      checkErrorFn(error, errorFn, function() {
+        var cursor = collection.find()
+        .toArray( function(error, teams) {
+          callback(error, teams);
+          db.close();
+        });      
+      });
+    } );
+  } catch(e) {
+    callback(e);
+  }
   
   return true;
 }
@@ -172,29 +194,38 @@ exports.addJoinRequest = function (teamid, request, callback) {
     };
   
   callback = callback || function() {};
+  
+  if (!teamid || typeof teamid !== 'string') {
+    errorFn('Id is invalid ', teamid);
+    return;
+  }
     
   request = request || {};
   //request.createdat = timestamp;
-    
-  getCollection( db, function(error, collection) {
-    checkErrorFn(error, errorFn, function() {
-      collection.findAndModify({
-        _id: new ObjectId(teamid)
-      }, {
-      }, {
-        $addToSet: {
-          joinrequests: request
-          , posts: post
-        }
-      }, {
-        safe: true
-        , 'new':true
-      }, function(error) {
-        callback(error);
+   
+  try { 
+    getCollection( db, function(error, collection) {
+      checkErrorFn(error, errorFn, function() {
+        collection.findAndModify({
+          _id: new ObjectId(teamid)
+        }, {
+        }, {
+          $addToSet: {
+            joinrequests: request
+            , posts: post
+          }
+        }, {
+          safe: true
+          , 'new':true
+        }, function(error) {
+          callback(error);
+        });
       });
     });
-  });
-  
+  } catch(e) {
+    callback(e);
+  }
+    
   return true;
 }
 
@@ -215,31 +246,42 @@ exports.addPlayer = function(teamid, userid, callback) {
   
   callback = callback || function() {};
   
+  if (!teamid || typeof teamid !== 'string') {
+    errorFn('Id is invalid ', teamid);
+    return;
+  }
+  
   // add userid to member list
   // add joining post
   // remove from joinrequest (if any)
   
   console.log(teamid, userid);
   
-  getCollection( db, function(error, collection) {
-    checkErrorFn(error, errorFn, function() {
-      collection.findAndModify({
-        _id: new ObjectId(teamid)
-      }, {
-      }, {
-        $addToSet: {
-          members: userid
-          , posts: joiningPost
-        }
-        , $pull: {
-          joinrequests: {requestor: userid}
-        }
-      }, {
-        safe: true
-        , 'new':true
-      }, callback);
+  try {
+    getCollection( db, function(error, collection) {
+      checkErrorFn(error, errorFn, function() {
+        collection.findAndModify({
+          _id: new ObjectId(teamid)
+        }, {
+        }, {
+          $addToSet: {
+            members: userid
+            , posts: joiningPost
+          }
+          , $pull: {
+            joinrequests: {requestor: userid}
+          }
+        }, {
+          safe: true
+          , 'new':true
+        }, callback);
+      });
     });
-  });
+  } catch(e) {
+    callback(e);
+  }
+  
+  return true;
 }
 
 //////////////////////////////////////////////////////////////

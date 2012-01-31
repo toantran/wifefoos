@@ -4,7 +4,7 @@
   .player-detail.info
     .nickname
       a(href='/profile/#{player._id}')= player.nickname || player.username
-    - if ((typeof player.team !== 'undefined') && player.team.teamname)
+    - if ((typeof player.team !== 'undefined') && player.team && player.team.teamname)
       .team Team:
         a(href='/team/#{player.team._id}')= player.team.teamname
     - else 

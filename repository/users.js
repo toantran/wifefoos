@@ -62,35 +62,39 @@ exports.getUser = function(username, callback) {
   
   callback = callback || function() {};    
   
-  getCollection( db, function(error, collection) {
-    checkErrorFn(error, errorFn, function() {
-      collection.find( {
-        username: username
-      }, {
-        username: 1
-      , nickname: 1
-      , password: 1
-      , firstname: 1
-      , lastname: 1
-      , team: 1
-      } , function(error, cursor) {
-        checkErrorFn(error, errorFn, function() {
-          cursor.nextObject(function(error, doc) {
-            checkErrorFn(error, errorFn, function() {
-              callback.call(this, null, doc);
-              db.close();
+  try {
+    getCollection( db, function(error, collection) {
+      checkErrorFn(error, errorFn, function() {
+        collection.find( {
+          username: username
+        }, {
+          username: 1
+        , nickname: 1
+        , password: 1
+        , firstname: 1
+        , lastname: 1
+        , team: 1
+        } , function(error, cursor) {
+          checkErrorFn(error, errorFn, function() {
+            cursor.nextObject(function(error, doc) {
+              checkErrorFn(error, errorFn, function() {
+                callback.call(this, null, doc);
+                db.close();
+              });
             });
           });
         });
       });
     });
-  });
-  
+  }
+  catch(e) {
+    callback(e);
+  }
   return true;
 };
 
 
-exports.getFullUser = function(userId, callback) {
+exports.getFullUser = function(userid, callback) {
   var db = getDb(),
       errorFn = function(error) {
         db.close();
@@ -98,23 +102,33 @@ exports.getFullUser = function(userId, callback) {
       };
       
   callback = callback || function() {};
-    
-  getCollection( db, function(error, collection) {
-    checkErrorFn(error, errorFn, function() {
-      collection.find( {
-        _id: new ObjectId(userId)
-      } , function(error, cursor) {
-        checkErrorFn(error, errorFn, function() {
-          cursor.nextObject(function(error, doc) {
-            checkErrorFn(error, errorFn, function() {
-              callback.call(this, null, doc);
-              db.close();
+  
+  console.log('userid = ', userid, typeof(userid));
+  if (!userid || (typeof userid !== 'string')) {
+    errorFn('Id is invalid ', userid);
+    return;
+  }
+  
+  try {
+    getCollection( db, function(error, collection) {
+      checkErrorFn(error, errorFn, function() {
+        collection.find( {
+          _id: new ObjectId(userid)
+        } , function(error, cursor) {
+          checkErrorFn(error, errorFn, function() {
+            cursor.nextObject(function(error, doc) {
+              checkErrorFn(error, errorFn, function() {
+                callback.call(this, null, doc);
+                db.close();
+              });
             });
           });
         });
       });
     });
-  });
+  } catch(e) {
+    callback(e);
+  }
   
   return true;
 };
@@ -128,26 +142,30 @@ exports.getAllUsers = function (callback) {
     };
 
   callback = callback || function() {};
-    
-  getCollection( db, function(err, collection) {
   
-    checkErrorFn(err, errorFn, function() {
-      var cursor = collection.find( {}, {
-        nickname: 1
-        , pictureurl: 1
-        , stats: 1
-        , team: 1        
-        , statustext: 1
-        , username: 1
-      }).toArray( function(err, users) {
-        checkErrorFn(err, errorFn, function() {
-          callback.call(this, null, users);
-          db.close();
+  try {  
+    getCollection( db, function(err, collection) {
+    
+      checkErrorFn(err, errorFn, function() {
+        var cursor = collection.find( {}, {
+          nickname: 1
+          , pictureurl: 1
+          , stats: 1
+          , team: 1        
+          , statustext: 1
+          , username: 1
+        }).toArray( function(err, users) {
+          checkErrorFn(err, errorFn, function() {
+            callback.call(this, null, users);
+            db.close();
+          });
         });
       });
+      
     });
-    
-  });
+  } catch(e) {
+    callback(e);
+  }
   
   return true;
 }
@@ -165,25 +183,29 @@ exports.insertUser = function(user, callback) {
   user = user || {};
   user.createdat = new Date();
    
-  getCollection( db, function(error, collection) {
-    checkErrorFn(error, errorFn, function() {
-      
-      user.pictureurl = user.pictureurl || '/images/player.jpg';
-      user.statustext = user.statustext || 'Ready for some foos!';
-      
-      collection.insert([user], {safe: true}, 
-        function(error, docs) {
-          checkErrorFn(error, errorFn, function() {
-            if (!docs || !docs.length) {
-              callback.call(this, 'Inserting user failed');
-            } else {
-              callback.call(this, null, docs[0]);
-            }
-            db.close();
-          });
-      });
-    });       
-  });
+  try {
+    getCollection( db, function(error, collection) {
+      checkErrorFn(error, errorFn, function() {
+        
+        user.pictureurl = user.pictureurl || '/images/player.jpg';
+        user.statustext = user.statustext || 'Ready for some foos!';
+        
+        collection.insert([user], {safe: true}, 
+          function(error, docs) {
+            checkErrorFn(error, errorFn, function() {
+              if (!docs || !docs.length) {
+                callback.call(this, 'Inserting user failed');
+              } else {
+                callback.call(this, null, docs[0]);
+              }
+              db.close();
+            });
+        });
+      });       
+    });
+  } catch(e) {
+    callback(e);
+  }
 
   return true;
 };
@@ -199,19 +221,23 @@ exports.saveUser = function(user, callback) {
   
   callback = callback || function() {};
         
-  getCollection( db, function(error, collection) {
-    checkErrorFn(error, errorFn, function() {
-      
-      collection.save(user, 
-        function(error, docs) {
-          checkErrorFn(error, errorFn, function() {
-            callback.call(this, error, user);
-            db.close();
-          });
-      });
-    });       
-  });
-
+  try {
+    getCollection( db, function(error, collection) {
+      checkErrorFn(error, errorFn, function() {
+        
+        collection.save(user, 
+          function(error, docs) {
+            checkErrorFn(error, errorFn, function() {
+              callback.call(this, error, user);
+              db.close();
+            });
+        });
+      });       
+    });
+  } catch(e) {
+    callback(e);
+  }
+  
   return true;
 };
 
@@ -226,28 +252,37 @@ exports.setTeam = function (userid, team, callback) {
   
   callback = callback || function() {};
       
-  getCollection( db, function(error, collection) {
-    checkErrorFn(error, errorFn, function() {
-      collection.findAndModify({
-        _id: new ObjectId(userid)
-      }, {
-      }, {
-        $set: {
-          team: team
-          , invites: []
-          , updatedat: new Date()
-        }
-      }, {
-        safe: true
-        , 'new':true
-      }, function(error, docs) {
-        checkErrorFn(error, errorFn, function() {
-          callback.call(this, error, docs);
-          db.close();
+  if (!userid || typeof userid !== 'string') {
+    errorFn('Id is invalid ', userid);
+    return;
+  }
+  
+  try {
+    getCollection( db, function(error, collection) {
+      checkErrorFn(error, errorFn, function() {
+        collection.findAndModify({
+          _id: new ObjectId(userid)
+        }, {
+        }, {
+          $set: {
+            team: team
+            , invites: []
+            , updatedat: new Date()
+          }
+        }, {
+          safe: true
+          , 'new':true
+        }, function(error, docs) {
+          checkErrorFn(error, errorFn, function() {
+            callback.call(this, error, docs);
+            db.close();
+          });
         });
       });
     });
-  });
+  } catch(e) {
+    callback(e);
+  }
   
   return true;
 }
@@ -263,35 +298,45 @@ exports.addPost = function (userid, post, callback) {
   
   callback = callback || function() {};
   
+  if (!userid || typeof userid !== 'string') {
+    errorFn('Id is invalid ', userid);
+    return;
+  }
+  
+  
   post = post || {};
   post.createdat = new Date();
   post.id = new ObjectId();
-      
-  getCollection( db, function(error, collection) {
-    checkErrorFn(error, errorFn, function() {
-      
-      collection.findAndModify({
-        _id: new ObjectId(userid)
-      }, {
-      }, {
-        $addToSet: {
-          posts: post
-        }
-        , $set: {
-          updatedat: new Date()
-        }
-      }, {
-        safe: true
-        , 'new':true
-      }, function(error, docs) {
-        checkErrorFn(error, errorFn, function() {
-          callback.call(this, error, docs);
-          db.close();
+  
+  try {    
+    getCollection( db, function(error, collection) {
+      checkErrorFn(error, errorFn, function() {
+        
+        collection.findAndModify({
+          _id: new ObjectId(userid)
+        }, {
+        }, {
+          $addToSet: {
+            posts: post
+          }
+          , $set: {
+            updatedat: new Date()
+          }
+        }, {
+          safe: true
+          , 'new':true
+        }, function(error, docs) {
+          checkErrorFn(error, errorFn, function() {
+            callback.call(this, error, docs);
+            db.close();
+          });
         });
-      });
-    });       
-  });
-
+      });       
+    });
+  } catch(e) {
+    callback(e);
+  }
+  
   return true;
 }
 
@@ -306,31 +351,40 @@ exports.addInvite = function(userid, invite, callback) {
       
   callback = callback || function() {};
   
-  getCollection( db, function(error, collection) {
-    checkErrorFn(error, errorFn, function() {
-      
-      collection.findAndModify({
-        _id: new ObjectId(userid)
-      }, {
-      }, {
-        $addToSet: {
-          invites: invite
-        }
-        , $set: {
-          updatedat: new Date()
-        }
-      }, {
-        safe: true
-        , 'new':true
-      }, function(error, docs) {
-        checkErrorFn(error, errorFn, function() {
-          callback.call(this, error, docs);
-          db.close();
+  if (!userid || typeof userid !== 'string') {
+    errorFn('Id is invalid ', userid);
+    return;
+  }
+  
+  try {
+    getCollection( db, function(error, collection) {
+      checkErrorFn(error, errorFn, function() {
+        
+        collection.findAndModify({
+          _id: new ObjectId(userid)
+        }, {
+        }, {
+          $addToSet: {
+            invites: invite
+          }
+          , $set: {
+            updatedat: new Date()
+          }
+        }, {
+          safe: true
+          , 'new':true
+        }, function(error, docs) {
+          checkErrorFn(error, errorFn, function() {
+            callback.call(this, error, docs);
+            db.close();
+          });
         });
-      });
-    });       
-  });
-
+      });       
+    });
+  } catch(e) {
+    callback(e);
+  }
+  
   return true;
 }
 

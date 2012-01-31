@@ -113,7 +113,7 @@ function createNewTeamPost(userid, team, callback) {
     , post = {
       type: 'newteam'
       , data: {
-        teamid: team._id
+        teamid: String(team._id)
       }
     };
     

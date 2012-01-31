@@ -15,7 +15,6 @@ var profile = {
 $(document).ready( function() {
 
   $('.todo-invite button').button();
-console.log(  $('.todo-invite button') );
   $('.todo-invite button').click(profile.accceptinviteclick);
   //$('input#createteambtn').click(profile.createTeamClick);  
   

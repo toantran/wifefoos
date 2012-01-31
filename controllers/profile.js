@@ -21,6 +21,13 @@ exports.index.authenticated = true;
 exports.show = function(req, res, next) {
   var userId = req.params.id || null;
   
+  console.log('showing user ', userId);
+  
+  if (userId === 'undefined') {
+    res.send(userId);
+    return;
+  }
+  
   if (!userId) {
     req.flash('error', 'player id is empty...playa');
     next();
@@ -191,14 +198,14 @@ function loadFullPost(user, post, callback) {
   // Populate post picture url, post description (embedded HTML)  
   switch (post.type) {
     case 'jointeam':  // added into a team
-      desc = '<a href="/profile/{0}">{1}</a> has been accepted by team <a href="/team/{3}">{2}</a>';
+      pictureurl = user.pictureurl || '';            
+      desc = '<a href="/profile/{0}">{1}</a> has joined team <a href="/team/{3}">{2}</a>';
       desc = desc.replace('{0}', String(user._id))
                  .replace('{1}', user.nickname);
                        
       if (post.data && post.data.teamid) {  // teamid exists, load team
         loadTeam(post.data.teamid, function(error, team) {
           if (team) {
-            pictureurl = team.pictureurl;
             desc = desc.replace('{2}', team.teamname)
                       .replace('{3}', String(team._id));
           }
@@ -233,7 +240,7 @@ function loadFullPost(user, post, callback) {
                         .replace('{1}', invitor.nickname)
                         .replace('{4}', String(team._id))
                         .replace('{5}', team.teamname);
-              pictureurl = invitor.pictureurl;
+              pictureurl = invitor.pictureurl || '';
               returnFn();
             } else {
               returnFn(error);
@@ -251,7 +258,7 @@ function loadFullPost(user, post, callback) {
       if (post.data && post.data.teamid) {  // teamid exists, load team
         loadTeam(post.data.teamid, function(error, team) {
           if (team) {
-            pictureurl = team.pictureurl;
+            pictureurl = team.pictureurl || '';
             desc = desc.replace('{2}', team.teamname)
                       .replace('{3}', String(team._id));
           }
@@ -262,7 +269,7 @@ function loadFullPost(user, post, callback) {
       }
       break;
     case 'recruit':  // recruit a player
-      pictureurl = user.pictureurl;
+      pictureurl = user.pictureurl || '';
       desc = '<a href="/profile/{0}">{1}</a> has asked <a href="/profile/{2}">{3}</a> to make a team';
       desc = desc.replace('{0}', String(user._id))
                  .replace('{1}', user.nickname);
@@ -278,6 +285,26 @@ function loadFullPost(user, post, callback) {
       } else {
         returnFn();
       }
+      break;
+    
+    case 'newteam':  
+      pictureurl = user.pictureurl || '';
+      desc = '<a href="/profile/{0}">{1}</a> has just created team <a href="/team/{2}">{3}</a>';
+      desc = desc.replace('{0}', String(user._id))
+                 .replace('{1}', user.nickname);
+      
+      if (post.data && post.data.teamid) {  // teamid exists, load team
+        loadTeam(post.data.teamid, function(error, team) {
+          
+          if (team) {
+            desc = desc.replace('{3}', team.teamname)
+                      .replace('{2}', String(team._id));
+          }
+          returnFn(error);
+        });
+      } else {
+        returnFn();
+      }                 
       break;
     default:
       returnFn();
