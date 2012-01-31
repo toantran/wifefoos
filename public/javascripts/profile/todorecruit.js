@@ -2,7 +2,7 @@
 var nomate = {
   
   recruitbtnclick: function(e) {
-    nomate.playerform.dialog('open');
+    nomate.playerlistdialog.dialog('open');
   },
   
   
@@ -11,7 +11,7 @@ var nomate = {
   },
   
   
-  playerformopen: function() {
+  playerlistdialogopen: function() {
     $('#todo-nomate-recruit #player-list').empty();
     nomate.loadAvailablePlayers();
   },
@@ -20,7 +20,7 @@ var nomate = {
   loadAvailablePlayers: function() {
     $.get('/player', { available: true })
     .success( function(data, status, res) {
-      noteam.populatePlayers(data);
+      nomate.populatePlayers(data);
     })
     .error( function(res, status) {
       console.log('failed ', status, res);
@@ -29,27 +29,77 @@ var nomate = {
   
   
   populatePlayers: function(players) {
+    var $list = $('#todo-nomate-recruit #player-list')
+      , teamid = nomate.playerlistdialog.attr('teamid')
+      , userid = nomate.playerlistdialog.attr('userid');
+     
+    for (var i=0; i < players.length; i++) {
+      var player = players[i]
+        , html = ['<div class="player-info">'
+                  , '<div class="player-detail picture">'
+                    , '<img src="{0}">'
+                  , '</div>'
+                  , '<div class="player-detail info">'
+                    , '<div class="nickname">'
+                      , '<a href="/profile/{2}">{1}</a>'
+                    , '</div>'
+                  , '</div>'
+                  , '<div class="buttons">'
+                    , '<a class="team-invite-button" teamid="{4}" invitorid="{5}" inviteeid="{3}">Invite</a>'
+                  , '</div>'
+                  , '<div class="clear-float"/>'
+                , '</div>'].join('');
+
+      html = html.replace('{0}', player.pictureurl || '/images/player.jpg')
+                .replace('{1}', player.nickname || 'No name')                  
+                .replace('{2}', player._id)
+                .replace('{3}', player._id)
+                .replace('{4}', teamid)
+                .replace('{5}', userid);
+                        
+      $list.append(html);
+    }
+  },
   
+  
+  inviteclick: function(e) {
+    var $button = $(e.target)
+      , teamid = $button.attr('teamid')
+      , invitorid = $button.attr('invitorid')      
+      , inviteeid = $button.attr('inviteeid');
+      
+    $.post('/player/invite', {
+      teamid: teamid
+      , playerid: inviteeid
+      , invitorid: invitorid
+    })
+    .success( function(data, status, res) {
+      console.log(data);
+      nomate.playerlistdialog.dialog('close');
+    })
+    .error( function(res, status) {
+      console.log(status);
+    });
   }
 };
 
 $( function() {
 
-  nomate.playerform = $('#todo-nomate-recruit.dialog');  
+  nomate.playerlistdialog = $('#todo-nomate-recruit.dialog');  
   
   // render buttons
   $('.todo-nomate button').button();
   
   // render dialog
-  nomate.playerform.dialog({
+  nomate.playerlistdialog.dialog({
     autoOpen: false
     , height: 400
-    , width: 500
+    , width: 550
     , modal: true
     , resizable: true
     , show: 'drop'
     , hide: 'explode'
-    , open: nomate.playerformopen
+    , open: nomate.playerlistdialogopen
     , buttons: {
       Cancel: nomate.recruitcancel
     }
@@ -57,4 +107,5 @@ $( function() {
   
   // assign button handlers
   $('button#recruitbtn').click( nomate.recruitbtnclick );
+  $(document).on('click', '#todo-nomate-recruit.dialog .buttons a', '', nomate.inviteclick);
 } );

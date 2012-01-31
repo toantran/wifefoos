@@ -5,7 +5,7 @@
         | You don't have a teammate
         .buttons
           button#recruitbtn Recruit
-      #todo-nomate-recruit.dialog(title='Find your teammate', userid='#{profile._id}')
+      #todo-nomate-recruit.dialog(title='Find your teammate', userid='#{profile._id}', teamid='#{profile.team._id}')
         .title Available players
           span
         #player-list

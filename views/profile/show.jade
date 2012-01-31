@@ -40,5 +40,8 @@ link(rel='stylesheet', href='/stylesheets/profile.css')
   .todo-section
     != partial('todoteam')
     != partial('todorecruit')
+    - if ((typeof profile !== 'undefined') && (typeof user !== 'undefined') && (profile._id == user._id))
+      - if (typeof profile.invites !== 'undefined' && profile.invites.length)
+        != partial('invite', profile.invites)
   .clear-float
 script(type='text/javascript', src='/javascripts/app/profile.js')

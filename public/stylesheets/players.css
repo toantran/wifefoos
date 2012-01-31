@@ -66,3 +66,29 @@
   margin-left: auto;
   margin-right: auto;  
 }
+
+.player-info .buttons {
+  float: right;
+  width: 70px;
+  padding-top: 10px;
+}
+
+a.team-invite-button {
+  cursor: pointer;
+  color: #005DC8;
+  padding: 3px 10px 3px 10px;  
+  border: 1px solid #B9B9B9;
+  -webkit-border-radius: 3px;
+  -moz-border-radius: 3px;
+  border-radius: 3px;  
+}
+
+a.team-invite-button:link {
+}
+
+a.team-invite-button:visited {
+}
+
+a.team-invite-button:hover {
+  background-color: #e0e0e0;
+}

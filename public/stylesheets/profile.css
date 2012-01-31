@@ -87,7 +87,7 @@
   margin-bottom: 5px;
 }
 
-.todo-noteam {
+.todo-noteam, .todo-invite, .todo-nomate {
   -webkit-border-radius: 3px;
   -moz-border-radius: 3px;
   border-radius: 3px;
@@ -96,21 +96,12 @@
   padding: 5px;
 }
 
-.todo-noteam button, .todo-nomate button {
+.todo-noteam button, .todo-nomate button, .todo-invite button {
   width: 100%;
 }
 
 .todo-noteam-text {
   /*line-height: 200%;&*/
-}
-
-.todo-nomate {
-  -webkit-border-radius: 3px;
-  -moz-border-radius: 3px;
-  border-radius: 3px;
-  background-color: #C6FFB0;
-  border: 1px solid #a2a0FF;
-  padding: 5px;
 }
 
 #teamname a {

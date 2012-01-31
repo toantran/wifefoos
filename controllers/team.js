@@ -48,8 +48,6 @@ exports.create = function(req, res, next) {
   var userId = req.params.id || req.session.user._id
     , teamname = req.body.teamname;
   
-  console.log(userId, ' create team ', teamname);
-    
   createTeam(teamname, userId, function(error, team) {
     if (error) {
       req.flash('error', error);
@@ -58,11 +56,9 @@ exports.create = function(req, res, next) {
       req.flash('error', 'DB error');
       res.redirect('back');
     } else {
-      console.log('created team ', team);
       assignTeamToUser(team, userId, function(error, user) {
         if (!error) {
-          createNewTeamPost(user, team, function() {
-            
+          createNewTeamPost(userId, team, function() {
           });
         }
         res.redirect('/team/' + team._id);      
@@ -111,7 +107,7 @@ exports.available.methods = ['GET'];
 exports.available.authenticated = true;
 
 
-function createNewTeamPost(user, team, callback) {
+function createNewTeamPost(userid, team, callback) {
   var repo = require('../repository/users')
     , mongo = require('mongodb')
     , post = {
@@ -121,33 +117,10 @@ function createNewTeamPost(user, team, callback) {
       }
     };
     
-  repo.addPost(String(user._id), post, function(error, savedUser) {
+  repo.addPost(userid, post, function(error, savedUser) {
     callback(error, savedUser);
   });
     
-  /*
-  repo.getFullUser(String(user._id), function(error, fullUser) {
-    if (error) {
-      console.log(error);
-      callback(error);
-    } else {
-      var posts = fullUser.posts || [];
-      posts.push({
-        id: new mongo.ObjectID()
-        , userId: String(fullUser._id)
-        , comment: 'You have just created a team!'
-        , createdat: new mongo.Timestamp(new Date())
-      });
-      
-      fullUser.posts = posts;
-      
-      repo.saveUser(fullUser, function( error, savedUser) {
-        callback(error, savedUser);
-      });
-    }
-  });
-  */
-  
   return true;
 }
 
@@ -173,14 +146,7 @@ function createTeam(teamname, ownerId, callback) {
 function assignTeamToUser(team, userId, callback) {
   var repo = require('../repository/users');
   
-  repo.getFullUser(userId, function(error, user) {
-    if (error) {
-      console.log(error);
-      callback(error);
-    } else {
-      repo.setTeam( userId, team, callback );
-    }
-  });
+  repo.setTeam( userId, team, callback );
 }
 
 function getAllTeams(callback) {

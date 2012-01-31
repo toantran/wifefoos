@@ -228,13 +228,23 @@ exports.setTeam = function (userid, team, callback) {
       
   getCollection( db, function(error, collection) {
     checkErrorFn(error, errorFn, function() {
-      collection.update({
+      collection.findAndModify({
         _id: new ObjectId(userid)
+      }, {
       }, {
         $set: {
           team: team
+          , invites: []
           , updatedat: new Date()
         }
+      }, {
+        safe: true
+        , 'new':true
+      }, function(error, docs) {
+        checkErrorFn(error, errorFn, function() {
+          callback.call(this, error, docs);
+          db.close();
+        });
       });
     });
   });
@@ -260,8 +270,9 @@ exports.addPost = function (userid, post, callback) {
   getCollection( db, function(error, collection) {
     checkErrorFn(error, errorFn, function() {
       
-      collection.update({
+      collection.findAndModify({
         _id: new ObjectId(userid)
+      }, {
       }, {
         $addToSet: {
           posts: post
@@ -271,6 +282,7 @@ exports.addPost = function (userid, post, callback) {
         }
       }, {
         safe: true
+        , 'new':true
       }, function(error, docs) {
         checkErrorFn(error, errorFn, function() {
           callback.call(this, error, docs);
@@ -282,6 +294,46 @@ exports.addPost = function (userid, post, callback) {
 
   return true;
 }
+
+
+exports.addInvite = function(userid, invite, callback) {
+  var db = getDb()
+    , errorFn = function(error) {
+        db.close();
+        callback.call(this, error);
+        return false;
+      };
+      
+  callback = callback || function() {};
+  
+  getCollection( db, function(error, collection) {
+    checkErrorFn(error, errorFn, function() {
+      
+      collection.findAndModify({
+        _id: new ObjectId(userid)
+      }, {
+      }, {
+        $addToSet: {
+          invites: invite
+        }
+        , $set: {
+          updatedat: new Date()
+        }
+      }, {
+        safe: true
+        , 'new':true
+      }, function(error, docs) {
+        checkErrorFn(error, errorFn, function() {
+          callback.call(this, error, docs);
+          db.close();
+        });
+      });
+    });       
+  });
+
+  return true;
+}
+
 
 //////////////////////////////////////////////////////////////
 // Public functions end

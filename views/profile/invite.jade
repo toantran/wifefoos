@@ -1,0 +1,3 @@
+.todo-invite You have been invited to join team 
+  a(href='/team/#{invite.team._id}')= invite.team.teamname
+  button(teamid='#{invite.team._id}', userid='#{profile._id}') Accept

@@ -90,7 +90,6 @@ exports.getFullTeam = function(teamId, callback) {
   getCollection(db, function(error, collection) {
     checkErrorFn(error, errorFn, function () {
       
-      console.log('Team Id = ', teamId, ' type ', typeof teamId);
       collection.findOne({_id: new ObjectId(teamId)}, function (error, team) {
         callback(error, team);
         db.close();
@@ -165,7 +164,7 @@ exports.addJoinRequest = function (teamid, request, callback) {
     , timestamp = new Date()
     , post= {
       id: new ObjectId()
-      , type: 'join'
+      , type: 'joinrequest'
       , data: {
         userid: request.requestor
       }
@@ -179,8 +178,9 @@ exports.addJoinRequest = function (teamid, request, callback) {
     
   getCollection( db, function(error, collection) {
     checkErrorFn(error, errorFn, function() {
-      collection.update({
+      collection.findAndModify({
         _id: new ObjectId(teamid)
+      }, {
       }, {
         $addToSet: {
           joinrequests: request
@@ -188,6 +188,7 @@ exports.addJoinRequest = function (teamid, request, callback) {
         }
       }, {
         safe: true
+        , 'new':true
       }, function(error) {
         callback(error);
       });
@@ -195,6 +196,50 @@ exports.addJoinRequest = function (teamid, request, callback) {
   });
   
   return true;
+}
+
+
+exports.addPlayer = function(teamid, userid, callback) {
+  var db = getDb()
+    , errorFn = function(error) {
+      db.close();
+      callback.call(this, error);
+    }
+    , joiningPost = {
+      type: 'join'
+      , data: {
+        userid: userid
+      }
+      , createdat: new Date()
+    };
+  
+  callback = callback || function() {};
+  
+  // add userid to member list
+  // add joining post
+  // remove from joinrequest (if any)
+  
+  console.log(teamid, userid);
+  
+  getCollection( db, function(error, collection) {
+    checkErrorFn(error, errorFn, function() {
+      collection.findAndModify({
+        _id: new ObjectId(teamid)
+      }, {
+      }, {
+        $addToSet: {
+          members: userid
+          , posts: joiningPost
+        }
+        , $pull: {
+          joinrequests: {requestor: userid}
+        }
+      }, {
+        safe: true
+        , 'new':true
+      }, callback);
+    });
+  });
 }
 
 //////////////////////////////////////////////////////////////
