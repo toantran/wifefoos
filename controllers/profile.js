@@ -79,14 +79,22 @@ function getUser(userId, callback) {
       loadPostsCallback = loadPostsCallback || function() {};
       
       if (fullUser && fullUser.posts && fullUser.posts.length) {
-        utils.map(fullUser.posts, loadFullPost, function(error, fullPosts) {
-
-          if (!error) {
-            fullUser.posts = fullPosts;
+        utils.map(fullUser.posts 
+          , function(post, cb) {
+            loadFullPost(fullUser, post, cb);
           }
-    
-          loadPostsCallback(null, fullUser);
-        });
+          , function(error, fullPosts) {
+
+            if (!error) {
+              fullPosts.sort( function(a, b) {
+                return b.createdat - a.createdat;
+              });
+              fullUser.posts = fullPosts;
+            }
+      
+            loadPostsCallback(null, fullUser);
+          }
+        );
       } else {
         loadPostsCallback(null, fullUser);
       }
@@ -165,8 +173,118 @@ function loadFullInvite(invite, callback) {
 
 
 // take in a brief post object and return a full post object
-function loadFullPost(post, callback) {
-  callback(null, post);
+function loadFullPost(user, post, callback) {
+  if (!post) {
+    callback(null, post);
+    return;
+  }
+
+  var desc = ''
+    , pictureurl = ''
+    , utils = require('utils')
+    , returnFn = function(error) {
+      post.pictureurl = pictureurl;
+      post.desc = desc;
+      callback(error, post);
+    };
+
+  // Populate post picture url, post description (embedded HTML)  
+  switch (post.type) {
+    case 'jointeam':  // added into a team
+      desc = '<a href="/profile/{0}">{1}</a> has been accepted by team <a href="/team/{3}">{2}</a>';
+      desc = desc.replace('{0}', String(user._id))
+                 .replace('{1}', user.nickname);
+                       
+      if (post.data && post.data.teamid) {  // teamid exists, load team
+        loadTeam(post.data.teamid, function(error, team) {
+          if (team) {
+            pictureurl = team.pictureurl;
+            desc = desc.replace('{2}', team.teamname)
+                      .replace('{3}', String(team._id));
+          }
+          returnFn(error);
+        });
+      } else {
+        returnFn();
+      }
+      break;
+      
+    case 'invite':  // get a team invite
+      desc = '<a href="/profile/{0}">{1}</a> has invited <a href="/profile/{2}">{3}</a> to join team <a href="/team/{4}">{5}</a>';
+      desc = desc.replace('{2}', String(user._id))
+                .replace('{3}', user.nickname);
+                
+      if ( post.data && post.data.teamid && post.data.playerid ) {
+        utils.parallel(
+          [
+            function(cb) {
+              loadTeam(post.data.teamid, cb);
+            }
+            , function(cb) {
+              loadUser(post.data.playerid, cb);
+            }
+          ]
+          , function(error, results) {
+            if (!error && results && results.length) {
+              var team = results[0]
+                , invitor = results[1];
+              
+              desc = desc.replace('{0}', String(invitor._id))
+                        .replace('{1}', invitor.nickname)
+                        .replace('{4}', String(team._id))
+                        .replace('{5}', team.teamname);
+              pictureurl = invitor.pictureurl;
+              returnFn();
+            } else {
+              returnFn(error);
+            }
+          }
+        );
+      }
+      break;
+      
+    case 'teamjoin':  // team joining request
+      desc = '<a href="/profile/{0}">{1}</a> has asked to join team <a href="/team/{3}">{2}</a>';
+      desc = desc.replace('{0}', String(user._id))
+                 .replace('{1}', user.nickname);
+                       
+      if (post.data && post.data.teamid) {  // teamid exists, load team
+        loadTeam(post.data.teamid, function(error, team) {
+          if (team) {
+            pictureurl = team.pictureurl;
+            desc = desc.replace('{2}', team.teamname)
+                      .replace('{3}', String(team._id));
+          }
+          returnFn(error);
+        });
+      } else {
+        returnFn();
+      }
+      break;
+    case 'recruit':  // recruit a player
+      pictureurl = user.pictureurl;
+      desc = '<a href="/profile/{0}">{1}</a> has asked <a href="/profile/{2}">{3}</a> to make a team';
+      desc = desc.replace('{0}', String(user._id))
+                 .replace('{1}', user.nickname);
+      
+      if (post.data && post.data.playerid) {
+        loadUser(post.data.playerid, function(error, invitee) {
+          if (invitee) {
+            desc = desc.replace('{2}', String(invitee._id))
+                      .replace('{3}', invitee.nickname);
+          }
+          returnFn(error);
+        });
+      } else {
+        returnFn();
+      }
+      break;
+    default:
+      returnFn();
+      break;
+  }
+  
+  return true;    
 }
 
 

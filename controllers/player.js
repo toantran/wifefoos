@@ -141,11 +141,9 @@ function updateUserTeam(userid, team, callback) {
     }
     , utils = require('utils')
     , setTeamFn = function(setTeamCallback) {
-      console.log('setTeamFn');
       userRepo.setTeam(userid, team, setTeamCallback);
     }
     , addPostFn = function(addPostCallback) {
-      console.log('addPostFn');
       userRepo.addPost(userid, joiningTeamPost, addPostCallback);
     };
 

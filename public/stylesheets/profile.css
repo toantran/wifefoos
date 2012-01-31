@@ -91,7 +91,7 @@
   -webkit-border-radius: 3px;
   -moz-border-radius: 3px;
   border-radius: 3px;
-  background-color: #C6FFB0;
+  background-color: #E1E7E3;  /*#C6FFB0;*/
   border: 1px solid #a2a0FF;
   padding: 5px;
 }
@@ -130,17 +130,22 @@
   padding: 5px;
 }
 
-.post-panel .post-item {
-  float: left;
+.post-item {
+  margin-bottom: 3px;
 }
 
 .poster-picture {
-  width: 20px;
+  float: left;
+  margin-right: 10px;
 }
 
 .poster-picture img {
-  max-height: 20px;
-  max-width: 20px;
+  max-height: 40px;
+  max-width: 40px;
+}
+
+.postmark {
+  color: #bbbbbb;
 }
 
 .poster-name, .post-comment {
