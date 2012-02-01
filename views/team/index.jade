@@ -2,4 +2,27 @@ link(rel='stylesheet', href='/stylesheets/team.css')
 .teams-list
   != partial('team', teams)
 .clear-float
+#team-challenge.dialog(title='Challenge')
+  .title Foos off!
+  .dialog-body
+    img(src='/images/challenge.jpg')
+    form
+      label(for='#challenge-msg') Challenge message:
+      textarea#challenge-msg(name='challengemsg', cols=40, rows=2)
+      br
+      label Match type:
+      ol      
+        li 
+          input(type='radio', name='matchtype', value='1') 
+          | One game
+        li 
+          input(type='radio', name='matchtype', value='3') 
+          | Best of 3
+        li 
+          input(type='radio', name='matchtype', value='5') 
+          | Best of 5
+        li 
+          input(type='radio', name='matchtype', value='99') 
+          | Death match!
+  .clear-float
 script(type='text/javascript', src='/javascripts/app/team.js')

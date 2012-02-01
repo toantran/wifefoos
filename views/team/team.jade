@@ -13,7 +13,7 @@
     - if ((!team.members || team.members.length <= 1) && (!user.team))
       a Join team
     - if (user.team && (user.team._id != team._id))
-      a Challenge
+      a(challengerid='#{user._id}', challengeeteamid='#{team._id}') Challenge
   .team-record.stats
     .stats-detail #{(team.stats && team.stats.wins) || '0'}-#{(team.stats && team.stats.losses) || '0'}
   .clear-float

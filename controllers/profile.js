@@ -92,10 +92,12 @@ function getUser(userId, callback) {
           }
           , function(error, fullPosts) {
 
-            if (!error) {
+            console.log('get full posts callback error= ', error, ' fullPost presort= ', fullPosts);
+            if (!error) {              
               fullPosts.sort( function(a, b) {
                 return b.createdat - a.createdat;
               });
+              console.log('fullPosts postSort= ', fullPosts);
               fullUser.posts = fullPosts;
             }
       

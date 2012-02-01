@@ -74,8 +74,8 @@
 }
 
 .team-picture img {
-  max-height: 50px;
-  max-width: 50px;
+  max-height: 75px;
+  max-width: 75px;
 }
 
 .team-name {
@@ -100,6 +100,10 @@
 
 .member-list {
   
+}
+
+.member-name a {
+  text-decoration: none;
 }
 
 .dialog .title {
@@ -134,10 +138,115 @@ a.team-join-button:hover {
 }
 
 .dialog-body img {
-  max-height: 50px;
-  float: left;
+  max-height: 75px;
   margin-right: 20px;
 }
 
+.dialog-body img, .dialog-body form {
+  float: left;
+}
+
 .dialog-body div {
+}
+
+.dialog label {
+  display: block;
+}
+
+.dialog ol {
+  list-style-type: none;
+  -webkit-padding-start: 10px;
+}
+
+
+#team-picture img {
+  max-height: 250px;
+  max-width: 250px;
+  margin-left: auto;
+  margin-right: auto;
+  display: block;
+}
+
+#team-picture-change {
+  margin-top: 3px;
+  margin-bottom: 3px;
+}
+
+#team-picture-change a {
+  cursor: pointer;
+}
+
+#team-main {
+  padding: 10px;
+}
+
+#team-info {
+  width: 250px;
+  float: left;
+}
+
+#team-name {
+  color : #00406C;
+	font-size : 2.2em;
+	font-weight : bold;
+	font-variant : small-caps;
+	line-height : 120%;
+	text-align : left;
+	text-decoration : none;
+	display : block;
+	margin-bottom: 5px;
+}
+
+#team-wall {
+  margin-left: 20px;
+  border-left: solid 1px #aaaaaa;
+  padding-left: 20px;
+  padding-right: 20px;
+  min-height: 500px;
+  float: left;
+}
+
+#team-wall {
+  width: 467px;
+}
+
+#team-info ol {
+  list-style-type: none;
+  -webkit-padding-start: 0;
+}
+
+#team-info ol li {
+  display: block;
+  margin-top: 3px;
+  margin-bottom: 5px;
+  clear: both;
+}
+
+.team-info-item {
+  font-size: 14px;
+}
+
+.team-info-item-label {
+  float: left;
+}
+
+.team-info-item-value {
+  float: right;
+}
+
+.todo-section {
+  float: right;
+  border-left: solid 1px #aaaaaa;
+  min-height: 500px;
+  padding-left: 10px;
+  padding-right: 10px;
+  width: 200px;
+  font-size: 12px;
+}
+
+.todo-section div {
+  margin-bottom: 5px;
+}
+
+#team-name {
 }

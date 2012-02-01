@@ -284,6 +284,33 @@ exports.addPlayer = function(teamid, userid, callback) {
   return true;
 }
 
+
+exports.addChallengeFrom = function(teamid, challenge, callback) {
+  var db = getDb()
+    , errorFn = function(error) {
+      db.close();
+      callback.call(this, error);
+    }
+    , challengePost = {
+      type: 'join'
+      , data: {
+        userid: userid
+      }
+      , createdat: new Date()
+    };
+    
+  callback = callback || function() {};
+  
+  if (!teamid || !challenge) {
+    callback('inputs null');
+    return false;
+  }
+  
+  callback();
+  
+  return true;
+}
+
 //////////////////////////////////////////////////////////////
 // Public functions end
 //////////////////////////////////////////////////////////////

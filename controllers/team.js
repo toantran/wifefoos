@@ -1,3 +1,40 @@
+exports.challenge = function(req, res, next) {
+  var teamid = req.param('teamid')
+    , opponentplayerid = req.param('challengerid');
+    
+  if (!teamid || !opponentplayerid) {
+    res.send({success: false, error: 'Ids empty'});
+    return false;
+  }
+    
+  createTeamChallenge({teamid: teamid, playerid: opponentplayerid}, function(error, result) {
+    res.send(result);
+  });
+  
+  return true;
+}
+exports.challenge.authenticated = true;
+exports.challenge.methods = ['POST'];
+
+
+exports.available = function (req, res, next) {
+  getAllTeams( function(error, teams) {
+    if (error || !teams || typeof(teams.length) === 'undefined') {
+      res.send({success: false});
+    } else {
+      var availableTeams = [];
+      for(team in teams) {
+        if (!team.members || (team.members.length <= 1)) {
+          availableTeams.push(team);
+        }
+      }
+      
+      res.send(availableTeams);
+    }
+  });
+}
+exports.available.methods = ['GET'];
+exports.available.authenticated = true;
 
 
 exports.index = function(req, res, next) {
@@ -91,26 +128,6 @@ exports.show = function(req, res, next) {
 exports.show.authenticated = true; 
 
 
-exports.available = function (req, res) {
-  getAllTeams( function(error, teams) {
-    if (error || !teams || typeof(teams.length) === 'undefined') {
-      res.send({success: false});
-    } else {
-      var availableTeams = [];
-      for(team in teams) {
-        if (!team.members || (team.members.length <= 1)) {
-          availableTeams.push(team);
-        }
-      }
-      
-      res.send(availableTeams);
-    }
-  });
-}
-exports.available.methods = ['GET'];
-exports.available.authenticated = true;
-
-
 function createNewTeamPost(userid, team, callback) {
   var repo = require('../repository/users')
     , mongo = require('mongodb')
@@ -163,4 +180,32 @@ function getAllTeams(callback) {
       callback(null, teams);
     }
   });
+}
+
+
+function createTeamChallenge(inputs, callback) {
+  var repo = requrire('../repository/teams')
+    , userRepo = require('../repository/users')
+    , challenge = {
+      message: inputs.msg
+      , matchtype: inputs.matchtype
+    };
+  
+  callback = callback || function() {};
+  
+  if (!inputs || !inputs.teamid || !inputs.playerid) {
+    callback('Ids empty');
+    return false;
+  }
+  
+  userRepo.getFullUser(inputs.playerid, function(error, user) {
+    if (!error && user.team) {
+      challenge.teamid = String(user.team._id);
+    }
+    
+    repo.addChallenge(teamid, challenge, function(error, team) {
+      callback(error, team);
+    });
+  });
+  return true;
 }

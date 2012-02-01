@@ -1,0 +1,41 @@
+link(rel='stylesheet', href='/stylesheets/team.css')
+#team-main
+  #team-info
+    #team-name Team #{team.teamname}
+    #team-picture
+      img(src='#{team.pictureurl || '/images/the-a-team.jpg'}', maxheight=100, maxwidth= 100)
+    #team-picture-change
+      a Change your team picture
+    ol
+      li.team-info-item            
+        .team-info-item-label Team record:
+        #team-record.team-info-item-value #{(team && team.stats && team.stats.wins) || 0}-#{(team && team.stats && team.stats.losses) || 0}
+        .clear-float
+      li.team-info-item            
+        .team-info-item-label Rank:
+        .team-info-item-value #{team.rank || 'N/A'}
+        .clear-float
+      li.team-info-item
+        .team-info-item-label Members:
+        .team-info-item-value
+        .clear-float
+      li.team-info-item
+        .team-info-item-label
+        .team-info-item-value
+        .clear-float
+  #team-wall
+    .new-post
+      form#form-newpost
+        label(for='form-newpost-post') Write something
+        textarea.post-text(cols='55')
+        br
+        input.post-btn(type='button', value='Post')
+    != partial('post', team.posts)
+  .todo-section
+    //!= partial('todoteam')
+    //!= partial('todorecruit')
+    //- if ((typeof profile !== 'undefined') && (typeof user !== 'undefined') && (team._id == user._id))
+    //  - if (typeof team.invites !== 'undefined' && team.invites.length)
+    //    != partial('invite', team.invites)
+  .clear-float
+script(type='text/javascript', src='/javascripts/app/team.js')
