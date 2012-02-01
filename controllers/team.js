@@ -1,6 +1,8 @@
 exports.challenge = function(req, res, next) {
   var teamid = req.param('teamid')
-    , opponentplayerid = req.param('challengerid');
+    , opponentplayerid = req.param('challengerid')
+    , msg = req.param('challengemsg')
+    , matchtype = req.param('matchtype');
     
   if (!teamid || !opponentplayerid) {
     res.send({success: false, error: 'Ids empty'});
@@ -186,6 +188,7 @@ function getAllTeams(callback) {
 function createTeamChallenge(inputs, callback) {
   var repo = requrire('../repository/teams')
     , userRepo = require('../repository/users')
+    , utils = require('utils')
     , challenge = {
       message: inputs.msg
       , matchtype: inputs.matchtype
@@ -203,9 +206,110 @@ function createTeamChallenge(inputs, callback) {
       challenge.teamid = String(user.team._id);
     }
     
-    repo.addChallenge(teamid, challenge, function(error, team) {
-      callback(error, team);
+    repo.addChallenged(inputs.teamid, challenge, function(error, team) {
+    
+      if (error) {
+        callback(error);
+        return false;
+      }
+      
+      callback(null, team);
+      
+      // successfully added challenge to challenged team, now, create posts in team's members 
+      if (team && team.members && team.members.length) {
+
+        var post = {
+          type: 'teamchallenged'
+          , data: {
+            teamid: challenge.teamid
+          }
+        };
+
+        utils.map(team.members, function(memberid, cb) {
+          
+          if (memberid) {
+            repo.addPost(memberid, post, cb);
+          } else {
+            cb();
+          }
+          
+          return true;
+          
+        }, function(err, result) {
+          if (err) {
+            console.log(err);
+          }
+        } );  
+      }
+      
+      
+      // create challenge record for challenging team
+      createTeamChallenging({
+        teamid: challenge.teamid
+        , challengedteamid: inputs.teamid
+        , msg: inputs.msg
+        , matchtype: inputs.matchtype
+      }, function() {});
     });
   });
+  return true;
+}
+
+
+
+function createTeamChallenging(inputs, callback) {
+  var repo = requrire('../repository/teams')
+    , userRepo = require('../repository/users')
+    , utils = require('utils')
+    , challenge = {      
+      message: inputs.msg
+      , teamid: inputs.challengedteamid
+      , matchtype: inputs.matchtype
+    };
+  
+  callback = callback || function() {};
+  
+  if (!inputs || !inputs.teamid || !inputs.challengedteamid) {
+    callback('Ids empty');
+    return false;
+  }
+
+  repo.addChallenging(inputs.teamid, challenge, function(error, team) {
+  
+    if (error) {
+      callback(error);
+      return false;
+    }
+    
+    callback(null, team);
+    
+    // successfully added challenge to challenging team, now, create posts in team's members 
+    if (team && team.members && team.members.length) {
+
+      var post = {
+        type: 'teamchallenging'
+        , data: {
+          teamid: inputs.challengedteamid
+        }
+      };
+
+      utils.map(team.members, function(memberid, cb) {
+        
+        if (memberid) {
+          repo.addPost(memberid, post, cb);
+        } else {
+          cb();
+        }
+        
+        return true;
+        
+      }, function(err, result) {
+        if (err) {
+          console.log(err);
+        }
+      } );  
+    }           
+  });
+
   return true;
 }

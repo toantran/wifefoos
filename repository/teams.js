@@ -255,8 +255,6 @@ exports.addPlayer = function(teamid, userid, callback) {
   // add joining post
   // remove from joinrequest (if any)
   
-  console.log(teamid, userid);
-  
   try {
     getCollection( db, function(error, collection) {
       checkErrorFn(error, errorFn, function() {
@@ -285,16 +283,56 @@ exports.addPlayer = function(teamid, userid, callback) {
 }
 
 
-exports.addChallengeFrom = function(teamid, challenge, callback) {
+exports.addPost = function(teamid, post, callback)  {
+  var db = getDb()
+    , errorFn = function(error) {
+      db.close();
+      callback.call(this, error);
+    };
+  
+  callback = callback || function() {};
+  
+  if (!teamid) {
+    callback('input null');
+    return false;
+
+  post.id = new ObjectId();
+  post.createdat = new Date();
+    
+  try {
+    getCollection( db, function(error, collection) {
+      checkErrorFn(error, errorFn, function() {
+        collection.findAndModify({
+          _id: new ObjectId(teamid)
+        }, {
+        }, {
+          $addToSet: {
+            posts: post
+          }
+        }, {
+          safe: true
+          , 'new':true
+        }, callback);
+      });
+    });
+  } catch(e) {
+    callback(e);
+  }
+
+  return true;
+}
+
+
+exports.addChallenged = function(teamid, challenge, callback) {
   var db = getDb()
     , errorFn = function(error) {
       db.close();
       callback.call(this, error);
     }
     , challengePost = {
-      type: 'join'
+      type: 'challenged'
       , data: {
-        userid: userid
+        teamid: challenge ? challenge.teamid : null
       }
       , createdat: new Date()
     };
@@ -306,10 +344,80 @@ exports.addChallengeFrom = function(teamid, challenge, callback) {
     return false;
   }
   
-  callback();
+  try {
+    getCollection( db, function(error, collection) {
+      checkErrorFn(error, errorFn, function() {
+      
+        challenge.type = 'challenged';
+        collection.findAndModify({
+          _id: new ObjectId(teamid)
+        }, {
+        }, {
+          $addToSet: {
+            challenges: challenge
+            , posts: challengePost
+          }
+        }, {
+          safe: true
+          , 'new':true
+        }, callback);
+      });
+    });
+  } catch(e) {
+    callback(e);
+  }
   
   return true;
 }
+
+
+exports.addChallenging = function(teamid, challenge, callback) {
+  var db = getDb()
+    , errorFn = function(error) {
+      db.close();
+      callback.call(this, error);
+    }
+    , challengePost = {
+      type: 'challenging'
+      , data: {
+        teamid: challenge ? challenge.teamid : null
+      }
+      , createdat: new Date()
+    };
+    
+  callback = callback || function() {};
+  
+  if (!teamid || !challenge) {
+    callback('inputs null');
+    return false;
+  }
+  
+  try {
+    getCollection( db, function(error, collection) {
+      checkErrorFn(error, errorFn, function() {
+      
+        challenge.type = 'challenging';
+        collection.findAndModify({
+          _id: new ObjectId(teamid)
+        }, {
+        }, {
+          $addToSet: {
+            challenges: challenge
+            , posts: challengePost
+          }
+        }, {
+          safe: true
+          , 'new':true
+        }, callback);
+      });
+    });
+  } catch(e) {
+    callback(e);
+  }
+  
+  return true;
+}
+
 
 //////////////////////////////////////////////////////////////
 // Public functions end
