@@ -1,3 +1,31 @@
+
+
+exports.getChallenge = function(req, res, next) {
+  var teamid = req.param('teamid')
+    , challengerid = req.param('challengerid');
+    
+  if (!teamid || !challengerid) {
+    res.send({success: false, error: 'Ids empty'});
+    return false;
+  }
+    
+  getTeamChallenge( teamid, challengerid, function(error, result) {
+    if (error) {
+      res.send({success: false, error: error});
+      return false;
+    } else {
+      res.send(result);
+    }
+  });
+  
+  return true;
+}
+exports.getChallenge.authenticated = true;
+exports.getChallenge.action = 'challenge';
+exports.getChallenge.methods = ['GET'];
+
+
+
 exports.challenge = function(req, res, next) {
   var teamid = req.param('teamid')
     , opponentplayerid = req.param('challengerid')
@@ -149,7 +177,7 @@ function createNewTeamPost(userid, team, callback) {
 
 
 function getTeam(teamId, callback) {
-    var repo = require('../repository/teams');
+  var repo = require('../repository/teams');
   
   repo.getFullTeam(teamId, callback);
 }
@@ -186,7 +214,7 @@ function getAllTeams(callback) {
 
 
 function createTeamChallenge(inputs, callback) {
-  var repo = requrire('../repository/teams')
+  var repo = require('../repository/teams')
     , userRepo = require('../repository/users')
     , utils = require('utils')
     , challenge = {
@@ -228,7 +256,7 @@ function createTeamChallenge(inputs, callback) {
         utils.map(team.members, function(memberid, cb) {
           
           if (memberid) {
-            repo.addPost(memberid, post, cb);
+            userRepo.addPost(memberid, post, cb);
           } else {
             cb();
           }
@@ -258,7 +286,7 @@ function createTeamChallenge(inputs, callback) {
 
 
 function createTeamChallenging(inputs, callback) {
-  var repo = requrire('../repository/teams')
+  var repo = require('../repository/teams')
     , userRepo = require('../repository/users')
     , utils = require('utils')
     , challenge = {      
@@ -296,7 +324,7 @@ function createTeamChallenging(inputs, callback) {
       utils.map(team.members, function(memberid, cb) {
         
         if (memberid) {
-          repo.addPost(memberid, post, cb);
+          userRepo.addPost(memberid, post, cb);
         } else {
           cb();
         }
@@ -311,5 +339,50 @@ function createTeamChallenging(inputs, callback) {
     }           
   });
 
+  return true;
+}
+
+
+function getTeamChallenge(teamid, challengerid, callback) {
+  callback = callback || function() {};
+  
+  if (!teamid || !challengerid ) {
+    callback('Ids empty');
+    return false;
+  }
+  
+  var repo = require('../repository/teams');
+  
+  repo.getFullTeam( teamid, function(error, team) {
+    if (error || !team) {
+      callback(error);
+      return false;
+    }
+    
+    if (team.challenges && team.challenges.length) {
+      var challenge = null;
+          
+      team.challenges.forEach( function(e) {
+        if (e && e.teamid === challengerid) {
+          challenge = e;
+        }
+      });
+      
+      if (challenge) {
+        repo.getFullTeam(challenge.teamid, function(err, challenger) {
+          if (!err) {
+            challenge.team = challenger;
+          }
+          
+          callback(null, challenge);
+        });
+      } else {
+        callback();
+      }
+    } else {
+      callback();
+    }  
+  });
+  
   return true;
 }

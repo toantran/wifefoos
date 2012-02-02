@@ -187,7 +187,8 @@ function restrict(req, res, next) {
   if (req.session.user) {
     next();
   } else {
+    var returnurl = encodeURIComponent(req.url);
     req.session.error = 'Access denied!';
-    res.redirect('/login');
+    res.redirect('/account/login?returnurl=' + returnurl);
   }
 }

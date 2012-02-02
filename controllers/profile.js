@@ -201,7 +201,7 @@ function loadFullPost(user, post, callback) {
   switch (post.type) {
     case 'jointeam':  // added into a team
       pictureurl = user.pictureurl || '';            
-      desc = '<a href="/profile/{0}">{1}</a> has joined team <a href="/team/{3}">{2}</a>';
+      desc = '<a href="/profile/{0}">{1}</a> joined team <a href="/team/{3}">{2}</a>';
       desc = desc.replace('{0}', String(user._id))
                  .replace('{1}', user.nickname);
                        
@@ -219,7 +219,7 @@ function loadFullPost(user, post, callback) {
       break;
       
     case 'invite':  // get a team invite
-      desc = '<a href="/profile/{0}">{1}</a> has invited <a href="/profile/{2}">{3}</a> to join team <a href="/team/{4}">{5}</a>';
+      desc = '<a href="/profile/{0}">{1}</a> invited <a href="/profile/{2}">{3}</a> to join team <a href="/team/{4}">{5}</a>';
       desc = desc.replace('{2}', String(user._id))
                 .replace('{3}', user.nickname);
                 
@@ -253,7 +253,7 @@ function loadFullPost(user, post, callback) {
       break;
       
     case 'teamjoin':  // team joining request
-      desc = '<a href="/profile/{0}">{1}</a> has asked to join team <a href="/team/{3}">{2}</a>';
+      desc = '<a href="/profile/{0}">{1}</a> asked to join team <a href="/team/{3}">{2}</a>';
       desc = desc.replace('{0}', String(user._id))
                  .replace('{1}', user.nickname);
                        
@@ -272,7 +272,7 @@ function loadFullPost(user, post, callback) {
       break;
     case 'recruit':  // recruit a player
       pictureurl = user.pictureurl || '';
-      desc = '<a href="/profile/{0}">{1}</a> has asked <a href="/profile/{2}">{3}</a> to make a team';
+      desc = '<a href="/profile/{0}">{1}</a> asked <a href="/profile/{2}">{3}</a> to make a team';
       desc = desc.replace('{0}', String(user._id))
                  .replace('{1}', user.nickname);
       
@@ -291,7 +291,7 @@ function loadFullPost(user, post, callback) {
     
     case 'newteam':  
       pictureurl = user.pictureurl || '';
-      desc = '<a href="/profile/{0}">{1}</a> has just created team <a href="/team/{2}">{3}</a>';
+      desc = '<a href="/profile/{0}">{1}</a> created team <a href="/team/{2}">{3}</a>';
       desc = desc.replace('{0}', String(user._id))
                  .replace('{1}', user.nickname);
       
@@ -308,6 +308,77 @@ function loadFullPost(user, post, callback) {
         returnFn();
       }                 
       break;
+      
+    case 'teamchallenging':
+      pictureurl = user.pictureurl || '';
+      desc = '<a href="/profile/{0}">{1}</a> challenged team <a href="/team/{2}">{3}</a>';
+      desc = desc.replace('{0}', String(user._id))
+                 .replace('{1}', user.nickname);
+      
+      if (post.data && post.data.teamid) {  // teamid exists, load team
+        loadTeam(post.data.teamid, function(error, team) {
+          
+          if (team) {
+            desc = desc.replace('{3}', team.teamname)
+                      .replace('{2}', String(team._id));
+                      
+            if (team.challenges && team.challenges.length) {
+              for (i = 0; i < team.challenges.length; i++) {
+                var challenge = team.challenges[i];
+                
+                if (challenge.teamid === String(user.team ? user.team._id : '')) {
+                  if (challenge.matchtype) {
+                    desc += ' in ' + matchtypetext(challenge.matchtype);
+                  }
+                  if (challenge.message) {
+                    desc += ' with message: "' + challenge.message + '"';
+                  }
+                }
+              }
+            }
+          }
+          returnFn(error);
+        });
+      } else {
+        returnFn();
+      }        
+      break;
+    
+    case 'teamchallenged':
+      pictureurl = user.pictureurl || '';
+      desc = 'Team <a href="/team/{2}">{3}</a> challenged <a href="/profile/{0}">{1}</a>';
+      desc = desc.replace('{0}', String(user._id))
+                 .replace('{1}', user.nickname);
+      
+      if (post.data && post.data.teamid) {  // teamid exists, load team
+        loadTeam(post.data.teamid, function(error, team) {
+          pictureurl = team.pictureurl || '';
+          if (team) {
+            desc = desc.replace('{3}', team.teamname)
+                      .replace('{2}', String(team._id));
+            
+            if (team.challenges && team.challenges.length) {
+              for (i = 0; i < team.challenges.length; i++) {
+                var challenge = team.challenges[i];
+                
+                if (challenge.teamid === String(user.team ? user.team._id : '')) {
+                  if (challenge.matchtype) {
+                    desc += ' in ' + matchtypetext(challenge.matchtype);
+                  }
+                  if (challenge.message) {
+                    desc += ' with message: "' + challenge.message + '"';
+                  }
+                }
+              }
+            }
+          }
+          returnFn(error);
+        });
+      } else {
+        returnFn();
+      }        
+      break;
+      
     default:
       returnFn();
       break;
@@ -328,4 +399,19 @@ function loadUser(userid, callback) {
   var repo = require('../repository/users');
   
   repo.getFullUser(userid, callback);
+}
+
+function matchtypetext(type) {
+  switch (type) {
+    case '1': 
+      return 'one game match';
+    case '3':
+      return 'best of 3 games match';
+    case '5':
+      return 'best of 5 games match';      
+    case '99':
+      return 'a death match';
+    default:
+      return type;
+  }
 }

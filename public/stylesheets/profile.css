@@ -87,7 +87,7 @@
   margin-bottom: 5px;
 }
 
-.todo-noteam, .todo-invite, .todo-nomate {
+.todo-noteam, .todo-invite, .todo-nomate, .team-challenge {
   -webkit-border-radius: 3px;
   -moz-border-radius: 3px;
   border-radius: 3px;
@@ -96,7 +96,11 @@
   padding: 5px;
 }
 
-.todo-noteam button, .todo-nomate button, .todo-invite button {
+.team-challenged {
+  background-color: #FCE4FF;  /*#C6FFB0;*/
+}
+
+.todo-noteam button, .todo-nomate button, .todo-invite button, .team-challenge button {
   width: 100%;
 }
 

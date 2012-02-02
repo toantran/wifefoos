@@ -1,0 +1,11 @@
+- if (challenge.type == 'challenged')
+  .team-challenge.team-challenged(challengedteamid='#{profile.team._id}', challengingteamid='#{challenge.teamid}')
+    .team-challenge-text
+    .buttons
+      button(value='accept', challengingteamid='#{profile.team._id}', challengedteamid='#{challenge.teamid}') Accept
+      button(value='decline', challengingteamid='#{profile.team._id}', challengedteamid='#{challenge.teamid}') Decline
+- if (challenge.type == 'challenging')
+  .team-challenge.team-challenging(challengingteamid='#{profile.team._id}', challengedteamid='#{challenge.teamid}')
+    .team-challenge-text
+    .buttons
+      button(value='cancel', challengingteamid='#{profile.team._id}', challengedteamid='#{challenge.teamid}') Cancel

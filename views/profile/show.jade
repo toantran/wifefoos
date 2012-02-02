@@ -1,4 +1,5 @@
 link(rel='stylesheet', href='/stylesheets/profile.css')
+- var team = profile.team;
 #profile-main
   #personal-info
     #player-name.player-nickname= profile.nickname
@@ -8,7 +9,6 @@ link(rel='stylesheet', href='/stylesheets/profile.css')
     #player-picture-change
       a Change your profile picture
     ol
-      - var team = profile.team;
       li#player-team.personal-info-item            
         .personal-info-item-label Team:
         .personal-info-item-value#teamname
@@ -43,5 +43,7 @@ link(rel='stylesheet', href='/stylesheets/profile.css')
     - if ((typeof profile !== 'undefined') && (typeof user !== 'undefined') && (profile._id == user._id))
       - if (typeof profile.invites !== 'undefined' && profile.invites.length)
         != partial('invite', profile.invites)
+      - if (team && team.challenges && team.challenges.length)
+        != partial('challenge', team.challenges)
   .clear-float
 script(type='text/javascript', src='/javascripts/app/profile.js')

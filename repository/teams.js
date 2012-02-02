@@ -295,7 +295,8 @@ exports.addPost = function(teamid, post, callback)  {
   if (!teamid) {
     callback('input null');
     return false;
-
+  }
+  
   post.id = new ObjectId();
   post.createdat = new Date();
     
