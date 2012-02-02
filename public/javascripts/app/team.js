@@ -38,9 +38,16 @@ var team = {
   }
   
   , challengesendclick: function(e) {
-    console.log(team.challengedialog.ajaxdata);
+    var values = team.challengedialog.ajaxdata
+      , form = $('form#team-challenge-form');    
     
-    $.post('/team/challenge', team.challengedialog.ajaxdata)
+    console.log(form, form.serializeArray());
+    $.each(form.serializeArray(), function(i, field) {
+        console.log(i, field);
+        values[field.name] = field.value;
+    });
+    
+    $.post('/team/challenge', values)
     .success( function(data) {
       $('<div style="font-size: 20px; color: red;"><img src="/images/challenge2.jpg" width=100px height=100px">Challenge sent!</div>').dialog({
         modal: true        

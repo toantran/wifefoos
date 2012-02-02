@@ -12,7 +12,10 @@ var profile = {
   }
   
   , challengebtnclick: function(e) {    
-    console.log( $(this).attr('value') );
+    var actionType = $(this).attr('value');
+    
+    switch (actionType) {
+    }
   }
   
   , loadchallenged: function(index, el) {
@@ -47,7 +50,34 @@ var profile = {
   }   
   
   , loadchallenging: function(index, el) {
-  
+    var challengingteamid = $(el).attr('challengingteamid')
+      , challengedteamid = $(el).attr('challengedteamid');
+      
+    $.get('/team/challenge', {
+      teamid: challengingteamid
+      , challengerid: challengedteamid
+    })
+    .success( function(data) {
+      var text = 'You have challenged team <a href="/team/{0}">{1}</a>';
+      
+      if (data) {
+        text = text.replace('{0}', data.teamid)
+                  .replace('{1}', data.team.teamname);
+        
+        if (data.matchtype) {
+          text += ' in ' + profile.matchtypetext(data.matchtype);
+        }
+        
+        if (data.message) {
+          text += ' with message ' + data.message;
+        }               
+      }
+      
+      $(el).find('.team-challenge-text').append(text);
+      
+    })
+    .error( function(res, status) {
+    });
   }
   
   , matchtypetext: function(type) {

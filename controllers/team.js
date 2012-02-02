@@ -37,7 +37,7 @@ exports.challenge = function(req, res, next) {
     return false;
   }
     
-  createTeamChallenge({teamid: teamid, playerid: opponentplayerid}, function(error, result) {
+  createTeamChallenge({teamid: teamid, playerid: opponentplayerid, matchtype: matchtype, msg: msg}, function(error, result) {
     res.send(result);
   });
   
@@ -71,7 +71,6 @@ exports.index = function(req, res, next) {
   var availableOnly = req.param('available');
   
   getAllTeams( function(error, teams) {
-    console.log('All teams ', teams);
     if (error || !teams || typeof(teams.length) === 'undefined') {
       res.send({success: false});
     } else {    
@@ -100,7 +99,6 @@ exports.index.authenticated = true;
 exports.add = function(req, res, next) {
   var userId = req.params.id || req.session.user._id;
   
-  console.log(userId);
   res.render(null, {
     layout: true
     , user: req.session.user
