@@ -76,10 +76,12 @@ exports.get = function(matchid, callback) {
       
   getCollection(db, function(error, collection) {
     checkErrorFn( error, errorFn, function() {
-      collection.findOne( { _id: new ObjectId(matchid)}, function(m) {
-        callback( m ? null: 'Match not found', m);
+      
+      var mm = collection.findOne( { _id: new ObjectId(matchid)}, function(error, m) {
+        callback( error, m);
         db.close();
       });    
+      
     });  
   });
   
@@ -101,6 +103,9 @@ exports.insertMatch = function(am, callback) {
   getCollection(db, function(error, collection) {
     checkErrorFn( error, errorFn, function() {
       collection.insert( am, {safe: true}, function(error, m) {
+        if (m && (m.length === +m.length)) {
+          m = m[0];
+        }
         callback( error, m);
         db.close();
       });    

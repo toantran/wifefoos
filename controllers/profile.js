@@ -361,6 +361,109 @@ function loadFullPost(user, post, callback) {
         returnFn();
       }        
       break;
+    
+    case 'newmatch':
+      pictureurl = '/images/match.jpg';
+      desc = 'A match between <a href="{0}">{1}</a> and <a href="{2}">{3}</a> was set!';
+            
+      if (post.data && post.data.matchid) {  // matchid exists, load match
+        console.log(post.data.matchid);
+        loadMatch(post.data.matchid, function(error, m) {        
+          
+          console.log('matchid = ', post.data.matchid, error, m);                    
+          if (m) {
+            
+            var team1 = m.teams[0]
+              , team2 = m.teams[1];
+              
+            desc = desc.replace('{1}', team1.teamname)
+                      .replace('{0}', String(team1._id))
+                      .replace('{3}', team2.teamname)
+                      .replace('{2}', String(team2._id));            
+          }
+          returnFn(error);
+        });
+      } else {
+        returnFn();
+      }        
+      break;
+      
+    case 'challengedeclined':
+      pictureurl = user.pictureurl || '';
+      desc = 'Team <a href="/team/{2}">{3}</a> declined a challenge from <a href="/profile/{0}">{1}</a>. They\'re too scared, maybe?';
+      desc = desc.replace('{0}', String(user._id))
+                 .replace('{1}', user.nickname);
+            
+      if (post.data && post.data.teamid) {  // teamid exists, load team        
+        loadTeam(post.data.teamid, function(error, team) {
+          pictureurl = team.pictureurl || '';
+          if (team) {
+            desc = desc.replace('{3}', team.teamname)
+                      .replace('{2}', String(team._id));            
+          }
+          returnFn(error);
+        });
+      } else {
+        returnFn();
+      }       
+      break;
+    
+    case 'challengedeclining':
+      pictureurl = user.pictureurl || '';
+      desc = '<a href="/profile/{0}">{1}</a> declined a challenge from team <a href="/team/{2}">{3}</a>. Chicken much?';
+      desc = desc.replace('{0}', String(user._id))
+                 .replace('{1}', user.nickname);
+            
+      if (post.data && post.data.teamid) {  // teamid exists, load team        
+        loadTeam(post.data.teamid, function(error, team) {
+          if (team) {
+            desc = desc.replace('{3}', team.teamname)
+                      .replace('{2}', String(team._id));            
+          }
+          returnFn(error);
+        });
+      } else {
+        returnFn();
+      }       
+      break;
+      
+    case 'challengecancelled':
+      pictureurl = user.pictureurl || '';
+      desc = '<a href="/profile/{0}">{1}</a> cancelled a challenge to team <a href="/team/{2}">{3}</a>. Regret much?';
+      desc = desc.replace('{0}', String(user._id))
+                 .replace('{1}', user.nickname);
+            
+      if (post.data && post.data.teamid) {  // teamid exists, load team        
+        loadTeam(post.data.teamid, function(error, team) {
+          if (team) {
+            desc = desc.replace('{3}', team.teamname)
+                      .replace('{2}', String(team._id));            
+          }
+          returnFn(error);
+        });
+      } else {
+        returnFn();
+      }
+      break;
+      
+    case 'challengeremoved':
+      pictureurl = user.pictureurl || '';
+      desc = 'Team <a href="/team/{2}">{3}</a> withdrew a challenge to <a href="/profile/{0}">{1}</a>. Maybe they think it\'s not a wise thing to do?';
+      desc = desc.replace('{0}', String(user._id))
+                 .replace('{1}', user.nickname);
+            
+      if (post.data && post.data.teamid) {  // teamid exists, load team        
+        loadTeam(post.data.teamid, function(error, team) {
+          if (team) {
+            desc = desc.replace('{3}', team.teamname)
+                      .replace('{2}', String(team._id));            
+          }
+          returnFn(error);
+        });
+      } else {
+        returnFn();
+      }
+      break;
       
     default:
       returnFn();
@@ -382,6 +485,12 @@ function loadUser(userid, callback) {
   var repo = require('../repository/users');
   
   repo.getFullUser(userid, callback);
+}
+
+function loadMatch(matchid, callback) {
+  var repo = require('../repository/matches');
+  
+  repo.get(matchid, callback);
 }
 
 function matchtypetext(type) {

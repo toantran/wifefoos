@@ -399,6 +399,9 @@ function createTeamChallenge(inputs, callback) {
               }
             };
 
+            addMemberPost(team.members, post, function(error, result) {});
+            
+            /*
             utils.map(team.members, function(memberid, cb) {
               
               if (memberid) {
@@ -414,6 +417,8 @@ function createTeamChallenge(inputs, callback) {
                 console.log(err);
               }
             } );  
+            
+            */
           }
           
           // create challenge record for challenging team
@@ -471,6 +476,9 @@ function createTeamChallenging(inputs, callback) {
         }
       };
 
+      addMemberPost(team.members, post, function(error, result) {});
+      
+      /*
       utils.map(team.members, function(memberid, cb) {
         
         if (memberid) {
@@ -485,7 +493,8 @@ function createTeamChallenging(inputs, callback) {
         if (err) {
           console.log(err);
         }
-      } );  
+      } ); 
+      */
     }           
   });
 
@@ -553,11 +562,37 @@ function cancelChallenge(inputs, callback) {
         callback(error, result);        
         
         if (!error) {
-          // create logs
+          // create logs for team members
+          if (result.members && result.members.length === +result.members.length) {
+            var cancellingLog = {
+              type: 'challengecancelled'
+              , data: {
+                teamid: inputs.challengedteamid
+                , msg: 'Regret much?'
+              }
+              , createdat: new Date()
+            };
+            
+            addMemberPost(result.members, cancellingLog, function(error, result) {});
+          }
         }
       } );
+      
+      
+      // create logs for team members
+      if (result.members && result.members.length === +result.members.length) {
+        var cancellingLog = {
+          type: 'challengeremoved'
+          , data: {
+            teamid: inputs.challengingteamid
+            , msg: 'Regret much?'
+          }
+          , createdat: new Date()
+        };
+        
+        addMemberPost(result.members, cancellingLog, function(error, result) {});
+      }
     }
-    
   });       
 }
 
@@ -578,8 +613,35 @@ function declineChallenge(inputs, callback) {
         
         if (!error) {
           // create logs
+          if (result.members && result.members.length === +result.members.length) {
+            var cancellingLog = {
+              type: 'challengedeclined'
+              , data: {
+                teamid: inputs.challengedteamid
+                , msg: 'Chicken dance'
+              }
+              , createdat: new Date()
+            };
+            
+            addMemberPost(result.members, cancellingLog, function(error, result) {});
+          }
         }
       } );
+      
+      
+      // create logs
+      if (result.members && result.members.length === +result.members.length) {
+        var cancellingLog = {
+          type: 'challengedeclining'
+          , data: {
+            teamid: inputs.challengingteamid
+            , msg: 'Chicken dance'
+          }
+          , createdat: new Date()
+        };
+        
+        addMemberPost(result.members, cancellingLog, function(error, result) {});
+      }
     }
     
   });       
@@ -623,20 +685,76 @@ function acceptChallenge(inputs, callback) {
         }
         
         callback(null, result);
+        return true;
+      });
+      
+      // remove challenges from teams
+      teamRepo.removeChallenge(inputs.challengingteamid, inputs.challengedteamid, function(error) {
+        if (error) {
+          console.log(error);
+        }
+      });
+      
+      teamRepo.removeChallenge(inputs.challengedteamid, inputs.challengingteamid, function(error) {
+        if (error) {
+          console.log(error);
+        }
       });
       
       // adding logs to members
+      var memberids = []
+        , memberPost = {
+          type: 'newmatch'
+          , data: {
+            matchid: String(result._id)
+          }
+          , createdat: new Date()
+        };
+        
+      teams.forEach(function(t) {
+        memberids = memberids.concat(t.members);
+      });
+      
+      console.log(memberids);
+      
+      addMemberPost(memberids, memberPost, function(err) {});
     });
   });
 }
 
 
 
-
-
-
-
-
+/*
+*/
+function addMemberPost(ids, post, callback) {
+  if (!ids) {
+    callback('Ids empty');
+  }
+  
+  var utils = require('utils')
+    , userRepo = require('../repository/users');
+    
+  if (ids.length === +ids.length) { // is array
+    utils.map(ids, function(memberid, cb) {
+      if (memberid) {
+        userRepo.addPost(memberid, post, cb);
+      } else {
+        cb();
+      }
+      
+      return true;
+      
+    }, function(err, result) {
+      if (err) {
+        console.log(err);
+      } 
+      
+      callback(err, result);
+    } );  
+  } else {
+    userRepo.addPost(ids, post, callback);
+  }
+}
 
 
 

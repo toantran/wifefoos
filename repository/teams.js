@@ -429,6 +429,13 @@ exports.removeChallenge = function( teamid, otherteamid, callback) {
     , errorFn = function(error) {
       db.close();
       callback.call(this, error);
+    }
+    , removingLog = {
+      type: 'challengeremoved'
+      , data: {
+        teamid: otherteamid
+      }
+      , createdat: new Date()
     };
     
   callback = callback || function() {};
@@ -447,6 +454,9 @@ exports.removeChallenge = function( teamid, otherteamid, callback) {
       }, {
         $pull: {
           challenges: {teamid: otherteamid}
+        }
+        , $addToSet: {
+          logs: removingLog
         }
       }, {
         safe: true
