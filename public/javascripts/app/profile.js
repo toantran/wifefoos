@@ -12,10 +12,39 @@ var profile = {
   }
   
   , challengebtnclick: function(e) {    
-    var actionType = $(this).attr('value');
+    var actionType = $(this).attr('value')
+      , url = ''
+      , postdata = {
+        challengingteamid : $(this).attr('challengingteamid')
+        , challengedteamid : $(this).attr('challengedteamid')        
+      }
+      , sendchallengeaction = function( url, data) {
+        if (url) {
+          $.post(url, data)
+          .success( function(data) {
+            
+          })
+          .error( function( res, status) {
+          
+          });
+        }
+      };
     
     switch (actionType) {
+      case 'cancel':
+        url = '/team/challengecancel';
+        break;
+      case 'accept':
+        url = '/team/challengeaccept';
+        break;
+      case 'decline':
+        url = '/team/challengedecline';
+        break;
+      default:
+        break;        
     }
+    
+    sendchallengeaction(url, postdata);
   }
   
   , loadchallenged: function(index, el) {
@@ -38,7 +67,7 @@ var profile = {
         }
         
         if (data.message) {
-          text += ' with message ' + data.message;
+          text += ' with message "' + data.message + '"';
         }               
       }
       
@@ -69,7 +98,7 @@ var profile = {
         }
         
         if (data.message) {
-          text += ' with message ' + data.message;
+          text += ' with message "' + data.message + '"';
         }               
       }
       

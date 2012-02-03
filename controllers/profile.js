@@ -312,6 +312,13 @@ function loadFullPost(user, post, callback) {
       desc = '<a href="/profile/{0}">{1}</a> challenged team <a href="/team/{2}">{3}</a>';
       desc = desc.replace('{0}', String(user._id))
                  .replace('{1}', user.nickname);
+
+      if (post.data && post.data.matchtype) {
+        desc += ' in ' + matchtypetext(post.data.matchtype);
+      }
+      if (post.data && post.data.msg) {
+        desc += ' with message: "' + post.data.msg + '"';
+      }
       
       if (post.data && post.data.teamid) {  // teamid exists, load team
         loadTeam(post.data.teamid, function(error, team) {
@@ -320,20 +327,6 @@ function loadFullPost(user, post, callback) {
             desc = desc.replace('{3}', team.teamname)
                       .replace('{2}', String(team._id));
                       
-            if (team.challenges && team.challenges.length) {
-              for (i = 0; i < team.challenges.length; i++) {
-                var challenge = team.challenges[i];
-                
-                if (challenge.teamid === String(user.team ? user.team._id : '')) {
-                  if (challenge.matchtype) {
-                    desc += ' in ' + matchtypetext(challenge.matchtype);
-                  }
-                  if (challenge.message) {
-                    desc += ' with message: "' + challenge.message + '"';
-                  }
-                }
-              }
-            }
           }
           returnFn(error);
         });
@@ -347,28 +340,20 @@ function loadFullPost(user, post, callback) {
       desc = 'Team <a href="/team/{2}">{3}</a> challenged <a href="/profile/{0}">{1}</a>';
       desc = desc.replace('{0}', String(user._id))
                  .replace('{1}', user.nickname);
-      
+
+      if (post.data && post.data.matchtype) {
+        desc += ' in ' + matchtypetext(post.data.matchtype);
+      }
+      if (post.data && post.data.msg) {
+        desc += ' with message: "' + post.data.msg + '"';
+      }
+            
       if (post.data && post.data.teamid) {  // teamid exists, load team
         loadTeam(post.data.teamid, function(error, team) {
           pictureurl = team.pictureurl || '';
           if (team) {
             desc = desc.replace('{3}', team.teamname)
-                      .replace('{2}', String(team._id));
-            
-            if (team.challenges && team.challenges.length) {
-              for (i = 0; i < team.challenges.length; i++) {
-                var challenge = team.challenges[i];
-                
-                if (challenge.teamid === String(user.team ? user.team._id : '')) {
-                  if (challenge.matchtype) {
-                    desc += ' in ' + matchtypetext(challenge.matchtype);
-                  }
-                  if (challenge.message) {
-                    desc += ' with message: "' + challenge.message + '"';
-                  }
-                }
-              }
-            }
+                      .replace('{2}', String(team._id));            
           }
           returnFn(error);
         });

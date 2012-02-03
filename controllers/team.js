@@ -1,5 +1,97 @@
 
 
+
+/*
+  POST
+  URL /team/challengedecline
+  Decline a challenge, create pending match
+*/
+exports.challengedecline = function(req, res) {
+  var inputs = {
+    challengingteamid : req.param('challengingteamid')
+    , challengedteamid : req.param('challengedteamid')
+    , msg : req.param('messsage')
+  };
+    
+  if (inputs.challengingteamid && inputs.challengedteamid) {
+    declineChallenge( inputs, function(error, result) {
+      res.send({
+        success: new Boolean(!error)
+        , error: error
+        , result: result
+      });
+    });
+  } else {
+    res.send({
+      success: false
+      , error: 'Ids empty'
+    });
+  }
+}
+exports.challengedecline.methods = ['POST'];
+exports.challengedecline.authenticated = true;
+
+
+
+/*
+  POST
+  URL /team/challengeaccept
+  Accept a challenge, create pending match
+*/
+exports.challengeaccept = function(req, res) {
+  var inputs = {
+    challengingteamid : req.param('challengingteamid')
+    , challengedteamid : req.param('challengedteamid')
+    , msg : req.param('messsage')
+  };
+  
+  acceptChallenge(inputs, function(error, result) {
+    res.send({
+        success: new Boolean(!error)
+        , error: error
+        , result: result
+      });
+  });  
+}
+exports.challengeaccept.methods = ['POST'];
+exports.challengeaccept.authenticated = true;
+
+
+/*
+  
+*/
+exports.challengecancel = function(req, res) {
+  var inputs = {
+    challengingteamid : req.param('challengingteamid')
+    , challengedteamid : req.param('challengedteamid')
+    , msg : req.param('messsage')
+  };
+    
+  if (inputs.challengingteamid && inputs.challengedteamid) {
+    cancelChallenge( inputs, function(error, result) {
+      res.send({
+        success: new Boolean(!error)
+        , error: error
+        , result: result
+      });
+    });
+  } else {
+    res.send({
+      success: false
+      , error: 'Ids empty'
+    });
+  }
+}
+exports.challengecancel.methods = ['POST'];
+exports.challengecancel.authenticated = true;
+
+
+
+/*
+  GET
+  URL /team/challenge
+  return a challenge object
+*/
 exports.getChallenge = function(req, res, next) {
   var teamid = req.param('teamid')
     , challengerid = req.param('challengerid');
@@ -26,6 +118,11 @@ exports.getChallenge.methods = ['GET'];
 
 
 
+/*
+  POST
+  URL  /team/challenge
+  Post a challenge to server
+*/
 exports.challenge = function(req, res, next) {
   var teamid = req.param('teamid')
     , opponentplayerid = req.param('challengerid')
@@ -36,9 +133,24 @@ exports.challenge = function(req, res, next) {
     res.send({success: false, error: 'Ids empty'});
     return false;
   }
-    
-  createTeamChallenge({teamid: teamid, playerid: opponentplayerid, matchtype: matchtype, msg: msg}, function(error, result) {
-    res.send(result);
+  
+  createTeamChallenge({
+    teamid: teamid
+    , playerid: opponentplayerid
+    , matchtype: matchtype
+    , msg: msg
+  }, function(error, result) {
+    if (error) {
+      res.send({
+        success: false
+        , error: error
+      });
+    } else {
+      res.send({
+        success: true
+        , result: result
+      });
+    }
   });
   
   return true;
@@ -47,6 +159,11 @@ exports.challenge.authenticated = true;
 exports.challenge.methods = ['POST'];
 
 
+/*
+  GET
+  URL /team/available
+  Get a list of available to join teams
+*/
 exports.available = function (req, res, next) {
   getAllTeams( function(error, teams) {
     if (error || !teams || typeof(teams.length) === 'undefined') {
@@ -67,6 +184,11 @@ exports.available.methods = ['GET'];
 exports.available.authenticated = true;
 
 
+/*
+  GET
+  URL /team
+  Render team list page
+*/
 exports.index = function(req, res, next) {
   var availableOnly = req.param('available');
   
@@ -96,6 +218,11 @@ exports.index = function(req, res, next) {
 exports.index.authenticated = true;
 
 
+/*
+  GET
+  URL /team/:id/add
+  Render the team adding page
+*/
 exports.add = function(req, res, next) {
   var userId = req.params.id || req.session.user._id;
   
@@ -109,6 +236,11 @@ exports.add = function(req, res, next) {
 exports.add.authenticated = true;
 
 
+/*
+  POST
+  URL /team/:id
+  Create a team
+*/
 exports.create = function(req, res, next) {
   var userId = req.params.id || req.session.user._id
     , teamname = req.body.teamname;
@@ -138,6 +270,11 @@ exports.create = function(req, res, next) {
 exports.create.authenticated = true;
 
 
+/*
+  GET
+  URL /team/:id
+  Render a team detail page
+*/
 exports.show = function(req, res, next) {
   var teamId = req.params.id;
   
@@ -232,51 +369,64 @@ function createTeamChallenge(inputs, callback) {
       challenge.teamid = String(user.team._id);
     }
     
-    repo.addChallenged(inputs.teamid, challenge, function(error, team) {
-    
-      if (error) {
-        callback(error);
-        return false;
-      }
+    // check if team has been challenged by the same team  
+    getTeamChallenge( inputs.teamid, challenge.teamid, function(error, result) {
       
-      callback(null, team);
+      // challenge exists
+      if (result) {
+        callback('Team already has a pending challenge');
+      } else {      
+      // challenge not found
       
-      // successfully added challenge to challenged team, now, create posts in team's members 
-      if (team && team.members && team.members.length) {
+        repo.addChallenged(inputs.teamid, challenge, function(error, team) {
+      
+          if (error) {
+            callback(error);
+            return false;
+          }
+          
+          callback(null, team);
+          
+          // successfully added challenge to challenged team, now, create posts in team's members 
+          if (team && team.members && team.members.length) {
 
-        var post = {
-          type: 'teamchallenged'
-          , data: {
+            var post = {
+              type: 'teamchallenged'
+              , data: {
+                teamid: challenge.teamid
+                , msg: inputs.msg
+                , matchtype: inputs.matchtype
+              }
+            };
+
+            utils.map(team.members, function(memberid, cb) {
+              
+              if (memberid) {
+                userRepo.addPost(memberid, post, cb);
+              } else {
+                cb();
+              }
+              
+              return true;
+              
+            }, function(err, result) {
+              if (err) {
+                console.log(err);
+              }
+            } );  
+          }
+          
+          // create challenge record for challenging team
+          createTeamChallenging({
             teamid: challenge.teamid
-          }
-        };
-
-        utils.map(team.members, function(memberid, cb) {
-          
-          if (memberid) {
-            userRepo.addPost(memberid, post, cb);
-          } else {
-            cb();
-          }
-          
-          return true;
-          
-        }, function(err, result) {
-          if (err) {
-            console.log(err);
-          }
-        } );  
+            , challengedteamid: inputs.teamid
+            , msg: inputs.msg
+            , matchtype: inputs.matchtype
+          }, function() {});
+        });
       }
-      
-      
-      // create challenge record for challenging team
-      createTeamChallenging({
-        teamid: challenge.teamid
-        , challengedteamid: inputs.teamid
-        , msg: inputs.msg
-        , matchtype: inputs.matchtype
-      }, function() {});
     });
+  
   });
   return true;
 }
@@ -316,6 +466,8 @@ function createTeamChallenging(inputs, callback) {
         type: 'teamchallenging'
         , data: {
           teamid: inputs.challengedteamid
+          , msg: inputs.msg
+          , matchtype: inputs.matchtype
         }
       };
 
@@ -384,3 +536,116 @@ function getTeamChallenge(teamid, challengerid, callback) {
   
   return true;
 }
+
+
+function cancelChallenge(inputs, callback) {
+  callback = callback || function() {};
+  
+  var repo = require('../repository/teams');
+  
+  repo.removeChallenge(inputs.challengedteamid, inputs.challengingteamid, function( error, result ) {
+    
+    if (error) {
+      console.log(error);
+      callback(error);
+    } else {
+      repo.removeChallenge(inputs.challengingteamid, inputs.challengedteamid, function( error, result) {
+        callback(error, result);        
+        
+        if (!error) {
+          // create logs
+        }
+      } );
+    }
+    
+  });       
+}
+
+
+function declineChallenge(inputs, callback) {
+  callback = callback || function() {};
+  
+  var repo = require('../repository/teams');
+  
+  repo.removeChallenge(inputs.challengedteamid, inputs.challengingteamid, function( error, result ) {
+    
+    if (error) {
+      console.log(error);
+      callback(error);
+    } else {
+      repo.removeChallenge(inputs.challengingteamid, inputs.challengedteamid, function( error, result) {
+        callback(error, result);        
+        
+        if (!error) {
+          // create logs
+        }
+      } );
+    }
+    
+  });       
+}
+
+
+function acceptChallenge(inputs, callback) {
+  callback = callback || function() {};
+  
+  var matchRepo = require('../repository/matches')
+    , teamRepo = require('../repository/teams')
+    , utils = require('utils')
+    , d = new Date()
+    , am = {
+      start: d
+      , end: new Date(d.setDate( d.getDate() + 3))  // ends after 3 days
+      , status: 'pending'
+    }
+    , teamids = [inputs.challengingteamid, inputs.challengedteamid];
+    
+  // getting all involved teams
+  utils.map(teamids, teamRepo.getFullTeam, function(error, teams) {
+    if (error) {
+      callback(error);
+      return false;
+    }
+    
+    am.teams = teams;
+    
+    matchRepo.insertMatch(am, function( error, result ) {
+      if (error) {
+        callback(error);
+        return false;
+      }
+      
+      // adding match to teams
+      teamRepo.addMatch(teamids, result, function(error) {
+        if(error) {
+          callback(error);
+          return false;
+        }
+        
+        callback(null, result);
+      });
+      
+      // adding logs to members
+    });
+  });
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

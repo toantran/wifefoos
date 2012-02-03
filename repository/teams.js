@@ -334,6 +334,8 @@ exports.addChallenged = function(teamid, challenge, callback) {
       type: 'challenged'
       , data: {
         teamid: challenge ? challenge.teamid : null
+        , msg: challenge ? challenge.message : null
+        , matchtype: challenge ? challenge.matchtype : null
       }
       , createdat: new Date()
     };
@@ -382,6 +384,8 @@ exports.addChallenging = function(teamid, challenge, callback) {
       type: 'challenging'
       , data: {
         teamid: challenge ? challenge.teamid : null
+        , msg: challenge ? challenge.message : null
+        , matchtype: challenge ? challenge.matchtype : null
       }
       , createdat: new Date()
     };
@@ -418,6 +422,98 @@ exports.addChallenging = function(teamid, challenge, callback) {
   
   return true;
 }
+
+
+exports.removeChallenge = function( teamid, otherteamid, callback) {
+  var db = getDb()
+    , errorFn = function(error) {
+      db.close();
+      callback.call(this, error);
+    };
+    
+  callback = callback || function() {};
+  
+  if (!teamid || !otherteamid) {
+    callback('inputs null');
+    return false;
+  }
+  
+  getCollection( db, function(error, collection) {
+    checkErrorFn(error, errorFn, function() {
+    
+      collection.findAndModify({
+        _id: new ObjectId(teamid)
+      }, {
+      }, {
+        $pull: {
+          challenges: {teamid: otherteamid}
+        }
+      }, {
+        safe: true
+        , 'new':true
+      }, callback);
+      
+    });
+  });
+  
+  return true;
+}
+
+
+
+exports.addMatch = function(ids, am, callback) {
+  var db = getDb()
+    , errorFn = function(error) {
+      db.close();
+      callback.call(this, error);
+    }
+    , findObj = {};
+    
+  callback = callback || function() {};
+  
+  if (!ids) {
+    callback('inputs null');
+    return false;
+  }    
+  
+  if (ids.length === +ids.length) {
+    var realId = [];
+    ids.forEach(function(id) {
+      realId.push( new ObjectId(id) );
+    });
+    
+    findObj = {
+      _id: {$in: realId}
+    };
+  } else {
+    findObj = {
+      _id: new ObjectId(ids)
+    };
+  }
+  
+  getCollection( db, function(error, collection) {
+    checkErrorFn(error, errorFn, function() {
+    
+      collection.findAndModify(findObj, {
+      }, {
+        $addToSet: {
+          matches: am
+        }
+        , $set: {
+          updatedat: new Date()
+        }
+      }, {
+        safe: true
+        , 'new':true
+      }, callback);
+      
+    });
+  });
+  
+  return true;
+}
+
+
 
 
 //////////////////////////////////////////////////////////////

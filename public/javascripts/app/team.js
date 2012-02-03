@@ -49,19 +49,35 @@ var team = {
     
     $.post('/team/challenge', values)
     .success( function(data) {
-      $('<div style="font-size: 20px; color: red;"><img src="/images/challenge2.jpg" width=100px height=100px">Challenge sent!</div>').dialog({
-        modal: true        
-        , title: 'Sent'
-        , stack: true
-        , close: function() {
-          team.challengedialog.dialog('close');        
-        }
-        , buttons: {
-          OK: function() {
-            $(this).dialog('close');
+      if (data && data.success) {
+        $('<div style="font-size: 20px; color: red;"><img src="/images/challenge2.jpg" width=100px height=100px">Challenge sent!</div>').dialog({
+          modal: true        
+          , title: 'Sent'
+          , stack: true
+          , close: function() {
+            team.challengedialog.dialog('close');        
           }
-        }
-      });      
+          , buttons: {
+            OK: function() {
+              $(this).dialog('close');
+            }
+          }
+        });    
+      } else {
+        $('<div>You have already challenged this team.</div>').dialog({
+          modal: true        
+          , title: 'Challenge'
+          , stack: true
+          , close: function() {
+            team.challengedialog.dialog('close');        
+          }
+          , buttons: {
+            OK: function() {
+              $(this).dialog('close');
+            }
+          }
+        });               
+      }  
     })
     .error( function(res, status) {
       console.log(status);    
