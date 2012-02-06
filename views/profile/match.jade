@@ -1,8 +1,9 @@
 - var playerteam = profile.team
 - var otherteam = null
-- each team in match.teams
-  - if (team._id != playerteam._id)
-    - otherteam = team;
+- if (typeof match.teams !== 'undefined')
+  - each team in match.teams
+    - if (team._id != playerteam._id)
+      - otherteam = team;
 - voted = false
 - if (profile.votes)
   - each vote in profile.votes

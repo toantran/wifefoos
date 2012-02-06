@@ -122,10 +122,10 @@ var profile = {
       default:
         return type;
     }
-  },
+  }
   
   
-  updateresultclick: function(e) {
+  , updateresultclick: function(e) {
     var btn = $(this)
       , matchid = btn.attr('matchid')
       , teamid = btn.attr('teamid')
@@ -156,6 +156,79 @@ var profile = {
     });
     */
   }
+  
+  
+  , newpostclick: function(e) {
+    var profileid = $(this).attr('profileid')
+      , userid = $(this).attr('userid')
+      , msg = $('#newpost-msg').val();
+    
+    if (msg) {  // has a post
+      $.post('/profile/' + profileid + '/addpost', {
+        posterid: userid
+        , msg: msg
+      })
+      .success( function(data) {
+        console
+        if (data && data.success) {
+          var html = profile.renderpost(data.post);
+          $(html).prependTo('.post-list').show('slow');
+          $('#newpost-msg').val('');
+        }
+      });
+    }
+    
+  }
+  
+  
+  , renderpost: function(post) {
+    var posttemplate = ['<div postid="{0}" class="post-panel" style="display: none;">'
+                          , '<a class="post-close-btn"></a>'
+                          , '<div class="post-item poster-picture">{1}</div>'
+                          , '<div class="post-item">'
+                            , '{2}'
+                          , '</div>'
+                          , '<div class="post-item postmark">{3}</div>'
+                          , '<div class="post-item post-comment"></div>'
+                          , '<div class="clear-float"></div>'
+                        , '</div>'].join('');
+                        
+    if (!post) { return ''; }
+    
+    posttemplate = posttemplate.replace('{0}', post.id)
+                              .replace('{1}', post.pictureurl ? '<a href=\'' + post.pictureurl + '\'/>': '')
+                              .replace('{2}', post.desc);
+                              
+    var d = new Date(post.createdat);                          
+    posttemplate = posttemplate.replace('{3}', 'on ' + d.toString());
+    
+    return posttemplate;
+  }
+  
+  
+  , postmouseover: function(e) {
+    $(this).addClass('post-active');
+  }
+  
+  
+  , postmouseout: function(e) {
+    $(this).removeClass('post-active');
+  }
+  
+  , postremoveclick: function(e) {
+    var postpnl = $(this).closest('.post-panel')
+      , profileid = postpnl ? $(postpnl).attr('profileid') : null
+      , postid = postpnl ? $(postpnl).attr('postid') : null;
+    
+    if (postid && profileid) {
+      $.post('/profile/' + profileid + '/removepost', {postid: postid})
+      .success( function(data) {
+        $(postpnl).hide('slow');
+      });
+    }
+    
+    $(postpnl).hide('slow');
+  }
 };
 
 $(document).ready( function() {
@@ -168,6 +241,11 @@ $(document).ready( function() {
   $('.team-challenging').each( profile.loadchallenging );
   $('.match-update-panel button').button();
   $('.match-update-panel button').click( profile.updateresultclick);
+  $('.new-post button').button();
+  $('.new-post button').click( profile.newpostclick );
+  $('.post-list').on('mouseover', '.post-panel', profile.postmouseover);
+  $('.post-list').on('mouseout', '.post-panel', profile.postmouseout);
+  $('.post-list').on('click', 'a.post-close-btn', profile.postremoveclick)
 } );
 
 

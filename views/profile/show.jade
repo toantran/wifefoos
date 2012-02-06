@@ -31,12 +31,12 @@ link(rel='stylesheet', href='/stylesheets/profile.css')
         .clear-float
   #personal-wall
     .new-post
-      form#form-newpost
-        label(for='form-newpost-post') Write something
-        textarea.post-text(cols='55')
-        br
-        input.post-btn(type='button', value='Post')
-    != partial('post', profile.posts)
+      label(for='newpost-msg') Write something
+      textarea#newpost-msg.post-text(cols='55')
+      br
+      button.post-btn(profileid='#{profile._id}', userid='#{user._id}') Post
+    .post-list
+      != partial('post', profile.posts)
   .todo-section
     != partial('todoteam')
     != partial('todorecruit')

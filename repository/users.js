@@ -359,10 +359,59 @@ exports.addPost = function (userid, post, callback) {
         
         collection.findAndModify({
           _id: new ObjectId(userid)
-        }, {
+        }, {  // sorting object
         }, {
           $addToSet: {
             posts: post
+          }
+          , $set: {
+            updatedat: new Date()
+          }
+        }, {
+          safe: true
+          , 'new':true
+        }, function(error, docs) {
+          checkErrorFn(error, errorFn, function() {
+            callback.call(this, error, docs);
+            db.close();
+          });
+        });
+      });       
+    });
+  } catch(e) {
+    callback(e);
+  }
+  
+  return true;
+}
+
+
+
+exports.removePost = function(userid, postid, callback) {
+  var db = getDb()
+    , errorFn = function(error) {
+        db.close();
+        callback.call(this, error);
+        return false;
+      };
+      
+  callback = callback || function() {};
+  
+  if (!userid || typeof userid !== 'string') {
+    errorFn('Id is invalid ', userid);
+    return;
+  }
+  
+  try {
+    getCollection( db, function(error, collection) {
+      checkErrorFn(error, errorFn, function() {
+        
+        collection.findAndModify({
+          _id: new ObjectId(userid)
+        }, {
+        }, {
+          $pull: {
+            posts: {id: new ObjectId(postid)}
           }
           , $set: {
             updatedat: new Date()

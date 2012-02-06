@@ -56,6 +56,137 @@ exports.show.authenticated = true;
 
 
 /*
+  POST
+  URL /profile/:id/addpost
+*/
+exports.addPost = function(req, res, next) {
+  var userid = req.params.id
+    , posterid = req.param('posterid')
+    , msg = req.param('msg')
+    , post = {
+      type: 'post'
+      , data: {
+        posterid: posterid
+        , msg: msg
+      }
+      , createdat: new Date()
+    };
+  
+  if (!userid) {
+    res.send();
+    return false;
+  }
+
+  addUserPost(userid, post, function(error, fullPost) {
+    var result = {
+      success: true
+    };
+    
+    if (error) {
+      result.success = false;
+      result.error = error;
+    } else {
+      result.post = fullPost;
+    }
+    
+    res.send(result);
+    
+    return true;
+  });
+  
+  return true;
+}
+exports.addPost.authenticated = true;
+exports.addPost.action = ':id/addpost';
+exports.addPost.methods = ['POST'];
+
+
+
+/*
+  POST
+  URL /profile/:id/removepost
+*/
+exports.removePost = function(req, res, next) {
+  var userid = req.params.id
+    , postid = req.param('postid');
+  
+  if (!userid) {
+    res.send();
+    return false;
+  }
+
+  removeUserPost(userid, postid, function(error, post) {
+    var result = {
+      success: true
+    };
+    
+    if (error) {
+      result.success = false;
+      result.error = error;
+    } else {
+      result.post = post;
+    }
+    
+    res.send(result);
+    
+    return true;
+  });
+  
+  return true;
+}
+exports.removePost.authenticated = true;
+exports.removePost.methods = ['POST'];
+exports.removePost.action = ':id/removepost';
+
+
+
+function removeUserPost(userid, postid, callback) {
+  var userRepo = require('../repository/users');
+  
+  callback = callback || function() {};
+  
+  userRepo.removePost(userid, postid, callback);
+  
+  return true;
+}
+
+
+
+
+function addUserPost(userid, post, callback) {
+  var userRepo = require('../repository/users');
+  
+  callback = callback || function() {};
+  
+  userRepo.addPost( userid, post, function(error, user) {
+    if (error) {
+      callback(error);
+    }
+    
+    if (user) {
+      loadFullPost( user, post, callback );
+    } else {
+      
+      userRepo.getFullUser(userid, function(error, fullUser) {
+        if (error || !fullUser) {
+          callback(error);
+          return false;
+        }
+        
+        loadFullPost(fullUser, post, callback);
+      });
+      
+    }
+    
+    return true;
+  });
+  
+  return true;
+}
+
+
+
+/*
   get a full tree user object
 */
 function getUser(userId, callback) {
@@ -466,6 +597,25 @@ function loadFullPost(user, post, callback) {
       }
       break;
       
+    case 'post':
+      desc = '<a href="/profile/{0}">{1}</a> wrote: <div>{2}</div>';
+      desc = desc.replace('{2}', post.data ? post.data.msg || '' : '');
+      
+      if (post.data && post.data.posterid) {
+        loadUser( post.data.posterid, function(error, poster) {
+          if(poster) {
+            pictureurl = poster.pictureurl || '';
+            desc = desc.replace('{0}', String(poster._id))
+                      .replace('{1}', poster.nickname);
+          }
+          
+          returnFn( error );
+        } );
+      } else {
+        returnFn();
+      }
+      
+      break;
     default:
       returnFn();
       break;

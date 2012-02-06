@@ -165,6 +165,34 @@
   border: 1px solid #dddddd;
   margin: 10px 0 5px 0;
   padding: 15px 5px 15px 5px;
+  position: relative;
+}
+
+.post-active {
+  background-color: white;
+}
+
+.post-close-btn {
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 15px;
+  height: 16px;
+  background-image: url(/images/close.png);
+  background-position: top left;
+  background-repeat: no-repeat;
+  display: none;
+  cursor: pointer;
+}
+
+a.post-close-btn:link {}
+a.post-close-btn:visited {}
+a.post-close-btn:hover {
+  background-position: 0 -48px;
+}
+
+.post-active .post-close-btn {
+  display: block;
 }
 
 .post-item {

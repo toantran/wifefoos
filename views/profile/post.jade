@@ -1,5 +1,7 @@
 - if (typeof post !== 'undefined')
-  .post-panel(postid='#{post.id}')
+  .post-panel(postid='#{post.id}', profileid='#{profile._id}')    
+    - if (profile._id == user._id)
+      a.post-close-btn
     .post-item.poster-picture
       - if (post.pictureurl)
         img(src='#{post.pictureurl}')
