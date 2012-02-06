@@ -19,11 +19,11 @@ link(rel='stylesheet', href='/stylesheets/profile.css')
         .clear-float
       li.personal-info-item            
         .personal-info-item-label Team record:
-        #team-record.personal-info-item-value #{(team && team.stats && team.stats.wins) || 0}-#{(team && team.stats && team.stats.losses) || 0}
+        #team-record.personal-info-item-value #{(team && team.stats ? team.stats.win : 0) || 0}-#{(team && team.stats ? team.stats.loss : 0) || 0}
         .clear-float
       li.personal-info-item            
         .personal-info-item-label Individual record:
-        .personal-info-item-value #{(profile.stats && profile.stats.wins) || 0}-#{(profile.stats && profile.stats.losses) || 0}
+        .personal-info-item-value #{(profile.stats ? profile.stats.win : 0 ) || 0}-#{(profile.stats ? profile.stats.loss : 0) || 0}
         .clear-float
       li.personal-info-item            
         .personal-info-item-label Rank:
@@ -45,5 +45,7 @@ link(rel='stylesheet', href='/stylesheets/profile.css')
         != partial('invite', profile.invites)
       - if (team && team.challenges && team.challenges.length)
         != partial('challenge', team.challenges)
+      - if (team && team.matches && team.matches.length)
+        != partial('match', team.matches)
   .clear-float
 script(type='text/javascript', src='/javascripts/app/profile.js')

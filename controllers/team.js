@@ -206,6 +206,9 @@ exports.index = function(req, res, next) {
         }      
         res.send(availableTeams);
       } else {
+        
+        teams.sort( sortingTeams );
+              
         res.render(teams, {
           layout: true
           , title: 'Wheels Foosball League (WFL) - Teams'
@@ -216,6 +219,20 @@ exports.index = function(req, res, next) {
   });
 }
 exports.index.authenticated = true;
+
+
+function sortingTeams(team1, team2) {
+  var win1 = team1.stats ? (team1.stats.win || 0) : 0
+    , loss1 = team1.stats ? (team1.stats.loss || 0) : 0
+    , total1 = win1 + loss1
+    , avg1 = total1 ? (win1 / total1) : 0
+    , win2 = team2.stats ? (team2.stats.win || 0) : 0
+    , loss2 = team2.stats ? (team2.stats.loss || 0) : 0
+    , total2 = win2 + loss2
+    , avg2 = total2 ? (win2 / total2) : 0;
+    
+  return -avg1 + avg2;
+}
 
 
 /*
@@ -291,6 +308,8 @@ exports.show = function(req, res, next) {
   }); 
 }
 exports.show.authenticated = true; 
+
+
 
 
 function createNewTeamPost(userid, team, callback) {
@@ -654,16 +673,17 @@ function acceptChallenge(inputs, callback) {
   var matchRepo = require('../repository/matches')
     , teamRepo = require('../repository/teams')
     , utils = require('utils')
-    , d = new Date()
+    , start = new Date()
+    , end = new Date()
     , am = {
-      start: d
-      , end: new Date(d.setDate( d.getDate() + 3))  // ends after 3 days
+      start: start
+      , end: new Date(end.setDate( end.getDate() + 3 ))  // ends after 3 days
       , status: 'pending'
     }
     , teamids = [inputs.challengingteamid, inputs.challengedteamid];
     
   // getting all involved teams
-  utils.map(teamids, teamRepo.getFullTeam, function(error, teams) {
+  utils.map(teamids, teamRepo.getSimpleTeam, function(error, teams) {
     if (error) {
       callback(error);
       return false;

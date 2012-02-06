@@ -22,7 +22,7 @@ var profile = {
         if (url) {
           $.post(url, data)
           .success( function(data) {
-            
+            window.location.href = window.location.href;
           })
           .error( function( res, status) {
           
@@ -122,6 +122,39 @@ var profile = {
       default:
         return type;
     }
+  },
+  
+  
+  updateresultclick: function(e) {
+    var btn = $(this)
+      , matchid = btn.attr('matchid')
+      , teamid = btn.attr('teamid')
+      , playerid = btn.attr('playerid')
+      , action = btn.attr('action');
+    
+    $.ajax({
+      url: '/match/' + matchid
+      , type: 'PUT'
+      , data: {
+        teamid: teamid
+        , playerid: playerid
+        , result: action
+      }
+      , success: function(data) {
+        window.location.href = window.location.href;
+      }
+    });
+    
+    /*
+    $.put('/match/' + matchid, {
+      teamid: teamid
+      , playerid: playerid
+      , result: action
+    })
+    .success( function(data) {
+      console.log(data);
+    });
+    */
   }
 };
 
@@ -133,7 +166,8 @@ $(document).ready( function() {
   $('.team-challenge button').click( profile.challengebtnclick );
   $('.team-challenged').each( profile.loadchallenged );
   $('.team-challenging').each( profile.loadchallenging );
-  
+  $('.match-update-panel button').button();
+  $('.match-update-panel button').click( profile.updateresultclick);
 } );
 
 

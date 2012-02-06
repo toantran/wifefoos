@@ -115,6 +115,45 @@ exports.getFullTeam = function(teamid, callback) {
 }
 
 
+exports.getSimpleTeam = function(teamid, callback) {
+  var db = getDb()
+    , errorFn = function(error) {
+        db.close();
+        callback.call(this, error);
+      };
+      
+  callback = callback || function() {};
+  
+  if (!teamid || typeof teamid !== 'string') {
+    errorFn('Id is invalid ', teamid);
+    return;
+  }
+  
+  try {
+    getCollection(db, function(error, collection) {
+      checkErrorFn(error, errorFn, function () {
+        
+        collection.findOne({_id: new ObjectId(teamid)}, {
+          _id: 1
+          , teamname: 1
+          , pictureurl: 1
+          , members: 1
+          , owner: 1
+        }, function (error, team) {
+          callback(error, team);
+          db.close();
+        });
+      } );
+    });
+  } catch(e) {
+    callback(e);
+  }
+  
+  return true;
+}
+
+
+
 exports.insertTeam = function(team, callback) {
   var db = getDb()
     , errorFn = function(error) {
@@ -503,9 +542,9 @@ exports.addMatch = function(ids, am, callback) {
   
   getCollection( db, function(error, collection) {
     checkErrorFn(error, errorFn, function() {
-    
-      collection.findAndModify(findObj, {
-      }, {
+      
+      console.log('find obj = ', findObj);
+      collection.update(findObj, {
         $addToSet: {
           matches: am
         }
@@ -514,7 +553,43 @@ exports.addMatch = function(ids, am, callback) {
         }
       }, {
         safe: true
-        , 'new':true
+        , multi: true
+      }, function() {
+        console.log('arguments = ', arguments);
+        callback(arguments);
+      });
+      
+    });
+  });
+  
+  return true;
+}
+
+
+exports.updateStats = function(teamid, win, callback) {
+  var db = getDb()
+    , errorFn = function(error) {
+      db.close();
+      callback.call(this, error);
+    }
+    , incObj = win ? {'stats.win':1} : {'stats.loss': 1};
+  
+  callback = callback || function() {};
+    
+  getCollection( db, function(error, collection) {
+    checkErrorFn(error, errorFn, function() {
+      
+      collection.findAndModify({
+        _id: new ObjectId(teamid)
+      }, {  // sorting object
+      }, {
+        $inc: incObj
+        , $set: {
+          updatedat: new Date()
+        }
+      }, {
+        safe: true
+        , multi: true
       }, callback);
       
     });
@@ -523,6 +598,63 @@ exports.addMatch = function(ids, am, callback) {
   return true;
 }
 
+
+exports.completeMatch = function(ids, am, callback) {
+  var db = getDb()
+    , errorFn = function(error) {
+      db.close();
+      callback.call(this, error);
+    }
+    , findObj = {};
+    
+  callback = callback || function() {};
+  
+  if (!ids) {
+    callback('inputs null');
+    return false;
+  }    
+  
+  if (typeof ids === 'string') {
+    findObj = {
+      _id: new ObjectId(ids)
+    };
+  } else if (ids.length === +ids.length) {
+    var realId = [];
+    ids.forEach(function(id) {
+      realId.push( new ObjectId(id) );
+    });
+    
+    findObj = {
+      _id: {$in: realId}
+    };
+  }  
+     
+  getCollection( db, function(error, collection) {
+    checkErrorFn(error, errorFn, function() {
+      
+      collection.update(findObj, {
+        $addToSet: {
+          completematches: am
+        }
+        , $pull: {
+          matches: { _id: am._id}
+        }
+        , $set: {
+          updatedat: new Date()
+        }
+      }, {
+        safe: true
+        , multi: true
+      }, function() {
+        console.log('arguments = ', arguments);
+        callback(arguments);
+      });
+      
+    });
+  });
+  
+  return true;
+}
 
 
 

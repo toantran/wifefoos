@@ -15,5 +15,5 @@
     - if (user.team && (user.team._id != team._id))
       a(challengerid='#{user._id}', challengeeteamid='#{team._id}') Challenge
   .team-record.stats
-    .stats-detail #{(team.stats && team.stats.wins) || '0'}-#{(team.stats && team.stats.losses) || '0'}
+    .stats-detail #{(team.stats ? team.stats.win : 0) || '0'}-#{(team.stats ? team.stats.loss : 0) || '0'}
   .clear-float

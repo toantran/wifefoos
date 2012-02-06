@@ -96,12 +96,45 @@
   padding: 5px;
 }
 
+
+.todo-noteam, .todo-invite, .todo-nomate, .team-challenge {
+  font:bold 14px Tahoma, Geneva, sans-serif;
+  font-style:normal;
+  color:#ffffff;
+  background:#1568db;
+  border:0px solid #ffffff;
+  text-shadow:0px -1px 1px #222222;
+  box-shadow:2px 2px 5px #000000;
+  -moz-box-shadow:2px 2px 5px #000000;
+  -webkit-box-shadow:2px 2px 5px #000000;
+  border-radius:10px 10px 10px 10px;
+  -moz-border-radius:10px 10px 10px 10px;
+  -webkit-border-radius:10px 10px 10px 10px;
+  padding:20px;
+  margin:0 auto;
+}
+
+.todo-noteam a, .todo-invite a, .todo-nomate a, .team-challenge a {
+  color: #fff200;
+  text-decoration: none;
+}
+
+.todo-noteam {
+  background:#db4e15;
+  
+}
+
+.todo-nomate, .todo-invite {
+  background:#5bdb15
+}
+
 .team-challenged {
-  background-color: #FCE4FF;  /*#C6FFB0;*/
+  background-color: #db1515;  /*#C6FFB0;*/
 }
 
 .todo-noteam button, .todo-nomate button, .todo-invite button, .team-challenge button {
   width: 100%;
+  margin-bottom: 3px;
 }
 
 .todo-noteam-text {
@@ -131,7 +164,7 @@
 .post-panel {
   border: 1px solid #dddddd;
   margin: 10px 0 5px 0;
-  padding: 5px;
+  padding: 15px 5px 15px 5px;
 }
 
 .post-item {
@@ -154,4 +187,37 @@
 
 .poster-name, .post-comment {
   margin-left: 10px;
+}
+
+
+.match-update-panel {
+  font:bold 14px Tahoma, Geneva, sans-serif;
+  font-style:normal;
+  color:#ffffff;
+  background:#1568db;
+  border:0px solid #ffffff;
+  text-shadow:0px -1px 1px #222222;
+  box-shadow:2px 2px 5px #000000;
+  -moz-box-shadow:2px 2px 5px #000000;
+  -webkit-box-shadow:2px 2px 5px #000000;
+  border-radius:10px 10px 10px 10px;
+  -moz-border-radius:10px 10px 10px 10px;
+  -webkit-border-radius:10px 10px 10px 10px;
+  padding:20px;
+  margin:0 auto;
+}
+
+.match-update-panel:active{
+  position:relative;
+  top:2px;
+}
+
+.match-update-panel a {
+  color: #fff200;
+  text-decoration: none;
+}
+
+.match-update-panel button {
+  width: 100%;
+  margin-bottom: 3px;
 }

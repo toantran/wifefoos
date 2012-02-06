@@ -41,7 +41,6 @@ var team = {
     var values = team.challengedialog.ajaxdata
       , form = $('form#team-challenge-form');    
     
-    console.log(form, form.serializeArray());
     $.each(form.serializeArray(), function(i, field) {
         console.log(i, field);
         values[field.name] = field.value;

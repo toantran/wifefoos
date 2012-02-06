@@ -53,6 +53,51 @@ function getDb() {
 // Public functions begin
 //////////////////////////////////////////////////////////////
 
+
+exports.addVote = function(userid, vote, callback) {
+  var db = getDb()
+      , errorFn = function(error) {
+        db.close();
+        callback.call(this, error);
+      }
+      , logObj = {
+        type: 'matchresult'
+        , data: {
+          matchid: vote.matchid
+          , teamid: vote.teamid
+        }
+        , createdat: new Date()
+      };
+      
+  callback = callback || function() {};
+  
+  try {
+    getCollection( db, function(error, collection) {
+      checkErrorFn(error, errorFn, function() {
+        collection.findAndModify({
+          _id: new ObjectId(userid)
+        }, {  // sorting object
+        }, {
+          $addToSet: { 
+            votes: vote
+            , logs: logObj
+          }
+          , $set: {updatedat: new Date()}
+        }, {
+          safe: true
+        }, callback);
+      });
+    });
+  }
+  catch(e) {
+    callback(e);
+  }
+  
+  return true;    
+}
+
+
+
 exports.getUser = function(username, callback) {
   var db = getDb(),
       errorFn = function(error) {
@@ -387,6 +432,39 @@ exports.addInvite = function(userid, invite, callback) {
   
   return true;
 }
+
+
+exports.updateStats = function(teamid, win, callback) {
+  var db = getDb()
+    , errorFn = function(error) {
+      db.close();
+      callback.call(this, error);
+    }
+    , incObj = win ? {'stats.win':1} : {'stats.loss': 1};
+  
+  callback = callback || function() {};
+    
+  getCollection( db, function(error, collection) {
+    checkErrorFn(error, errorFn, function() {
+      
+      collection.update({
+        'team._id': new ObjectId(teamid)
+      }, {
+        $inc: incObj
+        , $set: {
+          updatedat: new Date()
+        }
+      }, {
+        safe: true
+        , multi: true
+      }, callback);
+      
+    });
+  });
+  
+  return true;
+}
+
 
 
 //////////////////////////////////////////////////////////////

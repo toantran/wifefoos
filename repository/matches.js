@@ -114,6 +114,81 @@ exports.insertMatch = function(am, callback) {
   
 }
 
+
+exports.addVote = function(matchid, vote, callback) {
+  callback = callback || function() {};
+  
+  var db = getDb()
+    , errorFn = function(error) {
+        db.close();
+        callback.call(this, error);
+      };
+      
+  vote = vote || {};
+  //vote.createdat = new Date();
+  
+  getCollection(db, function(error, collection) {
+    checkErrorFn( error, errorFn, function() {
+      collection.findAndModify( {
+        _id: new ObjectId(matchid)
+      }, {
+      }, {
+        $addToSet: {
+          votes: vote
+        }
+        , $set: {
+          updatedat: new Date()
+        }
+      }, {
+        safe: true
+        , 'new': true
+      }, function(error, m) {
+        if (m && (m.length === +m.length)) {
+          m = m[0];
+        }
+        callback( error, m);
+        db.close();
+      });    
+    });  
+  });  
+}
+
+
+
+exports.setStatus = function(matchid, status, callback) {
+  callback = callback || function() {};
+  
+  var db = getDb()
+    , errorFn = function(error) {
+        db.close();
+        callback.call(this, error);
+      };
+        
+  getCollection(db, function(error, collection) {
+    checkErrorFn( error, errorFn, function() {
+      collection.findAndModify( {
+        _id: new ObjectId(matchid)
+      }, {
+      }, {
+        $set: {
+          status: status
+          , updatedat: new Date()
+        }
+      }, {
+        safe: true
+        , 'new': true
+      }, function(error, m) {
+        if (m && (m.length === +m.length)) {
+          m = m[0];
+        }
+        callback( error, m);
+        db.close();
+      });    
+    });  
+  });  
+}
+
+
 //////////////////////////////////////////////////////////////
 // Public functions end
 //////////////////////////////////////////////////////////////

@@ -11,7 +11,7 @@
     - else 
       .team Team: None
   .player-detail.stats
-    .stats-detail #{(player.stats && player.stats.wins) || '0'}-#{(player.stats && player.stats.losses) || '0'}
+    .stats-detail #{(player.stats ? player.stats.win : 0) || '0'}-#{(player.stats ? player.stats.loss : 0) || '0'}
     //.buttons
     //  input(type='button', value='Challenge!')      
   .clear-float

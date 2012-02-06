@@ -174,7 +174,6 @@ function controllerAction(name, plural, action, fn) {
       } else {
         options[name] = obj;
       }
-      console.log(options);
       return res.render(path, options, fn);
     };
     fn.apply(this, arguments);

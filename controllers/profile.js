@@ -235,7 +235,7 @@ function loadFullPost(user, post, callback) {
             if (!error && results && results.length) {
               var team = results[0]
                 , invitor = results[1];
-              
+                            
               desc = desc.replace('{0}', String(invitor._id))
                         .replace('{1}', invitor.nickname)
                         .replace('{4}', String(team._id))
@@ -350,8 +350,8 @@ function loadFullPost(user, post, callback) {
             
       if (post.data && post.data.teamid) {  // teamid exists, load team
         loadTeam(post.data.teamid, function(error, team) {
-          pictureurl = team.pictureurl || '';
           if (team) {
+            pictureurl = team.pictureurl || '';
             desc = desc.replace('{3}', team.teamname)
                       .replace('{2}', String(team._id));            
           }
@@ -364,22 +364,23 @@ function loadFullPost(user, post, callback) {
     
     case 'newmatch':
       pictureurl = '/images/match.jpg';
-      desc = 'A match between <a href="{0}">{1}</a> and <a href="{2}">{3}</a> was set!';
+      desc = 'A match between <a href="{0}">{1}</a> and <a href="{2}">{3}</a> was set!  Match will expire on {4}.  Game on!';
             
       if (post.data && post.data.matchid) {  // matchid exists, load match
-        console.log(post.data.matchid);
         loadMatch(post.data.matchid, function(error, m) {        
           
           console.log('matchid = ', post.data.matchid, error, m);                    
-          if (m) {
+          if (m && m.teams) {
             
             var team1 = m.teams[0]
-              , team2 = m.teams[1];
+              , team2 = m.teams[1]
+              , expire = (m.end.getMonth()+1) + '/' + m.end.getDate() + '/' + m.end.getFullYear() + ' ' + m.end.getHours() + ':' + m.end.getMinutes();
               
             desc = desc.replace('{1}', team1.teamname)
                       .replace('{0}', String(team1._id))
                       .replace('{3}', team2.teamname)
-                      .replace('{2}', String(team2._id));            
+                      .replace('{2}', String(team2._id))
+                      .replace('{4}', expire);            
           }
           returnFn(error);
         });
@@ -396,8 +397,8 @@ function loadFullPost(user, post, callback) {
             
       if (post.data && post.data.teamid) {  // teamid exists, load team        
         loadTeam(post.data.teamid, function(error, team) {
-          pictureurl = team.pictureurl || '';
           if (team) {
+            pictureurl = team.pictureurl || '';
             desc = desc.replace('{3}', team.teamname)
                       .replace('{2}', String(team._id));            
           }
