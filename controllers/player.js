@@ -120,7 +120,14 @@ exports.acceptinvite = function(req, res, next) {
   addPlayerToTeam(teamid, userid, function(error, team) {
     if (!error && team) {
       result.success = true;
-      updateUserTeam(userid, team, function() {});
+      updateUserTeam(userid, team, function(error, user) {
+        if (!error && user) {
+          // refresh user in session          
+          if (req.session.user._id === user._id) {
+            req.session.user = user;
+          }
+        }
+      });
     } else {
       result.error = error;
     }
@@ -151,7 +158,7 @@ function updateUserTeam(userid, team, callback) {
   
   utils.parallel([setTeamFn, addPostFn], function(error, results) {
     var user = results && results.length ? results[0] : null;
-    console.log(error, results);
+    
     callback(error, user);
   });
 }
