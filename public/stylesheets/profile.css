@@ -149,16 +149,18 @@
   width: 100%;
 }
 
-.new-post form label {
+.new-post label {
   display: block;
 }
 
-.new-post form label {
-  display: block;
-}
-
-.new-post form post-text {
+.new-post post-text {
   width: 100%;
+}
+
+.post-text {
+  border-color: #ccc;
+  font-family: Arial;
+  font-size: 11px;
 }
 
 .post-panel {
@@ -197,6 +199,8 @@ a.post-close-btn:hover {
 
 .post-item {
   margin-bottom: 3px;
+  float: left;
+  width: 395px;
 }
 
 .poster-picture {
@@ -249,3 +253,16 @@ a.post-close-btn:hover {
   width: 100%;
   margin-bottom: 3px;
 }
+
+.watermark {
+	color: #999 !important;
+	font-size: 11px;
+}
+
+.post-new-comment button{
+  display: none;
+}
+
+.post-comment-list .post-active button {
+  display: block;
+} 

@@ -171,8 +171,15 @@ var profile = {
       .success( function(data) {
         console
         if (data && data.success) {
-          var html = profile.renderpost(data.post);
-          $(html).prependTo('.post-list').show('slow');
+          var html = profile.renderpost(data.post, profileid, userid);
+          var el = $(html).prependTo('.post-list')
+                           .show('slow');
+                           
+          el.find('.post-new-comment textarea')
+            .watermark('Write something...')
+            .elastic();
+          el.find('.post-new-comment button').button();
+          el.find('.post-new-comment button').click(profile.newcommentclick);
           $('#newpost-msg').val('');
         }
       });
@@ -181,23 +188,31 @@ var profile = {
   }
   
   
-  , renderpost: function(post) {
+  , renderpost: function(post, profileid, userid) {
     var posttemplate = ['<div postid="{0}" class="post-panel" style="display: none;">'
                           , '<a class="post-close-btn"></a>'
-                          , '<div class="post-item poster-picture">{1}</div>'
+                          , '<div class="poster-picture">{1}</div>'
                           , '<div class="post-item">'
                             , '{2}'
+                            , '<div class="postmark">{3}</div>'
+                            , '<div class="post-comment-list">'
+                              , '<div class="post-new-comment">'
+                                , '<textarea class="post-text" cols=62/>'
+                                , '<button postid="{4}" profileid="{5}" posterid="{6}">Post</button>'
+                              , '</div>'
+                            , '</div>'
                           , '</div>'
-                          , '<div class="post-item postmark">{3}</div>'
-                          , '<div class="post-item post-comment"></div>'
                           , '<div class="clear-float"></div>'
                         , '</div>'].join('');
                         
     if (!post) { return ''; }
     
     posttemplate = posttemplate.replace('{0}', post.id)
-                              .replace('{1}', post.pictureurl ? '<a href=\'' + post.pictureurl + '\'/>': '')
-                              .replace('{2}', post.desc);
+                              .replace('{4}', post.id)
+                              .replace('{1}', post.pictureurl ? '<img src=\'' + post.pictureurl + '\'/>': '')
+                              .replace('{2}', post.desc)
+                              .replace('{5}', profileid)
+                              .replace('{6}', userid);
                               
     var d = new Date(post.createdat);                          
     posttemplate = posttemplate.replace('{3}', 'on ' + d.toString());
@@ -229,6 +244,44 @@ var profile = {
     
     $(postpnl).hide('slow');
   }
+  
+  
+  , postcommentfocus: function(e) {
+    var parent = $(this).closest('.post-new-comment');
+    
+    $(parent).addClass('post-active');
+  }
+  
+  
+  , postcommentblur: function(e) {
+    var parent = $(this).closest('.post-new-comment');
+    
+    if (!$(this).val()) {
+      $(parent).removeClass('post-active');
+    }
+  }
+  
+  , newcommentclick: function(e) {
+    var parent = $(this).closest('.post-new-comment')
+      , inputs = $(parent).find('textarea.post-text')
+      , msg = (inputs && inputs.length) ? $(inputs[0]).val() : ''
+      , profileid = $(this).attr('profileid')
+      , postid = $(this).attr('postid')
+      , posterid = $(this).attr('posterid');
+        
+    console.log(msg , profileid , posterid , postid);
+    if (msg && profileid && posterid && postid) {
+      $.post('/profile/' + profileid + '/addcomment', {
+        postid: postid
+        , posterid: posterid
+        , msg: msg
+      })
+      .success( function(data) {
+        console.log(data);
+      });
+      
+    }
+  }
 };
 
 $(document).ready( function() {
@@ -241,11 +294,19 @@ $(document).ready( function() {
   $('.team-challenging').each( profile.loadchallenging );
   $('.match-update-panel button').button();
   $('.match-update-panel button').click( profile.updateresultclick);
-  $('.new-post button').button();
+  $('#personal-wall button').button();
   $('.new-post button').click( profile.newpostclick );
   $('.post-list').on('mouseover', '.post-panel', profile.postmouseover);
   $('.post-list').on('mouseout', '.post-panel', profile.postmouseout);
-  $('.post-list').on('click', 'a.post-close-btn', profile.postremoveclick)
+  $('.post-list').on('click', 'a.post-close-btn', profile.postremoveclick);
+  $('.post-list').on('focus', '.post-new-comment textarea', profile.postcommentfocus);
+  $('.post-list').on('blur', '.post-new-comment textarea', profile.postcommentblur);  
+  $('#newpost-msg').watermark('Write a new post...')
+                  .elastic();
+  $('.post-new-comment textarea').watermark('Write something...', 'watermark')
+                                .elastic();
+  $('.post-new-comment button').click( profile.newcommentclick );                              
+                                
 } );
 
 

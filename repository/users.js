@@ -483,13 +483,21 @@ exports.addInvite = function(userid, invite, callback) {
 }
 
 
-exports.updateStats = function(teamid, win, callback) {
+exports.updateStats = function(teamid, opponentid, win, callback) {
   var db = getDb()
     , errorFn = function(error) {
       db.close();
       callback.call(this, error);
     }
-    , incObj = win ? {'stats.win':1} : {'stats.loss': 1};
+    , incObj = win ? {'stats.win':1} : {'stats.loss': 1}
+    , statLog = {
+      type: 'matchresult'
+      , data: {
+        opponentid: opponentid
+        , result: win ? 'win' : 'lose'
+      }
+      , createdat: new Date()
+    };
   
   callback = callback || function() {};
     
@@ -502,6 +510,9 @@ exports.updateStats = function(teamid, win, callback) {
         $inc: incObj
         , $set: {
           updatedat: new Date()
+        }
+        , $addToSet: {
+          posts: statLog
         }
       }, {
         safe: true

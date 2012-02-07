@@ -139,6 +139,47 @@ exports.removePost.methods = ['POST'];
 exports.removePost.action = ':id/removepost';
 
 
+/*
+  POST
+  URL /profile/:id/addcomment
+*/
+exports.addcomment = function(req, res, next) {
+  var userid = req.params.id
+    , postid = req.param('postid')
+    , posterid = req.param('posterid')
+    , msg = req.param('msg');
+    
+  addPostComment(userid, postid, posterid, msg, function(error, comment) {
+    var result = {
+      success: true
+    };
+    
+    if (error) {
+      result.success = false;
+      result.error = error;
+    } else {
+      result.comment = comment;
+    }
+    
+    res.send(result);
+    
+    return true;
+  });
+  
+  return true;
+}
+exports.addcomment.authenticated = true;
+exports.addcomment.methods = ['POST'];
+exports.addcomment.action = ':id/addcomment';
+
+
+
+function addPostComment(userid, postid, posterid, msg, callback) {
+  callback('Not implemented');
+
+}
+
+
 
 function removeUserPost(userid, postid, callback) {
   var userRepo = require('../repository/users');
@@ -616,6 +657,38 @@ function loadFullPost(user, post, callback) {
       }
       
       break;
+      
+    case 'matchresult':
+      pictureurl = user.pictureurl || '';
+      
+      if (post.data) {
+        if ((post.data.result || 'win') === 'win') {
+          desc = '<a href="/profile/{0}">{1}</a> won a match against team <a href="/team/{2}">{3}</a>.  Rub it on them!';        
+        } else {
+          desc = '<a href="/profile/{0}">{1}</a> lost a match to team <a href="/team/{2}">{3}</a>.  That has got to hurt!';        
+        }
+      } else {
+        desc = '<a href="/profile/{0}">{1}</a> played a match against team <a href="/team/{2}">{3}</a> with unknown result';
+      }
+
+      desc = desc.replace('{0}', String(user._id))
+                 .replace('{1}', user.nickname);
+                 
+      if (post.data && post.data.opponentid) {  // teamid exists, load team        
+        
+        loadTeam(post.data.opponentid, function(error, team) {
+          if (team) {
+            desc = desc.replace('{3}', team.teamname)
+                      .replace('{2}', String(team._id));            
+          }
+          returnFn(error);
+        });
+      } else {
+        returnFn();
+      }
+                       
+      break;
+      
     default:
       returnFn();
       break;

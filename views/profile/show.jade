@@ -31,8 +31,8 @@ link(rel='stylesheet', href='/stylesheets/profile.css')
         .clear-float
   #personal-wall
     .new-post
-      label(for='newpost-msg') Write something
-      textarea#newpost-msg.post-text(cols='55')
+      //label(for='newpost-msg') Write something
+      textarea#newpost-msg.post-text(cols='74')
       br
       button.post-btn(profileid='#{profile._id}', userid='#{user._id}') Post
     .post-list
@@ -49,3 +49,6 @@ link(rel='stylesheet', href='/stylesheets/profile.css')
         != partial('match', team.matches)
   .clear-float
 script(type='text/javascript', src='/javascripts/app/profile.js')
+script(type='text/javascript', src='/javascripts/jquery/jquery.watermark.min.js')
+script(type='text/javascript', src='/javascripts/jquery/jquery.elastic.source.js')
+

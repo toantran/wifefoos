@@ -1,11 +1,16 @@
 - if (typeof post !== 'undefined')
   .post-panel(postid='#{post.id}', profileid='#{profile._id}')    
-    - if (profile._id == user._id)
+    - if ((profile._id == user._id) || (post.posterid == user._id))
       a.post-close-btn
-    .post-item.poster-picture
+    .poster-picture
       - if (post.pictureurl)
         img(src='#{post.pictureurl}')
     .post-item!= post.desc
-    .post-item.postmark on #{post.createdat}
-    .post-item.post-comment= post.comment
+      .postmark on #{post.createdat}
+      .post-comment-list
+        - if (typeof post.comments !== 'undefined')
+          - partial('comment', post.comments)
+        .post-new-comment
+          textarea.post-text(cols='62')
+          button(postid='#{post.id}', profileid='#{profile._id}', posterid='#{user._id}') Post
     .clear-float    

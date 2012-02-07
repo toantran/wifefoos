@@ -73,17 +73,20 @@ function vote(inputs, callback) {
       return;
     });   
     
-    if (am && am.teams && am.votes) {
+    if (am && am.teams && (am.teams.length === 2) && am.votes) {
       
       var voteCount = am.votes.length
         , memberCount = 0
         , results = {};
       
-      am.teams.forEach( function(team) {
+      am.teams.forEach( function(team, index, teams) {
         memberCount += team.members ? team.members.length : 0;
         
         // initialize the result object for later
-        results[String(team._id)] = 0;
+        results[String(team._id)] = {
+          count: 0
+          , opponentid: String(teams[(index + 1) % 2]._id)
+        };
       });
       
       if (voteCount >= memberCount) {  // full votes
@@ -93,15 +96,15 @@ function vote(inputs, callback) {
         // calculate result
         am.votes.forEach( function(item) {
           if (item && item.teamid) {
-            results[item.teamid] += item.count;
+            results[item.teamid].count += item.count;
           }
         });
         
         // set stats for teams and players
         for(teamid in results) {
-          var win = results[teamid] >= 0;
+          var win = results[teamid].count >= 0;
           
-          updateStats(teamid, win);
+          updateStats(teamid, results[teamid], win);
         }
 
         // move teams' match to complete match collection
@@ -112,7 +115,7 @@ function vote(inputs, callback) {
 }
 
 
-function updateStats(teamid, win, callback) {
+function updateStats(teamid, data, win, callback) {
   var teamRepo = require('../repository/teams')
     , userRepo = require('../repository/users')
     , count = 2
@@ -127,8 +130,8 @@ function updateStats(teamid, win, callback) {
   callback = callback || function() {};
     
   if (teamid) {  
-    teamRepo.updateStats(teamid, win, fn);
-    userRepo.updateStats(teamid, win, fn);
+    teamRepo.updateStats(teamid, data.opponentid, win, fn);
+    userRepo.updateStats(teamid, data.opponentid, win, fn);
   } else {
     callback();
   }
