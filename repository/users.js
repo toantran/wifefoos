@@ -559,7 +559,8 @@ exports.updateStats = function(teamid, opponentid, win, callback) {
     }
     , incObj = win ? {'stats.win':1} : {'stats.loss': 1}
     , statLog = {
-      type: 'matchresult'
+      id: new ObjectId()
+      , type: 'matchresult'
       , data: {
         opponentid: opponentid
         , result: win ? 'win' : 'lose'
