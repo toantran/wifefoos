@@ -266,3 +266,12 @@ a.post-close-btn:hover {
 .post-comment-list .post-active button {
   display: block;
 } 
+
+.post-comment-list {
+  margin: 7px 0 5px 0;
+}
+
+.comment-panel {
+  padding: 5px 0 3px 0;
+}
+

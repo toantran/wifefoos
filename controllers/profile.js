@@ -157,11 +157,18 @@ exports.addcomment = function(req, res, next) {
     if (error) {
       result.success = false;
       result.error = error;
+      res.send(result);
     } else {
-      result.comment = comment;
+      loadFullComment(comment, function(error, fullComment) {
+        if (error) {
+          result.comment = comment;
+        } else {
+          result.comment = fullComment;
+        }
+        res.send(result);
+      });      
     }
     
-    res.send(result);
     
     return true;
   });
@@ -175,8 +182,11 @@ exports.addcomment.action = ':id/addcomment';
 
 
 function addPostComment(userid, postid, posterid, msg, callback) {
-  callback('Not implemented');
+  var userRepo = require('../repository/users');
 
+  callback = callback || function() {};
+  
+  userRepo.addComment(userid, postid, {posterid: posterid, msg: msg}, callback);
 }
 
 
@@ -364,7 +374,15 @@ function loadFullPost(user, post, callback) {
     , returnFn = function(error) {
       post.pictureurl = pictureurl;
       post.desc = desc;
-      callback(error, post);
+      
+      if (post.comments) {
+        loadPostComments(post, function(error, fullComments) {
+          post.comments = fullComments;
+          callback(error, post);
+        });
+      } else {
+        callback(error, post);
+      }
     };
 
   // Populate post picture url, post description (embedded HTML)  
@@ -695,6 +713,38 @@ function loadFullPost(user, post, callback) {
   }
   
   return true;    
+}
+
+
+function loadPostComments(post, callback) {
+  var utils = require('utils');
+  
+  if (post && post.comments) {
+    utils.map(post.comments, loadFullComment, callback );
+  } else {
+    callback(null, post.comments);
+  }
+}
+
+
+function loadFullComment(comment, callback) {
+  
+  if (comment && comment.posterid) {
+    loadUser(comment.posterid, function(error, user) {
+      if (user) {
+        comment.pictureurl = user.pictureurl || '';
+        var desc = '<a href="/profile/{0}">{1}</a> wrote: <div>{2}</div>';
+        
+        desc = desc.replace('{2}', comment.msg || '')
+                  .replace('{0}', String(user._id))
+                  .replace('{1}', user.nickname);
+        comment.desc = desc;          
+      }
+      callback(error, comment);
+    });
+  } else {
+    callback(null, comment);
+  }
 }
 
 

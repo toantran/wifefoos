@@ -435,6 +435,74 @@ exports.removePost = function(userid, postid, callback) {
 }
 
 
+exports.addComment = function(userid, postid, data, callback) {
+  var db = getDb()
+    , errorFn = function(error) {
+        db.close();
+        callback.call(this, error);
+        return false;
+      }
+    , postObjId = new ObjectId(postid);
+      
+  callback = callback || function() {};
+  data = data || {};
+  data.id = new ObjectId();
+  data.createdat = new Date();
+  
+  if (!userid || typeof userid !== 'string') {
+    errorFn('Id is invalid ', userid);
+    return;
+  }
+  
+  try {
+    getCollection( db, function(error, collection) {
+      checkErrorFn(error, errorFn, function() {
+        
+        var cursor = collection.find({_id: new ObjectId(userid)});
+        cursor.each( function(error, user) {
+          if(!error && user && user.posts) {
+            user.posts.forEach( function(post) {
+              if (post.id = postObjId) {
+                post.comments = post.comments || [];
+                post.comments.push(data);                
+              }
+            });
+            collection.save(user);
+          }
+        } );
+        
+        callback(null, data);
+        /*
+        collection.findAndModify({
+          _id: new ObjectId(userid)
+        }, {
+        }, {
+          $addToSet: {
+            'posts.comments': data
+          }
+          , $set: {
+            updatedat: new Date()
+          }
+        }, {
+          safe: true
+          , 'new':true
+        }, function(error, docs) {
+          checkErrorFn(error, errorFn, function() {
+            callback.call(this, error, docs);
+            db.close();
+          });
+        });
+        */
+      });       
+    });
+  } catch(e) {
+    callback(e);
+  }
+  
+  return true;
+}
+
+
 exports.addInvite = function(userid, invite, callback) {
   var db = getDb()
     , errorFn = function(error) {

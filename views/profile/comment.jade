@@ -1,0 +1,11 @@
+| hi there
+- if (typeof comment !== 'undefined')
+  .comment-panel(commentid='#{comment.id}', profileid='#{profile._id}')    
+    - if ((profile._id == user._id) || (comment.posterid == user._id))
+      a.post-close-btn
+    .poster-picture
+      - if (comment.pictureurl)
+        img(src='#{comment.pictureurl}')
+    .comment-item!= comment.desc
+      .postmark on #{comment.createdat}
+    .clear-float    

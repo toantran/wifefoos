@@ -262,6 +262,7 @@ var profile = {
   
   , newcommentclick: function(e) {
     var parent = $(this).closest('.post-new-comment')
+      , commentlist = $(this).closest('.post-comment-list')
       , inputs = $(parent).find('textarea.post-text')
       , msg = (inputs && inputs.length) ? $(inputs[0]).val() : ''
       , profileid = $(this).attr('profileid')
@@ -275,9 +276,42 @@ var profile = {
         , msg: msg
       })
       .success( function(data) {
+        if (data) {
+          var html = profile.rendercomment(data.comment, profileid);
+          if (html) {
+            $(parent).before(html)
+                      .show('slow');
+            $(inputs).val('');
+          }
+        }
       });
       
     }
+  }
+  
+  
+  , rendercomment: function(comment, profileid) {
+    var commenttpl = ['<div commentid="{0}" profileid="{1}" class="comment-panel">'
+                        , '<a class="post-close-btn"></a>'
+                        , '<div class="poster-picture">'
+                          , '{2}'
+                        , '</div>'
+                        , '<div class="comment-item">{3}</div>'
+                        , '<div class="postmark">on {4}</div>'
+                        , '<div class="clear-float"></div>'
+                      , '</div>'].join('');
+                        
+    if (!comment) { return ''; }
+    
+    commenttpl = commenttpl.replace('{0}', comment.id)
+                          .replace('{1}', profileid)
+                          .replace('{2}', comment.pictureurl ? '<img src=\'' + comment.pictureurl + '\'/>': '')
+                          .replace('{3}', comment.desc);
+                              
+    var d = new Date(comment.createdat);                          
+    commenttpl = commenttpl.replace('{4}', 'on ' + d.toString());
+    
+    return commenttpl;
   }
 };
 
