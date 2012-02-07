@@ -169,7 +169,6 @@ var profile = {
         , msg: msg
       })
       .success( function(data) {
-        console
         if (data && data.success) {
           var html = profile.renderpost(data.post, profileid, userid);
           var el = $(html).prependTo('.post-list')
@@ -269,7 +268,6 @@ var profile = {
       , postid = $(this).attr('postid')
       , posterid = $(this).attr('posterid');
         
-    console.log(msg , profileid , posterid , postid);
     if (msg && profileid && posterid && postid) {
       $.post('/profile/' + profileid + '/addcomment', {
         postid: postid
@@ -277,7 +275,6 @@ var profile = {
         , msg: msg
       })
       .success( function(data) {
-        console.log(data);
       });
       
     }

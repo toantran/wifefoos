@@ -42,7 +42,6 @@ var team = {
       , form = $('form#team-challenge-form');    
     
     $.each(form.serializeArray(), function(i, field) {
-        console.log(i, field);
         values[field.name] = field.value;
     });
     
@@ -79,7 +78,6 @@ var team = {
       }  
     })
     .error( function(res, status) {
-      console.log(status);    
     });
   }  
 };

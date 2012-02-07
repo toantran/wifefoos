@@ -23,7 +23,6 @@ var nomate = {
       nomate.populatePlayers(data);
     })
     .error( function(res, status) {
-      console.log('failed ', status, res);
     });
   },
   
@@ -78,7 +77,6 @@ var nomate = {
       window.location.href = window.location.href;
     })
     .error( function(res, status) {
-      console.log(status);
     });
   }
 };
