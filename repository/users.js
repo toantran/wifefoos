@@ -462,7 +462,7 @@ exports.addComment = function(userid, postid, data, callback) {
         cursor.each( function(error, user) {
           if(!error && user && user.posts) {
             user.posts.forEach( function(post) {
-              if (post.id = postObjId) {
+              if (post.id == postObjId) {
                 post.comments = post.comments || [];
                 post.comments.push(data);                
               }
