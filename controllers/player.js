@@ -19,6 +19,7 @@ exports.index = function (req, res, next) {
     if (availableOnly) {
       res.send(players);
     } else {
+      players.sort( sortingPlayer );
       res.render(players, {
         layout: true
         , title: 'Wheels Foosball League (WFL) - Players'
@@ -29,6 +30,19 @@ exports.index = function (req, res, next) {
 exports.index.methods = ['GET'];
 exports.index.authenticated = true;
 
+
+function sortingPlayer(player1, player2) {
+  var win1 = player1.stats ? (player1.stats.win || 0) : 0
+    , loss1 = player1.stats ? (player1.stats.loss || 0) : 0
+    , total1 = win1 + loss1
+    , avg1 = total1 ? (win1 / total1) : 0.5
+    , win2 = player2.stats ? (player2.stats.win || 0) : 0
+    , loss2 = player2.stats ? (player2.stats.loss || 0) : 0
+    , total2 = win2 + loss2
+    , avg2 = total2 ? (win2 / total2) : 0.5;
+    
+  return -avg1 + avg2;
+}
 
 /*
   POST

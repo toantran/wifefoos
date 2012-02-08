@@ -225,11 +225,11 @@ function sortingTeams(team1, team2) {
   var win1 = team1.stats ? (team1.stats.win || 0) : 0
     , loss1 = team1.stats ? (team1.stats.loss || 0) : 0
     , total1 = win1 + loss1
-    , avg1 = total1 ? (win1 / total1) : 0
+    , avg1 = total1 ? (win1 / total1) : 0.5
     , win2 = team2.stats ? (team2.stats.win || 0) : 0
     , loss2 = team2.stats ? (team2.stats.loss || 0) : 0
     , total2 = win2 + loss2
-    , avg2 = total2 ? (win2 / total2) : 0;
+    , avg2 = total2 ? (win2 / total2) : 0.5;
     
   return -avg1 + avg2;
 }
