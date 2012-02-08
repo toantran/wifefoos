@@ -2,12 +2,12 @@
 - var otherteamname = null
 - if (typeof match.teams !== 'undefined')
   - each team in match.teams
-    - if (team._id != playerteam._id)
+    - if (!team._id.equals(playerteam._id))
       - otherteamname = team.teamname;
 - voted = false
 - if (profile.votes)
   - each vote in profile.votes
-    - if (vote.matchid == match._id)
+    - if (vote.matchid.equals(match._id))
       - voted = true
 - if (!voted) 
   .match-update-panel Did you win the match against team 
