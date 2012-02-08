@@ -1,9 +1,9 @@
 - var playerteam = profile.team
-- var otherteam = null
+- var otherteamname = null
 - if (typeof match.teams !== 'undefined')
   - each team in match.teams
     - if (team._id != playerteam._id)
-      - otherteam = team;
+      - otherteamname = team.teamname;
 - voted = false
 - if (profile.votes)
   - each vote in profile.votes
@@ -11,9 +11,6 @@
       - voted = true
 - if (!voted) 
   .match-update-panel Did you win the match against team 
-    - if (otherteam)
-      a #{otherteam.teamname}?
-    - else
-      a N/A
+    a #{otherteamname || 'N/A'}?
     button(matchid='#{match._id}', teamid='#{playerteam._id}', playerid='#{profile._id}', action='win') Yes, we won
     button(matchid='#{match._id}', teamid='#{playerteam._id}', playerid='#{profile._id}', action='lose') No, we lost
