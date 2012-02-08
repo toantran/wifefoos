@@ -460,9 +460,12 @@ exports.addComment = function(userid, postid, data, callback) {
         
         var cursor = collection.find({_id: new ObjectId(userid)});
         cursor.each( function(error, user) {
-          if(!error && user && user.posts) {
+          if(!error && user && user.posts) {            
+            console.log('looking for post ', postObjId);
             user.posts.forEach( function(post) {
-              if (post.id == postObjId) {
+              console.log('post ', post.id);
+              if (post.id.equals(postObjId)) {
+                console.log('found the post ', post);
                 post.comments = post.comments || [];
                 post.comments.push(data);                
               }
