@@ -4,7 +4,8 @@
  */
 
 var fs = require('fs')
-  , express = require('express');
+  , express = require('express')
+  , form = require('connect-form');
 
 exports.boot = function(app){
   bootApplication(app);
@@ -14,8 +15,8 @@ exports.boot = function(app){
 // App settings and middleware
 
 function bootApplication(app) {
-  app.use(express.logger(':method :url :status'));
-  app.use(express.bodyParser());
+  app.use(express.logger());
+  app.use(express.bodyParser({ uploadDir: __dirname + '/public/images/profiles'}));
   app.use(express.methodOverride());
   app.use(express.cookieParser());
   app.use(express.session({ secret: 'saigon riverland' }));

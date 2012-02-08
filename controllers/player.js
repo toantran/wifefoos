@@ -1,4 +1,70 @@
 
+/*
+  POST
+  URL /player/:id/picture
+*/
+exports.picture = function(req, res, next) {  
+  var playerid = req.params.id
+    , fs = require('fs');
+          
+  // connect-form adds the req.form object
+  // we can (optionally) define onComplete, passing
+  // the exception (if any) fields parsed, and files parsed
+  
+  
+  
+  if (image = req.files.image) {
+    if (/image*/.test(image.type)) {  // is image file
+      var fileExt = image.name.split('.')
+        , ext = fileExt[fileExt.length-1]
+        , filename = playerid + '.' + ext
+        , filepath = __dirname + '/../public/images/profiles/' + filename
+        , pictureurl = '/images/profiles/' + filename;
+        
+      fs.rename( image.path, filepath, function(err) {
+        if (err) {
+          console.log(err);
+          res.redirect('back');
+        } else {
+          updatePlayerPictureUrl(playerid, pictureurl, function(err) {
+            res.redirect('back');
+          });
+        }
+      });
+      
+      return;
+    }
+  }   
+  
+  
+  /*
+  console.log('form look like this ', req.form);
+  req.form.complete(function(err, fields, files){
+    console.log('uploading complete');
+    if (err) {
+      next(err);
+    } else {
+      console.log('\nuploaded %s to %s'
+        ,  files.image.filename
+        , files.image.path);
+    }
+    res.redirect('back');
+  });
+
+  // We can add listeners for several form
+  // events such as "progress"
+  req.form.on('progress', function(bytesReceived, bytesExpected){
+    var percent = (bytesReceived / bytesExpected * 100) | 0;
+    process.stdout.write('Uploading: %' + percent + '\r');
+  });
+  */
+  
+  res.redirect('back');
+}
+exports.picture.authenticated = true;
+exports.picture.methods = ['POST'];
+exports.picture.action = ':id/picture';
+
 
 /*
   GET
@@ -150,6 +216,15 @@ exports.acceptinvite = function(req, res, next) {
 }
 exports.acceptinvite.methods = ['POST'];
 exports.acceptinvite.authenticated = true;
+
+
+
+function updatePlayerPictureUrl(playerid, pictureurl, callback) {
+  var userRepo = require('../repository/users');
+  
+  userRepo.updatepicture(playerid, pictureurl, callback);
+}
+
 
 
 function updateUserTeam(userid, team, callback) {
