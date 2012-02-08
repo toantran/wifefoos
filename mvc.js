@@ -4,8 +4,7 @@
  */
 
 var fs = require('fs')
-  , express = require('express')
-  , form = require('connect-form');
+  , express = require('express');
 
 exports.boot = function(app){
   bootApplication(app);
