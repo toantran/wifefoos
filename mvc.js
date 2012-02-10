@@ -18,7 +18,7 @@ function bootApplication(app) {
   app.use(express.bodyParser({ uploadDir: __dirname + '/public/images/profiles'}));
   app.use(express.methodOverride());
   app.use(express.cookieParser());
-  app.use(express.session({ secret: 'saigon riverland' }));
+  app.use(express.session({ secret: 'saigon riverland' }));  
   app.use(app.router);
   app.use(express.static(__dirname + '/public'));
 
