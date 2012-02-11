@@ -313,6 +313,20 @@ var profile = {
     
     return commenttpl;
   }
+  
+  , changepictureclick: function(e) {
+    var profileid = $(this).attr('profileid')
+      , formHtml = ['<div title="Change profile picture">'
+                    , '<form method="post" enctype="multipart/form-data" action="/player/' + profileid + '/picture">'
+                      , '<p>Image: <input type="file" name="image"></p>'
+                      , '<p><input type="submit" value="Upload"></p>'
+                    , '</form>'
+                  , '</div>'].join('');
+    
+    $(formHtml).dialog();
+    
+    console.log(profileid);
+  }
 };
 
 $(document).ready( function() {
@@ -337,7 +351,7 @@ $(document).ready( function() {
   $('.post-new-comment textarea').watermark('Write something...', 'watermark')
                                 .elastic();
   $('.post-new-comment button').click( profile.newcommentclick );                              
-                                
+  $('#player-picture-change a').click( profile.changepictureclick );
 } );
 
 

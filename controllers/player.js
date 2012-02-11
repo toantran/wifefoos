@@ -1,6 +1,48 @@
 
 
 /*
+*/
+exports.updatepicture = function(req, res, next) {
+  var playerid = req.params.id;
+  
+  console.log('hi there');  
+  if (!playerid) {
+    console.log('playeid empty, cannot save picture');
+    res.send();
+    return;
+  }
+  
+  console.log(req.body);
+  
+  // connect-form adds the req.form object
+  // we can (optionally) define onComplete, passing
+  // the exception (if any) fields parsed, and files parsed
+  /*
+  req.form.complete(function(err, fields, files){
+    if (err) {
+      console.log(err);
+      res.send();
+    } else {
+      console.log('\nuploaded %s to %s'
+        ,  files.image.filename
+        , files.image.path);
+      res.redirect('back');
+    }
+  });
+
+  // We can add listeners for several form
+  // events such as "progress"
+  req.form.on('progress', function(bytesReceived, bytesExpected){
+    var percent = (bytesReceived / bytesExpected * 100) | 0;
+    console.log('Uploading: %' + percent + '\r');
+  });
+  */
+}
+exports.updatepicture.authenticated = true;
+exports.updatepicture.methods = ['POST'];
+exports.updatepicture.action = ':id/picture';
+
+/*
   GET
   URL: /player
   Return a list of all players

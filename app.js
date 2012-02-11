@@ -5,7 +5,7 @@
 //change to test
 var express = require('express');
 
-var app = module.exports = express.createServer();
+var app = module.exports = express.createServer( );
 
 require('./mvc').boot(app);
 
