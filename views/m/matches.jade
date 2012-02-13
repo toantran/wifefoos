@@ -1,0 +1,10 @@
+- var matches = []
+- if (typeof m != 'undefined' && m && typeof m.matches != 'undefined' && m.matches)
+  - matches = m.matches || []
+.profile-todo(data-role='collapsible', data-collapsed='true', data-content='c', data-theme='b')
+  h2.title-text Matches #{matches.length}
+  ul(data-role='listview' data-theme='g')
+  - each match in matches
+    - if (typeof match.opponent != 'undefined' && match.opponent)
+      li #{match.opponent.teamname || '#ERR'}
+    

@@ -323,9 +323,7 @@ var profile = {
                     , '</form>'
                   , '</div>'].join('');
     
-    $(formHtml).dialog();
-    
-    console.log(profileid);
+    $(formHtml).dialog();    
   }
 };
 

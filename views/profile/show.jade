@@ -6,7 +6,7 @@ link(rel='stylesheet', href='/stylesheets/profile.css')
     #player-status= profile.statustext
     #player-picture
       img(src='#{profile.pictureurl || '../../images/player.jpg'}', maxheight=100, maxwidth= 100)
-    - if (profile._id == user._id)
+    - if (profile._id == user._id) 
       #player-picture-change
         a(profileid='#{profile._id}') Change your profile picture
     ol

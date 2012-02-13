@@ -1,0 +1,21 @@
+- var nickname = ''
+- var wins = 0
+- var losses = 0
+- if (typeof m != 'undefined' && m)
+  - nickname = m.nickname || ''
+  - wins = m.stats ? m.stats.win || 0 : 0
+  - losses = m.stats ? m.stats.loss || 0 : 0
+.profile-header(data-role='header')
+  .user-nickname= nickname
+  .user-score #{wins}-#{losses}
+.profile-body(data-role='content')
+  ul(data-role='listview', data-inset='true', data-theme='e')
+    li
+      a Challenges
+        span.ui-li-count 1
+    li
+      a Matches
+        span.ui-li-count 2
+    li
+      a New Posts
+        span.ui-li-count 10

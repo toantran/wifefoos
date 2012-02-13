@@ -1,0 +1,10 @@
+- var c = [{opponent: {teamname: 'ABC'}}]
+- if ((typeof m != 'undefined') && m && (typeof m.challenges != 'undefined') && m.challenges)
+  - c = m.challenges
+.profile-todo(data-role='collapsible', data-collapsed='true', data-theme='b')
+  h2.title-text Challenges #{c.length}
+  ul(data-role='listview', data-theme='d', data-inset='true')
+  - each challenge in c
+    - if (typeof challenge.opponent != 'undefined' && challenge.opponent)
+      li #{challenge.opponent.teamname || '#ERR'}
+    

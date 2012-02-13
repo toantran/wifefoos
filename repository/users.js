@@ -54,6 +54,40 @@ function getDb() {
 //////////////////////////////////////////////////////////////
 
 
+exports.updatepicture = function(userid, pictureurl, callback) {
+  var db = getDb()
+      , errorFn = function(error) {
+        db.close();
+        callback.call(this, error);
+      };
+      
+  callback = callback || function() {};
+  
+  try {
+    getCollection( db, function(error, collection) {
+      checkErrorFn(error, errorFn, function() {
+        collection.findAndModify({
+          _id: new ObjectId(userid)
+        }, {  // sorting object
+        }, {
+          $set: { 
+            pictureurl: pictureurl
+            , updatedat: new Date()
+          }
+        }, {
+          safe: true
+        }, callback);
+      });
+    });
+  }
+  catch(e) {
+    callback(e);
+  }
+  
+  return true;   
+}
+
+
 exports.addVote = function(userid, vote, callback) {
   var db = getDb()
       , errorFn = function(error) {
@@ -460,9 +494,9 @@ exports.addComment = function(userid, postid, data, callback) {
         
         var cursor = collection.find({_id: new ObjectId(userid)});
         cursor.each( function(error, user) {
-          if(!error && user && user.posts) {
+          if(!error && user && user.posts) {            
             user.posts.forEach( function(post) {
-              if (post.id = postObjId) {
+              if (post.id && post.id.equals(postObjId)) {
                 post.comments = post.comments || [];
                 post.comments.push(data);                
               }

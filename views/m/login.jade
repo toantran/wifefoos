@@ -1,0 +1,8 @@
+!= partial('../messages')
+form(action='/m/authenticate', method='post')  
+  div(data-role='fieldcontain')
+    label.ui-hidden-accessible(for='username') Email
+    input#username(type='text', name='username', placeholder='Email', value='#{username}')
+    label.ui-hidden-accessible(for='password') Password
+    input#password(type='password', name='password', placeholder='Password', value='#{password}')
+    input(type='submit', value='Log in')
