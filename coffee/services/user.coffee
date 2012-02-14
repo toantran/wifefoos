@@ -1,11 +1,18 @@
 crypto = require 'crypto'
 userRepo = require '../repository/users'
+teamRepo = require '../repository/teams'
+utils = require 'utils'
 
 hash = (msg, key) ->
   crypto.createHmac( 'sha256', key)
   .update(msg)
   .digest('hex')
 
+loadUserTeam = (teamid, callback) ->
+  if teamid? and teamid isnt 'undefined'
+    teamRepo.getFullTeam String(teamid), callback
+  else
+    callback()
 
 exports.authenticate = (username, password, callback) ->
   console.assert username, 'username cannot be null or empty'
@@ -31,6 +38,15 @@ exports.loadMobileUser = (userid, callback) ->
     userRepo.getFullUser userid, (error, user) ->
       if error
         callback error
+      else if user
+        user.wins = user.stats?.win ? 0
+        user.losses = user.stats?.loss ? 0
+        loadUserTeam user.team?._id, (err, team) ->
+          user.challenges = team?.challenges
+          user.challengeCount = team?.challenges?.length || 0
+          user.matches = team?.matches
+          user.matchCount = team?.matches?.length || 0
+          callback null, user
       else
         callback null, user
   catch e

@@ -63,6 +63,7 @@
     } else {
       try {
         return userSvc.loadMobileUser(userid, function(error, fullUser) {
+          if (fullUser == null) fullUser = {};
           if (error) req.flash('error', error);
           return res.render(fullUser, {
             layout: 'mobile.jade',

@@ -53,6 +53,28 @@ function getDb() {
 // Public functions begin
 //////////////////////////////////////////////////////////////
 
+exports.query = function(criteria, callback) {
+  callback = callback || function() {};
+  
+  var db = getDb()
+    , errorFn = function(error) {
+        db.close();
+        callback.call(this, error);
+      };
+      
+  getCollection(db, function(error, collection) {
+    checkErrorFn( error, errorFn, function() {      
+      var cursor = collection.find( criteria );
+      cursor.toArray( function(err, mm) {
+        callback(err, mm);
+        db.close();
+      } );
+    });  
+  });
+  
+  return true;
+}
+
 
 exports.getCollection = function(callback) {
   

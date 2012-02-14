@@ -57,7 +57,7 @@ exports.show = (req, res, next) ->
     req.flash 'error', 'Invalid user'
   else
     try
-      userSvc.loadMobileUser userid, (error, fullUser) ->
+      userSvc.loadMobileUser userid, (error, fullUser = {}) ->
         req.flash 'error', error if error
         res.render fullUser, layout: 'mobile.jade', title: 'Mobile WFL', user: req.session.user
     catch e
