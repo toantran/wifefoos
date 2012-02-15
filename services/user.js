@@ -1,5 +1,5 @@
 (function() {
-  var crypto, hash, loadUserTeam, teamRepo, userRepo, utils;
+  var crypto, hash, loadChallenge, loadChallenges, loadMatch, loadMatches, loadUserTeam, teamRepo, userRepo, utils;
 
   crypto = require('crypto');
 
@@ -13,12 +13,71 @@
     return crypto.createHmac('sha256', key).update(msg).digest('hex');
   };
 
-  loadUserTeam = function(teamid, callback) {
-    if ((teamid != null) && teamid !== 'undefined') {
-      return teamRepo.getFullTeam(String(teamid), callback);
+  loadChallenge = function(challenge, callback) {
+    if (challenge == null) return callback();
+    if (challenge.teamid != null) {
+      return teamRepo.getSimpleTeam(String(challenge.teamid), function(err, team) {
+        var _ref;
+        challenge.teamname = (_ref = team != null ? team.teamname : void 0) != null ? _ref : 'Unknown';
+        return callback(null, challenge);
+      });
     } else {
-      return callback();
+      return callback(null, challenge);
     }
+  };
+
+  loadChallenges = function(challenges, callback) {
+    if (!((challenges != null) && challenges.length !== 0)) {
+      return callback(null, challenges);
+    }
+    return utils.map(challenges, loadChallenge, callback);
+  };
+
+  loadMatch = function(hometeamid, m, callback) {
+    var team, _i, _len, _ref, _ref2;
+    if ((m != null ? (_ref = m.teams) != null ? _ref.length : void 0 : void 0) !== 0) {
+      _ref2 = m.teams;
+      for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
+        team = _ref2[_i];
+        if (team != null ? team._id.equals(hometeamid) : void 0) {
+          m.opponentteamid = team._id;
+          m.opponentteamname = team.teamname;
+        }
+      }
+    }
+    return callback(null, m);
+  };
+
+  loadMatches = function(hometeamid, matches, callback) {
+    if (!((matches != null) && matches.length !== 0)) {
+      return callback(null, matches);
+    }
+    return utils.map(matches, function(m, cb) {
+      return loadMatch(hometeamid, m, cb);
+    }, callback);
+  };
+
+  loadUserTeam = function(teamid, callback) {
+    if (!((teamid != null) && teamid !== 'undefined')) return callback();
+    return teamRepo.getFullTeam(String(teamid), function(err, team) {
+      var __loadChallengesFn, __loadMatchesFn;
+      if ((err != null) || !(team != null)) return callback(err);
+      __loadChallengesFn = function(lc_cb) {
+        return loadChallenges(team.challenges, function(lc_err, challenges) {
+          if (lc_err == null) team.challenges = challenges;
+          return lc_cb(err, challenges);
+        });
+      };
+      __loadMatchesFn = function(lm_cb) {
+        return loadMatches(team._id, team.matches, function(lm_err, matches) {
+          if (lm_err == null) team.matches = matches;
+          return lm_cb(err, matches);
+        });
+      };
+      return utils.parallel([__loadChallengesFn, __loadMatchesFn], function(parallel_err, results) {
+        return callback(err, team);
+      });
+    });
   };
 
   exports.authenticate = function(username, password, callback) {
@@ -55,6 +114,7 @@
             user.challenges = team != null ? team.challenges : void 0;
             user.challengeCount = (team != null ? (_ref6 = team.challenges) != null ? _ref6.length : void 0 : void 0) || 0;
             user.matches = team != null ? team.matches : void 0;
+            console.dir(user.matches);
             user.matchCount = (team != null ? (_ref7 = team.matches) != null ? _ref7.length : void 0 : void 0) || 0;
             return callback(null, user);
           });

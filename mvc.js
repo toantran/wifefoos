@@ -87,7 +87,6 @@
       format = req.params.format;
       path = "" + __dirname + "/views/" + name + "/" + action + ".jade";
       res.render = function(obj, options, fn) {
-        console.log(obj, options);
         res.render = render;
         if (typeof obj === 'string') return res.render(obj, options, fn);
         if (action === 'show' && format) {
@@ -104,7 +103,7 @@
         } else {
           options[name] = obj;
         }
-        console.log(path, options);
+        console.dir(options);
         return res.render(path, options, fn);
       };
       return fn.apply(this, arguments);

@@ -74,7 +74,6 @@ controllerAction = (name, plural, action, fn) ->
     # decorate res.render function to populate extra data object for a view.  This is case, the decorator 
     # trying to populate a property with 'controller' name
     res.render = (obj, options, fn) ->
-      console.log obj, options
       res.render = render
       # Template path
       if typeof obj is 'string'
@@ -96,7 +95,7 @@ controllerAction = (name, plural, action, fn) ->
       else
         options[name] = obj
       
-      console.log path, options
+      console.dir options
       res.render path, options, fn
     fn.apply this, arguments
 
