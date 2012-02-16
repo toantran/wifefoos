@@ -657,8 +657,65 @@ exports.completeMatch = function(ids, am, callback) {
         safe: true
         , multi: true
       }, function() {
-        console.log('arguments = ', arguments);
-        callback(arguments);
+        callback.apply( this, arguments);
+      });
+      
+    });
+  });
+  
+  return true;
+}
+
+
+exports.cancelMatch = function(ids, am, callback) {
+  var db = getDb()
+    , errorFn = function(error) {
+      db.close();
+      callback.call(this, error);
+    }
+    , findObj = {};
+    
+  callback = callback || function() {};
+  
+  if (!ids) {
+    callback('inputs null');
+    return false;
+  }    
+  
+  if (typeof ids === 'string') {
+    findObj = {
+      _id: new ObjectId(ids)
+    };
+  } else if (ids.length === +ids.length) {
+    var realId = ids.map( function(id) {return new ObjectId(id)});
+    
+    findObj = {
+      _id: {$in: realId}
+    };
+  }  
+  
+  var matchId = null;
+  if (typeof am === 'string') {
+    matchId = new ObjectId(am);
+  } else {
+    matchId = am._id;
+  }
+         
+  getCollection( db, function(error, collection) {
+    checkErrorFn(error, errorFn, function() {
+      
+      collection.update(findObj, {
+        $pull: {
+          matches: { _id: matchId}
+        }
+        , $set: {
+          updatedat: new Date()
+        }
+      }, {
+        safe: true
+        , multi: true
+      }, function() {
+        callback.apply( this, arguments);
       });
       
     });

@@ -80,6 +80,10 @@
     });
   };
 
+  /*
+  Authenticate a user login
+  */
+
   exports.authenticate = function(username, password, callback) {
     var encryptedPassword;
     console.assert(username, 'username cannot be null or empty');
@@ -97,6 +101,10 @@
       }
     });
   };
+
+  /*
+  LOAD a user document with all neccessary properties re-populated in the root object
+  */
 
   exports.loadMobileUser = function(userid, callback) {
     console.assert(userid, 'userid cannot be null or 0');
@@ -126,6 +134,13 @@
       console.log(e);
       return callback(e);
     }
+  };
+
+  exports.updateStats = function(teamid, opponentid, win, callback) {
+    if (callback == null) callback = function() {};
+    if (typeof teamid !== 'string') teamid = String(teamid);
+    if (typeof opponentid !== 'string') opponentid = String(opponentid);
+    return userRepo.updateStats(teamid, opponentid, win, callback);
   };
 
 }).call(this);

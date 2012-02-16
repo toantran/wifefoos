@@ -57,6 +57,10 @@ loadUserTeam = (teamid, callback) ->
     utils.parallel [__loadChallengesFn, __loadMatchesFn], (parallel_err, results) ->
       callback err, team
 
+
+###
+Authenticate a user login
+###
 exports.authenticate = (username, password, callback) ->
   console.assert username, 'username cannot be null or empty'
   throw 'username is null or empty' unless username?
@@ -72,7 +76,10 @@ exports.authenticate = (username, password, callback) ->
     else 
       callback null, false
         
-        
+
+###
+LOAD a user document with all neccessary properties re-populated in the root object
+###        
 exports.loadMobileUser = (userid, callback) ->
   console.assert userid, 'userid cannot be null or 0'  
   throw 'userid is null or empty' unless userid?
@@ -99,3 +106,9 @@ exports.loadMobileUser = (userid, callback) ->
   catch e
     console.log e
     callback e
+    
+    
+exports.updateStats = (teamid, opponentid, win, callback = ->) ->
+  teamid = String teamid if typeof teamid isnt 'string'
+  opponentid = String opponentid if typeof opponentid isnt 'string'
+  userRepo.updateStats teamid, opponentid, win, callback

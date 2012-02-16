@@ -19,4 +19,10 @@
     }
   };
 
+  exports.setStatus = function(matchid, status, callback) {
+    if (callback == null) callback = function() {};
+    if (typeof matchid !== 'string') matchid = String(matchid);
+    return matchRepo.setStatus(matchid, status, callback);
+  };
+
 }).call(this);
