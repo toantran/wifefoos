@@ -11,7 +11,6 @@ var mongo = require('mongodb')
     , host = process.env['MONGO_NODE_DRIVER_HOST'] != null ? process.env['MONGO_NODE_DRIVER_HOST'] : 'localhost'
     , port = process.env['MONGO_NODE_DRIVER_PORT'] != null ? process.env['MONGO_NODE_DRIVER_PORT'] : Connection.DEFAULT_PORT;
 
-console.log('HOST %s and PORT %s',  host, port);
 
 function getCollection(db, callback) {
   var errorFn = function(error) {        

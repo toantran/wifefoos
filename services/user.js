@@ -1,9 +1,9 @@
 (function() {
-  var crypto, hash, loadChallenge, loadChallenges, loadMatch, loadMatches, loadUserTeam, teamRepo, userRepo, utils;
+  var crypto, hash, loadChallenge, loadChallenges, loadMatch, loadMatches, loadUserTeam, newUserRepo, teamRepo, utils;
 
   crypto = require('crypto');
 
-  userRepo = require('../repository/users');
+  newUserRepo = require('../repository/users2');
 
   teamRepo = require('../repository/teams');
 
@@ -89,7 +89,7 @@
     console.assert(username, 'username cannot be null or empty');
     if (username == null) throw 'username is null or empty';
     encryptedPassword = hash(password, 'a little dog');
-    return userRepo.getUser(username, function(error, user) {
+    return newUserRepo.getByUsername(username, function(error, user) {
       if (error) {
         return callback(error);
       } else if (!user) {
@@ -110,7 +110,7 @@
     console.assert(userid, 'userid cannot be null or 0');
     if (userid == null) throw 'userid is null or empty';
     try {
-      return userRepo.getFullUser(userid, function(error, user) {
+      return newUserRepo.getById(userid, function(error, user) {
         var _ref, _ref2, _ref3, _ref4, _ref5;
         if (error) {
           return callback(error);
@@ -131,16 +131,47 @@
         }
       });
     } catch (e) {
-      console.log(e);
+      console.trace(e);
       return callback(e);
     }
   };
 
-  exports.updateStats = function(teamid, opponentid, win, callback) {
+  /*
+  Update player's stats
+  */
+
+  exports.updateStats = function(playerid, opponentid, win, callback) {
+    var findObj, incObj, statLog, updateObj;
     if (callback == null) callback = function() {};
-    if (typeof teamid !== 'string') teamid = String(teamid);
+    if (typeof playerid === 'string') playerid = newUserRepo.ObjectId(playerid);
     if (typeof opponentid !== 'string') opponentid = String(opponentid);
-    return userRepo.updateStats(teamid, opponentid, win, callback);
+    findObj = {
+      _id: playerid
+    };
+    incObj = win ? {
+      'stats.win': 1
+    } : {
+      'stats.loss': 1
+    };
+    statLog = {
+      id: new newUserRepo.ObjectId(),
+      type: 'matchresult',
+      data: {
+        opponentid: opponentid,
+        result: win ? 'win' : 'lose'
+      },
+      createdat: new Date()
+    };
+    updateObj = {
+      $inc: incObj,
+      $set: {
+        updatedat: new Date()
+      },
+      $addToSet: {
+        posts: statLog
+      }
+    };
+    return newUserRepo.update(findObj, updateObj, callback);
   };
 
 }).call(this);

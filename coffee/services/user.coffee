@@ -1,5 +1,5 @@
 crypto = require 'crypto'
-userRepo = require '../repository/users'
+newUserRepo = require '../repository/users2'
 teamRepo = require '../repository/teams'
 utils = require 'utils'
 
@@ -66,7 +66,7 @@ exports.authenticate = (username, password, callback) ->
   throw 'username is null or empty' unless username?
   
   encryptedPassword = hash password, 'a little dog'
-  userRepo.getUser username, (error, user) ->
+  newUserRepo.getByUsername username, (error, user) ->
     if error
       callback error
     else if not user 
@@ -85,7 +85,7 @@ exports.loadMobileUser = (userid, callback) ->
   throw 'userid is null or empty' unless userid?
   
   try
-    userRepo.getFullUser userid, (error, user) ->
+    newUserRepo.getById userid, (error, user) ->
       if error
         callback error
       else if user
@@ -104,11 +104,32 @@ exports.loadMobileUser = (userid, callback) ->
       else
         callback null, user
   catch e
-    console.log e
+    console.trace e
     callback e
     
-    
-exports.updateStats = (teamid, opponentid, win, callback = ->) ->
-  teamid = String teamid if typeof teamid isnt 'string'
+###
+Update player's stats
+###
+exports.updateStats = (playerid, opponentid, win, callback = ->) ->
+  playerid = newUserRepo.ObjectId( playerid ) if typeof playerid is 'string'
   opponentid = String opponentid if typeof opponentid isnt 'string'
-  userRepo.updateStats teamid, opponentid, win, callback
+  findObj = _id : playerid
+  incObj = if win then {'stats.win':1} else {'stats.loss': 1}
+  statLog = 
+    id: new newUserRepo.ObjectId()
+    type: 'matchresult'
+    data: 
+      opponentid: opponentid
+      result: if win then 'win' else 'lose'
+    createdat: new Date()
+  updateObj = 
+    $inc: incObj
+    $set: 
+      updatedat: new Date()
+    $addToSet: 
+      posts: statLog
+    
+  newUserRepo.update findObj, updateObj, callback
+  
+  
+  

@@ -72,7 +72,7 @@
           });
         });
       } catch (e) {
-        console.log(e);
+        console.trace(e);
         req.flash('error', e);
         return next();
       }

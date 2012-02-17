@@ -62,7 +62,7 @@ exports.show = (req, res, next) ->
         req.flash 'error', error if error
         res.render fullUser, layout: 'mobile.jade', title: 'Mobile WFL', user: req.session.user
     catch e
-      console.log e
+      console.trace e
       req.flash 'error', e
       next() 
 exports.show.authenticated = true
