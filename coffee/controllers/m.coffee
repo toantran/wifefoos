@@ -39,8 +39,7 @@ exports.login = (req, res, next) ->
     title: 'Mobile WFL'
   }
   delete req.session.username
-  delete req.session.password
-  
+  delete req.session.password  
 exports.login.methods = ['GET']
 
 

@@ -1,5 +1,5 @@
 baseDb = require('./base')
-baseRepo = new baseDb.repository('matches')
+baseRepo = new baseDb.repository('teams')
 
 {Db, ObjectId, Timestamp, Connection, Server, checkError, errorHandler, getDb} = baseDb
 
@@ -9,6 +9,8 @@ exports.read = () ->
   baseRepo.read.apply baseRepo, arguments
 exports.update = () ->
   baseRepo.update.apply baseRepo, arguments
+exports.save = () ->
+  baseRepo.save.apply baseRepo, arguments  
 exports.remove = () ->
   baseRepo.remove.apply baseRepo, arguments
 exports.getById = () ->

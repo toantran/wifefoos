@@ -1,4 +1,4 @@
-
+teamSvc = require( '../services/team' )
 
 
 /*
@@ -207,7 +207,7 @@ exports.index = function(req, res, next) {
         res.send(availableTeams);
       } else {
         
-        teams.sort( sortingTeams );
+        teams.sort( teamSvc.sortingTeams );
               
         res.render(teams, {
           layout: true

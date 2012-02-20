@@ -77,6 +77,7 @@ exports.authenticate = (username, password, callback) ->
       callback null, false
         
 
+
 ###
 LOAD a user document with all neccessary properties re-populated in the root object
 ###        
@@ -107,13 +108,18 @@ exports.loadMobileUser = (userid, callback) ->
     console.trace e
     callback e
     
+    
+    
 ###
 Update player's stats
 ###
-exports.updateStats = (playerid, opponentid, win, callback = ->) ->
-  playerid = newUserRepo.ObjectId( playerid ) if typeof playerid is 'string'
+exports.updateStats = (userid, opponentid, win, callback = ->) ->
+  console.assert userid, 'userid cannot be null or 0'  
+  throw 'userid is null or empty' unless userid?
+  
+  userid = new newUserRepo.ObjectId( userid ) if typeof userid is 'string'
   opponentid = String opponentid if typeof opponentid isnt 'string'
-  findObj = _id : playerid
+  findObj = _id : userid
   incObj = if win then {'stats.win':1} else {'stats.loss': 1}
   statLog = 
     id: new newUserRepo.ObjectId()
@@ -129,7 +135,213 @@ exports.updateStats = (playerid, opponentid, win, callback = ->) ->
     $addToSet: 
       posts: statLog
     
-  newUserRepo.update findObj, updateObj, callback
+  try
+    newUserRepo.update findObj, updateObj, callback
+  catch e
+    console.trace e
+    callback e
   
   
   
+###
+Update player's picture
+###
+exports.updatePicture = (userid, pictureurl, callback = ->) ->
+  console.assert userid, 'userid cannot be null or 0'  
+  throw 'userid is null or empty' unless userid?
+
+  userid = new newUserRepo.ObjectId( userid ) if typeof userid is 'string'
+  findObj = _id : userid
+  updateObj = 
+    $set: 
+      pictureurl: pictureurl
+      updatedat: new Date()
+  
+  try
+    newUserRepo.update findObj, updateObj, callback  
+  catch e
+    console.trace e
+    callback e
+    
+    
+
+###
+Add a vote record into player's record
+###
+exports.addVote = (userid, vote, callback = ->) ->
+  console.assert userid, 'userid cannot be null or 0'  
+  throw 'userid is null or empty' unless userid?
+  
+  userid = new newUserRepo.ObjectId( userid ) if typeof userid is 'string'
+  findObj = _id : userid
+  logObj = 
+    type: 'matchresult'
+    data: 
+      matchid: vote.matchid
+      teamid: vote.teamid
+    createdat: new Date()
+  updateObj = 
+    $set: 
+      updatedat: new Date()
+    $addToSet:
+      votes: vote
+      logs: logObj
+  
+  try
+    newUserRepo.update findObj, updateObj, callback  
+  catch e
+    console.trace e
+    callback e
+        
+
+###
+Set a team to a player
+###    
+exports.setTeam = (userid, team, callback = ->) ->
+  console.assert userid, 'userid cannot be null or 0'  
+  throw 'userid is null or empty' unless userid?
+  
+  userid = new newUserRepo.ObjectId( userid ) if typeof userid is 'string'
+  findObj = _id : userid
+  post =
+    id: new newUserRepo.ObjectId() 
+    type: 'jointeam'
+    data: 
+      teamid: String(team._id)
+    createdat: new Date()
+  updateObj = 
+    $set: 
+      team: team
+      updatedat: new Date()
+    $unset:
+      invites: 1
+    $addToSet:
+      posts: post  
+  
+  try
+    newUserRepo.update findObj, updateObj, callback  
+  catch e
+    console.trace e
+    callback e
+        
+
+###
+Add a post record into player's record
+###            
+exports.addPost = (userid, post, callback= ->) ->
+  console.assert userid, 'userid cannot be null or 0'  
+  throw 'userid is null or empty' unless userid?
+  
+  userid = new newUserRepo.ObjectId( userid ) if typeof userid is 'string'
+  
+  findObj = _id : userid
+  post or= {}
+  post.createdat = new Date()
+  post.id = new newUserRepo.ObjectId()
+  updateObj = 
+    $set: 
+      updatedat: new Date()
+    $addToSet:
+      posts: post    
+  
+  try
+    newUserRepo.update findObj, updateObj, callback  
+  catch e
+    console.trace e
+    callback e
+    
+
+###
+Remove a post from player's record
+###    
+exports.removePost = (userid, postid, callback = ->) ->
+  console.assert userid, 'userid cannot be null or 0'  
+  throw 'userid is null or empty' unless userid?
+  console.assert postid, 'postid cannot be null or 0'  
+  throw 'postid is null or empty' unless postid?
+  
+  userid = new newUserRepo.ObjectId( userid ) if typeof userid is 'string'
+  postid = new newUserRepo.ObjectId( postid ) if typeof postid is 'string'
+  findObj = _id : userid
+  updateObj = 
+    $set: 
+      updatedat: new Date()
+    $pull: 
+      posts: 
+        id: postid
+  
+  try
+    newUserRepo.update findObj, updateObj, callback  
+  catch e
+    console.trace e
+    callback e
+    
+
+###
+Add a comment record into player's record
+###    
+exports.addComment = (userid, postid, data, callback = ->) ->
+  console.assert userid, 'userid cannot be null or 0'  
+  throw 'userid is null or empty' unless userid?
+  console.assert postid, 'postid cannot be null or 0'  
+  throw 'postid is null or empty' unless postid?
+  
+  userid = new newUserRepo.ObjectId( userid ) if typeof userid is 'string'
+  postid = new newUserRepo.ObjectId( postid ) if typeof postid is 'string'
+  
+  data or= {}
+  data.id = new newUserRepo.ObjectId()
+  data.createdat = new Date()
+  
+  findObj = _id : userid  
+  
+  try
+    newUserRepo.getById userid, (getErr, user) ->
+      return callback( getErr ) if getErr?
+      for post in user?.posts
+        if post?.id?.equals( postid )
+          post.comments or= []
+          post.comments.push data
+      newUserRepo.save user, callback
+  catch e
+    console.trace e
+    callback e
+  
+
+###
+Add a vote record into player's record
+###        
+exports.addTeamInvite = (userid, teamid, callback = ->) ->
+  console.assert userid, 'userid cannot be null or 0'  
+  throw 'userid is null or empty' unless userid?
+  console.assert teamid, 'teamid cannot be null or 0'  
+  throw 'teamid is null or empty' unless teamid?
+  
+  userid = new newUserRepo.ObjectId( userid ) if typeof userid is 'string'
+  teamid = new newUserRepo.ObjectId( teamid ) if typeof teamid is 'string'
+  
+  findObj = _id : userid
+  invite = 
+    teamid: teamid
+  invitedPost = 
+    id: new newUserRepo.ObjectId()
+    type: 'invite'
+    data: 
+      teamid: teamid
+    createdat: new Date()
+  updateObj = 
+    $set: 
+      updatedat: new Date()
+    $addToSet:
+      invites: invite
+      posts: invitedPost  
+  
+  try
+    newUserRepo.update findObj, updateObj, callback  
+  catch e
+    console.trace e
+    callback e
+  
+  
+     
+    

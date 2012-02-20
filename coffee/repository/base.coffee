@@ -97,15 +97,15 @@ repository::read = (findArgs..., callback = ->) ->
   db = getDb()
   errorFn = errorHandler db, callback
   
-  console.log 'Inside read ', this
   @getCollection db, (collectionErr, collection) ->
     checkError collectionErr, errorFn, ->
       try
         cursor = collection.find.apply collection, findArgs
-        cursor.toArray (toArrayErr, docs) ->
-          db.close()
-          console.log toArrayErr if toArrayErr
-          callback.apply this, arguments
+        callback null, cursor
+#        cursor.toArray (toArrayErr, docs) ->
+#          db.close()
+#          console.log toArrayErr if toArrayErr
+#          callback.apply this, arguments
       catch e
         console.trace e
         callback e
@@ -116,11 +116,12 @@ repository::getById = (docid, callback = ->) ->
   throw 'Invalid id' unless docid? and docid isnt 'undefined'
   
   docid = new ObjectId(docid) if typeof docid is 'string'
-  @read _id: docid, (readErr, docs) ->
-    if (not readErr?)  and docs?.length
-      callback null, docs[0]  
-    else
-      callback readErr, docs
+  @read _id: docid, (readErr, cursor) ->    
+    return callback( readErr ) if readErr
+    cursor.toArray (toArrayErr, docs) ->
+      return callback(toArrayErr) if toArrayErr
+      return callback('Not found') unless docs?.length
+      callback null, docs[0]
 
 
 repository::update = (criteria, objNew, options = {}, callback) ->
@@ -129,6 +130,7 @@ repository::update = (criteria, objNew, options = {}, callback) ->
   options.safe = if callback? then true else false
   options.multi = true
   options.upsert = true
+  options['new']= true
   
   @getCollection db, (collectionErr, collection) ->
     checkError collectionErr, errorFn, ->
@@ -139,6 +141,22 @@ repository::update = (criteria, objNew, options = {}, callback) ->
       catch e
         console.trace e
         callback e if callback?
+        
+        
+repository::save = (doc, callback = ->) ->
+  throw 'Empty doc' unless doc?
+  db = getDb()
+  errorFn = errorHandler db, callback
+  
+  @getCollection db, (collectionErr, collection) ->
+    checkError collectionErr, errorFn, ->
+      try
+        collection.save doc, {safe: true}, () ->
+          db.close()
+          callback.apply this, arguments
+      catch e
+        console.trace e
+        callback e if callback?        
       
 
 repository::remove = (criteria, callback = ->) ->

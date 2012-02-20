@@ -3,27 +3,28 @@
   font:bold 20px Tahoma, Geneva, sans-serif;
   font-style:normal;
   color:#ffffff;
-  background:#1568db;
-  border:0px solid #ffffff;
-  text-shadow:0px -1px 2px #222222;
-  box-shadow:0px 0px 4px #000000;
-  -moz-box-shadow:0px 0px 4px #000000;
-  -webkit-box-shadow:0px 0px 4px #000000;
-  border-radius:4px 4px 4px 4px;
-  -moz-border-radius:4px 4px 4px 4px;
-  -webkit-border-radius:4px 4px 4px 4px;
-  cursor:pointer;
 }
 
 .profile-header:active {
-  cursor:pointer;
-  position:relative;
-  top:2px;
+}
+
+.user-picture {
+  float: left;    
+  height: 36px;
+  width: 36px;
+  margin-top: 2px;
+  margin-left: 2px;
+}
+
+.user-picture img {
+  max-width: 36px;
+  max-height: 36px;
 }
 
 .user-nickname {
   float: left;
   padding: 7px;
+  margin-left: 5px;
 }
 
 .user-score {
@@ -35,4 +36,33 @@
   border-radius:0px 4px 4px 0px;
   -moz-border-radius:0px 4px 4px 0px;
   -webkit-border-radius:0px 4px 4px 0px;
+}
+
+.li-count {
+  float: right;
+  clear: right;
+  font-size: 11px;
+  font-weight: bold;
+  padding: .2em .5em;
+  margin-right: 1em;
+  -webkit-background-clip: padding-box;
+  background-clip: padding-box;
+  -moz-background-clip: padding;
+  -moz-border-radius: 1em;
+  -webkit-border-radius: 1em;
+  border-radius: 1em;
+  font-family: Helvetica,Arial,sans-serif;
+  text-decoration: none;
+  border: 1px solid #CCC;
+  background: #EEE;
+  font-weight: bold;
+  color: #444;
+  text-shadow: 0 1px 1px #F6F6F6;
+  background-image: -webkit-gradient(linear,left top,left bottom,from(#FDFDFD),to(#EEE));
+  background-image: -webkit-linear-gradient(#FDFDFD,#EEE);
+  background-image: -moz-linear-gradient(#FDFDFD,#EEE);
+  background-image: -ms-linear-gradient(#FDFDFD,#EEE);
+  background-image: -o-linear-gradient(#FDFDFD,#EEE);
+  background-image: linear-gradient(#FDFDFD,#EEE);
+  white-space: nowrap;
 }

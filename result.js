@@ -73,10 +73,12 @@
   };
 
   processMatch = function(m) {
-    var rm_cb, team, _i, _len, _ref, _ref2;
+    var rm_cb, team, _i, _len, _ref, _ref2, _ref3;
     if (m == null) return;
-    console.log(m.status, m.start, (_ref = m.votes) != null ? _ref.length : void 0);
-    if ((!(m.votes != null)) || (!m.votes.length)) {
+    console.log(m.status, m.start, m.end, (_ref = m.votes) != null ? _ref.length : void 0);
+    if (m != null ? (_ref2 = m.votes) != null ? _ref2.length : void 0 : void 0) {
+      return updateMatchScore(m);
+    } else {
       console.time('Cancelling match for team');
       rm_cb = function(err) {
         console.timeEnd('Cancelling match for team');
@@ -84,9 +86,9 @@
           return console.log('Cancelling match for team with error %s', err);
         }
       };
-      _ref2 = m.teams;
-      for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
-        team = _ref2[_i];
+      _ref3 = m.teams;
+      for (_i = 0, _len = _ref3.length; _i < _len; _i++) {
+        team = _ref3[_i];
         teamSvc.cancelMatch(String(team._id), String(m._id), rm_cb);
       }
       console.time('Cancelling match');
@@ -94,8 +96,6 @@
         console.timeEnd('Cancelling match');
         if (err) return console.log('Cancelling match err %s', err);
       });
-    } else {
-      return updateMatchScore(m);
     }
   };
 

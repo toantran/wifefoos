@@ -1,15 +1,28 @@
-- if (typeof m != 'undefined' && m)
-  .profile-header(data-role='header')
-    .user-nickname #{m.nickname || ''}
-    .user-score #{m.wins || 0}-#{m.losses || 0}
-  .profile-body(data-role='content')
-    ul(data-role='listview', data-inset='true', data-theme='e')
-      li
-        a Challenges
-          span.ui-li-count #{m.challengeCount || 0}
-      li
-        a Matches
-          span.ui-li-count #{m.matchCount || 0}
-      li
-        a New Posts
-          span.ui-li-count 10
+div(data-role='page', id='landing', data-title='Home', data-theme='b')
+  - if (typeof m != 'undefined' && m)
+    .profile-header(data-role='header', data-theme='b', data-position='fixed')
+      - if (m.pictureurl)
+        .user-picture
+          img(src='#{m.pictureurl}')
+      .user-nickname #{m.nickname || ''}
+      .user-score #{m.wins || 0}-#{m.losses || 0}
+    .div(data-role='content')
+    .div(data-role='footer', data-position='fixed', data-theme='c')
+      .div(data-role='navbar')
+        ul
+          li
+            a(href='#challenge') Challenges
+              span.li-count #{m.challengeCount || 0}
+          li
+            a(href='#match') Matches
+              span.li-count #{m.matchCount || 0}
+    
+div(data-role='page', id='challenge', data-title='Challenge', data-theme='b')
+  - if (typeof m != 'undefined' && m)
+    .div(data-role='header', data-theme='b', data-theme='b') Challenges
+    .profile-body(data-role='content')            
+    
+div(data-role='page', id='match', data-title='Match', data-theme='b')
+  - if (typeof m != 'undefined' && m)
+    .profile-header(data-role='header', data-theme='b') Matches      
+    .profile-body(data-role='content')    

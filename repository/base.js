@@ -28,14 +28,6 @@
 
   exports.Server = Server;
 
-  repository = function(collectionName) {
-    this.collectionName = collectionName;
-  };
-
-  repository.prototype.setCollectionName = function(collectionName) {
-    this.collectionName = collectionName;
-  };
-
   /*
   Default error handler
   */
@@ -48,6 +40,36 @@
     } else if ((next != null) && typeof next === 'function') {
       return next.call();
     }
+  };
+
+  /*
+  Return the default DB
+  */
+
+  exports.getDb = getDb = function() {
+    return new Db(dbName, new Server(host, port, {}), {
+      native_parser: false
+    });
+  };
+
+  /*
+  Return a default error handler
+  */
+
+  exports.errorHandler = errorHandler = function(db, callback) {
+    if (callback == null) callback = function() {};
+    return function(error) {
+      db.close;
+      return callback(error);
+    };
+  };
+
+  repository = function(collectionName) {
+    this.collectionName = collectionName;
+  };
+
+  repository.prototype.setCollectionName = function(collectionName) {
+    this.collectionName = collectionName;
   };
 
   /*
@@ -85,28 +107,6 @@
     }
   };
 
-  /*
-  Return the default DB
-  */
-
-  exports.getDb = getDb = function() {
-    return new Db(dbName, new Server(host, port, {}), {
-      native_parser: false
-    });
-  };
-
-  /*
-  Return a default error handler
-  */
-
-  exports.errorHandler = errorHandler = function(db, callback) {
-    if (callback == null) callback = function() {};
-    return function(error) {
-      db.close;
-      return callback(error);
-    };
-  };
-
   repository.prototype.create = function(doc, callback) {
     var db, errorFn;
     if (callback == null) callback = function() {};
@@ -140,17 +140,12 @@
     if (callback == null) callback = function() {};
     db = getDb();
     errorFn = errorHandler(db, callback);
-    console.log('Inside read ', this);
     return this.getCollection(db, function(collectionErr, collection) {
       return checkError(collectionErr, errorFn, function() {
         var cursor;
         try {
           cursor = collection.find.apply(collection, findArgs);
-          return cursor.toArray(function(toArrayErr, docs) {
-            db.close();
-            if (toArrayErr) console.log(toArrayErr);
-            return callback.apply(this, arguments);
-          });
+          return callback(null, cursor);
         } catch (e) {
           console.trace(e);
           return callback(e);
@@ -168,12 +163,13 @@
     if (typeof docid === 'string') docid = new ObjectId(docid);
     return this.read({
       _id: docid
-    }, function(readErr, docs) {
-      if ((!(readErr != null)) && (docs != null ? docs.length : void 0)) {
+    }, function(readErr, cursor) {
+      if (readErr) return callback(readErr);
+      return cursor.toArray(function(toArrayErr, docs) {
+        if (toArrayErr) return callback(toArrayErr);
+        if (!(docs != null ? docs.length : void 0)) return callback('Not found');
         return callback(null, docs[0]);
-      } else {
-        return callback(readErr, docs);
-      }
+      });
     });
   };
 
@@ -185,10 +181,34 @@
     options.safe = callback != null ? true : false;
     options.multi = true;
     options.upsert = true;
+    options['new'] = true;
     return this.getCollection(db, function(collectionErr, collection) {
       return checkError(collectionErr, errorFn, function() {
         try {
           return collection.update(criteria, objNew, options, function() {
+            db.close();
+            return callback.apply(this, arguments);
+          });
+        } catch (e) {
+          console.trace(e);
+          if (callback != null) return callback(e);
+        }
+      });
+    });
+  };
+
+  repository.prototype.save = function(doc, callback) {
+    var db, errorFn;
+    if (callback == null) callback = function() {};
+    if (doc == null) throw 'Empty doc';
+    db = getDb();
+    errorFn = errorHandler(db, callback);
+    return this.getCollection(db, function(collectionErr, collection) {
+      return checkError(collectionErr, errorFn, function() {
+        try {
+          return collection.save(doc, {
+            safe: true
+          }, function() {
             db.close();
             return callback.apply(this, arguments);
           });

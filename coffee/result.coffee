@@ -47,9 +47,11 @@ updateMatchScore = (m) ->
   
 processMatch = (m) ->
   return unless m?
-  console.log m.status, m.start, m.votes?.length
+  console.log m.status, m.start, m.end, m.votes?.length
   
-  if (not m.votes?) or (not m.votes.length)  # no vote, remove match!
+  if m?.votes?.length  # update match score
+    updateMatchScore m
+  else # no vote, remove match!
     console.time 'Cancelling match for team'
     rm_cb = (err) -> 
       console.timeEnd 'Cancelling match for team' 
@@ -60,10 +62,8 @@ processMatch = (m) ->
     matchSvc.setStatus m._id, 'Cancelled', (err) ->
       console.timeEnd 'Cancelling match'
       console.log 'Cancelling match err %s', err if err
-      
-  else  # update match score
-    updateMatchScore m
-
+    
+  
 try
   console.time 'Getting pending matches'
   matchSvc.getPendingExpiredMatches (error, matches) ->
