@@ -1,28 +1,110 @@
 (function() {
-  var teamRepo;
+  var newTeamRepo, teamRepo;
 
   teamRepo = require('../repository/teams');
 
-  exports.cancelMatch = function(teamid, match, callback) {
+  newTeamRepo = require('../repository/teams2');
+
+  exports.cancelMatch = function(teamid, matchid, callback) {
+    var findObj, updateObj;
     if (callback == null) callback = function() {};
-    if (!((teamid != null) && teamid !== 'undefined' && (match != null) && match !== 'undefined')) {
+    if (!((teamid != null) && teamid !== 'undefined' && (matchid != null) && matchid !== 'undefined')) {
       return callback();
     }
-    return teamRepo.cancelMatch(teamid, match, callback);
+    if (typeof teamid === 'string') teamid = new newTeamRepo.ObjectId(teamid);
+    if (typeof matchid === 'string') matchid = new newTeamRepo.ObjectId(matchid);
+    findObj = {
+      _id: teamid
+    };
+    updateObj = {
+      $pull: {
+        matches: {
+          _id: matchid
+        }
+      },
+      $set: {
+        updatedat: new Date()
+      }
+    };
+    try {
+      return newTeamRepo.update(findObj, updateObj, callback);
+    } catch (e) {
+      console.trace(e);
+      return callback(e);
+    }
   };
 
   exports.updateStats = function(teamid, opponentid, win, callback) {
+    var findObj, incObj, statLog, updateObj;
     if (callback == null) callback = function() {};
-    if (typeof teamid !== 'string') teamid = String(teamid);
+    console.assert(teamid != null, 'teamid cannot be null or 0');
+    if (teamid == null) throw 'teamid is null or empty';
+    if (typeof teamid === 'string') teamid = new newTeamRepo.ObjectId(teamid);
     if (typeof opponentid !== 'string') opponentid = String(opponentid);
-    return teamRepo.updateStats(teamid, opponentid, win, callback);
+    findObj = {
+      _id: teamid
+    };
+    incObj = win ? {
+      'stats.win': 1
+    } : {
+      'stats.loss': 1
+    };
+    statLog = {
+      id: new newTeamRepo.ObjectId(),
+      type: 'matchresult',
+      data: {
+        opponentid: opponentid,
+        result: win ? 'win' : 'lose'
+      },
+      createdat: new Date()
+    };
+    updateObj = {
+      $inc: incObj,
+      $set: {
+        updatedat: new Date()
+      },
+      $addToSet: {
+        posts: statLog
+      }
+    };
+    try {
+      return newTeamRepo.update(findObj, updateObj, callback);
+    } catch (e) {
+      console.trace(e);
+      return callback(e);
+    }
   };
 
-  exports.setMatchComplete = function(teamid, matchid, callback) {
+  exports.setMatchComplete = function(teamid, am, callback) {
+    var findObj, matchid, updateObj;
     if (callback == null) callback = function() {};
-    if (typeof teamid !== 'string') teamid = String(teamid);
-    if (typeof matchid !== 'string') matchid = String(matchid);
-    return teamRepo.completeMatch(teamid, matchid, callback);
+    if (!((teamid != null) && teamid !== 'undefined' && (am != null) && am !== 'undefined')) {
+      return callback();
+    }
+    if (typeof teamid === 'string') teamid = new newTeamRepo.ObjectId(teamid);
+    matchid = am._id;
+    findObj = {
+      _id: teamid
+    };
+    updateObj = {
+      $addToSet: {
+        completematches: am
+      },
+      $pull: {
+        matches: {
+          _id: matchid
+        }
+      },
+      $set: {
+        updatedat: new Date()
+      }
+    };
+    try {
+      return newTeamRepo.update(findObj, updateObj, callback);
+    } catch (e) {
+      console.trace(e);
+      return callback(e);
+    }
   };
 
   exports.sortingTeams = function(team1, team2) {

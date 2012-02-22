@@ -26,11 +26,17 @@ exports.ObjectId = ObjectId
 exports.getByUsername = (username, callback = ->) ->
   return callback('Invalid username') unless username
   
-  console.log 'Outside read ', baseRepo
-  baseRepo.read username: username, (err, users) ->
-    if (not err?)  and users?.length
-      callback null, users[0]  
-    else      
-      callback err, users      
-      
+  baseRepo.read username: username, (err, cursor) ->
+    if err?
+      callback err
+    else if cursor?
+      cursor.toArray (toArrayErr, users) ->
+        if toArrayErr?
+          callback toArrayErr
+        else if users?.length
+          callback null, users[0]
+        else
+          callback 'User not found'
+    else
+      callback 'DB read failed'
       

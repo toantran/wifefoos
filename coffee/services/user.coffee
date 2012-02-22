@@ -1,7 +1,7 @@
 crypto = require 'crypto'
 newUserRepo = require '../repository/users2'
 teamRepo = require '../repository/teams'
-utils = require 'utils'
+utils = require './utils'
 
 hash = (msg, key) ->
   crypto.createHmac( 'sha256', key)
@@ -39,8 +39,13 @@ loadMatches = (hometeamid, matches, callback) ->
     loadMatch hometeamid, m, cb
   , callback
 
+
+###
+Load user's team with active matches and active challenges
+###
 loadUserTeam = (teamid, callback) ->
   return callback() unless teamid? and teamid isnt 'undefined'
+  
   teamRepo.getFullTeam String(teamid), (err, team) ->
     return callback( err ) if err? or not team?
     # load full challenge list
@@ -51,7 +56,7 @@ loadUserTeam = (teamid, callback) ->
     # load full match list
     __loadMatchesFn = (lm_cb) ->
       loadMatches team._id, team.matches, (lm_err, matches) ->
-        team.matches = matches unless lm_err?
+        team.matches = matches.filter( (am) -> am.end >= new Date() ) unless lm_err?
         lm_cb err,matches
         
     utils.parallel [__loadChallengesFn, __loadMatchesFn], (parallel_err, results) ->
@@ -67,6 +72,7 @@ exports.authenticate = (username, password, callback) ->
   
   encryptedPassword = hash password, 'a little dog'
   newUserRepo.getByUsername username, (error, user) ->
+    console.log 'encryptedPassword %s   user.password %s', encryptedPassword, user.password
     if error
       callback error
     else if not user 
@@ -95,13 +101,17 @@ exports.loadMobileUser = (userid, callback) ->
         # populate property losses
         user.losses = user.stats?.loss ? 0
         # populate challenge count, match count
-        loadUserTeam user.team?._id, (err, team) ->
-          user.challenges = team?.challenges
-          user.challengeCount = team?.challenges?.length || 0
-          user.matches = team?.matches
-          console.dir user.matches
-          user.matchCount = team?.matches?.length || 0
-          callback null, user
+        try
+          loadUserTeam user.team?._id, (err, team) ->
+            user.challenges = team?.challenges
+            user.challengeCount = team?.challenges?.length || 0
+            user.matches = team?.matches
+            console.dir user.matches
+            user.matchCount = team?.matches?.length || 0
+            callback null, user
+        catch loadUserTeamEx
+          console.trace loadUserTeamEx
+          callback loadUserTeamEx 
       else
         callback null, user
   catch e
@@ -343,5 +353,25 @@ exports.addTeamInvite = (userid, teamid, callback = ->) ->
     callback e
   
   
-     
+exports.sortingPlayers = (player1, player2) ->
+  win1 = player1?.stats?.win ? 0
+  loss1 = player1?.stats?.loss ? 0
+  total1 = win1 + loss1
+  avg1 = if total1 then (win1 / total1) else 0
+  win2 = player2?.stats?.win ? 0
+  loss2 = player2?.stats?.loss ? 0
+  total2 = win2 + loss2
+  avg2 = if total2 then (win2 / total2) else 0
+    
+  if avg1 isnt avg2
+    -avg1 + avg2
+  else if win1 isnt win2
+    -win1 + win2
+  else
+    loss1 - loss2
+    
+    
+    
+    
+    
     

@@ -1,18 +1,84 @@
 teamRepo = require '../repository/teams'
+newTeamRepo = require '../repository/teams2'
 
-exports.cancelMatch = (teamid, match, callback = ->) ->
-  return callback() unless teamid? and teamid isnt 'undefined' and match? and match isnt 'undefined'
-  teamRepo.cancelMatch teamid, match, callback  
+exports.cancelMatch = (teamid, matchid, callback = ->) ->
+  return callback() unless teamid? and teamid isnt 'undefined' and matchid? and matchid isnt 'undefined'
+  
+  teamid = new newTeamRepo.ObjectId(teamid) if typeof teamid is 'string'
+  matchid = new newTeamRepo.ObjectId(matchid) if typeof matchid is 'string'
+  
+  findObj = 
+    _id: teamid
+  updateObj =
+    $pull: 
+      matches: 
+        _id: matchid
+    $set: 
+      updatedat: new Date()
+  
+  try
+    newTeamRepo.update findObj, updateObj, callback  
+  catch e
+    console.trace e
+    callback e  
+  
+  
   
 exports.updateStats = (teamid, opponentid, win, callback = ->) ->
-  teamid = String teamid if typeof teamid isnt 'string'
-  opponentid = String opponentid if typeof opponentid isnt 'string'
-  teamRepo.updateStats teamid, opponentid, win, callback 
+  console.assert teamid?, 'teamid cannot be null or 0'  
+  throw 'teamid is null or empty' unless teamid?
   
-exports.setMatchComplete = (teamid, matchid, callback = ->) ->
-  teamid = String teamid if typeof teamid isnt 'string'
-  matchid = String matchid if typeof matchid isnt 'string'
-  teamRepo.completeMatch teamid, matchid, callback
+  teamid = new newTeamRepo.ObjectId( teamid ) if typeof teamid is 'string'
+  opponentid = String opponentid if typeof opponentid isnt 'string'
+  findObj = _id : teamid
+  incObj = if win then {'stats.win':1} else {'stats.loss': 1}
+  statLog = 
+    id: new newTeamRepo.ObjectId()
+    type: 'matchresult'
+    data: 
+      opponentid: opponentid
+      result: if win then 'win' else 'lose'
+    createdat: new Date()
+  updateObj = 
+    $inc: incObj
+    $set: 
+      updatedat: new Date()
+    $addToSet: 
+      posts: statLog
+    
+  try
+    newTeamRepo.update findObj, updateObj, callback
+  catch e
+    console.trace e
+    callback e 
+  
+  
+  
+exports.setMatchComplete = (teamid, am, callback = ->) ->
+  return callback() unless teamid? and teamid isnt 'undefined' and am? and am isnt 'undefined'
+  
+  teamid = new newTeamRepo.ObjectId(teamid) if typeof teamid is 'string'
+  matchid = am._id
+  
+  findObj = 
+    _id: teamid
+  updateObj =
+    $addToSet: 
+      completematches: am
+    $pull: 
+      matches:  
+        _id: matchid
+    $set: 
+      updatedat: new Date()
+  
+  try
+    newTeamRepo.update findObj, updateObj, callback  
+  catch e
+    console.trace e
+    callback e 
+  
+  
+  
   
 exports.sortingTeams = (team1, team2) ->
   win1 = team1?.stats?.win ? 0

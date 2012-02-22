@@ -36,14 +36,23 @@
   exports.getByUsername = function(username, callback) {
     if (callback == null) callback = function() {};
     if (!username) return callback('Invalid username');
-    console.log('Outside read ', baseRepo);
     return baseRepo.read({
       username: username
-    }, function(err, users) {
-      if ((!(err != null)) && (users != null ? users.length : void 0)) {
-        return callback(null, users[0]);
+    }, function(err, cursor) {
+      if (err != null) {
+        return callback(err);
+      } else if (cursor != null) {
+        return cursor.toArray(function(toArrayErr, users) {
+          if (toArrayErr != null) {
+            return callback(toArrayErr);
+          } else if (users != null ? users.length : void 0) {
+            return callback(null, users[0]);
+          } else {
+            return callback('User not found');
+          }
+        });
       } else {
-        return callback(err, users);
+        return callback('DB read failed');
       }
     });
   };
