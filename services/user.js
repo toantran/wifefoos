@@ -154,6 +154,32 @@
   Update player's stats
   */
 
+  exports.resetStats = function(userid, callback) {
+    var findObj, updateObj;
+    if (callback == null) callback = function() {};
+    console.assert(userid, 'userid cannot be null or 0');
+    if (userid == null) throw 'userid is null or empty';
+    if (typeof userid === 'string') userid = new newUserRepo.ObjectId(userid);
+    findObj = {
+      _id: userid
+    };
+    updateObj = {
+      $unset: {
+        stats: 1
+      }
+    };
+    try {
+      return newUserRepo.update(findObj, updateObj, callback);
+    } catch (e) {
+      console.trace(e);
+      return callback(e);
+    }
+  };
+
+  /*
+  Update player's stats
+  */
+
   exports.updateStats = function(userid, opponentid, win, callback) {
     var findObj, incObj, statLog, updateObj;
     if (callback == null) callback = function() {};
@@ -186,6 +212,36 @@
       $addToSet: {
         posts: statLog
       }
+    };
+    try {
+      return newUserRepo.update(findObj, updateObj, callback);
+    } catch (e) {
+      console.trace(e);
+      return callback(e);
+    }
+  };
+
+  /*
+  Update player's stats.  Silently
+  */
+
+  exports.updateStatsSilent = function(userid, opponentid, win, callback) {
+    var findObj, incObj, updateObj;
+    if (callback == null) callback = function() {};
+    console.assert(userid, 'userid cannot be null or 0');
+    if (userid == null) throw 'userid is null or empty';
+    if (typeof userid === 'string') userid = new newUserRepo.ObjectId(userid);
+    if (typeof opponentid !== 'string') opponentid = String(opponentid);
+    findObj = {
+      _id: userid
+    };
+    incObj = win ? {
+      'stats.win': 1
+    } : {
+      'stats.loss': 1
+    };
+    updateObj = {
+      $inc: incObj
     };
     try {
       return newUserRepo.update(findObj, updateObj, callback);
@@ -466,6 +522,52 @@
       return -win1 + win2;
     } else {
       return loss1 - loss2;
+    }
+  };
+
+  exports.insert = function(user, callback) {
+    if (callback == null) callback = function() {};
+    console.assert(user, 'user cannot be null');
+    if (user == null) throw 'user cannot be null';
+    return utils.execute(newUserRepo.getByUsername, user.username).then(function(err, existingUser, cb) {
+      if (err != null) {
+        return callback(err);
+      } else if (existingUser != null) {
+        return callback('You Chose an Email Address That is Already Registered, You Hacker!');
+      } else {
+        user.createdat = new Date();
+        if (user.pictureurl == null) user.pictureurl = '/images/player.jpg';
+        if (user.statustext == null) user.statustext = 'Ready for some foos';
+        user.password = hash(user.password, 'a little dog');
+        try {
+          return newUserRepo.create(user, cb);
+        } catch (e) {
+          console.trace(e);
+          return callback(e);
+        }
+      }
+    }).then(function(err, newUsers, cb) {
+      return callback(err, newUsers != null ? newUsers[0] : void 0);
+    });
+  };
+
+  exports.getAllPlayers = function(callback) {
+    var query;
+    if (callback == null) callback = function() {};
+    query = {};
+    try {
+      return newUserRepo.read(query, function(readErr, cursor) {
+        if (readErr != null) {
+          return callback(readErr);
+        } else if (cursor != null) {
+          return cursor.toArray(callback);
+        } else {
+          return callback();
+        }
+      });
+    } catch (e) {
+      console.log(e);
+      throw e;
     }
   };
 

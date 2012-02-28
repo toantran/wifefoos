@@ -36,7 +36,7 @@ exports.getByUsername = (username, callback = ->) ->
         else if users?.length
           callback null, users[0]
         else
-          callback 'User not found'
+          callback null, null
     else
       callback 'DB read failed'
       

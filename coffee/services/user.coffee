@@ -119,6 +119,26 @@ exports.loadMobileUser = (userid, callback) ->
     callback e
     
     
+
+###
+Update player's stats
+###
+exports.resetStats = (userid, callback = ->) ->
+  console.assert userid, 'userid cannot be null or 0'  
+  throw 'userid is null or empty' unless userid?
+  
+  userid = new newUserRepo.ObjectId( userid ) if typeof userid is 'string'
+  findObj = _id : userid
+  updateObj = 
+    $unset: 
+      stats: 1
+    
+  try
+    newUserRepo.update findObj, updateObj, callback
+  catch e
+    console.trace e
+    callback e
+    
     
 ###
 Update player's stats
@@ -151,6 +171,27 @@ exports.updateStats = (userid, opponentid, win, callback = ->) ->
     console.trace e
     callback e
   
+
+###
+Update player's stats.  Silently
+###
+exports.updateStatsSilent = (userid, opponentid, win, callback = ->) ->
+  console.assert userid, 'userid cannot be null or 0'  
+  throw 'userid is null or empty' unless userid?
+  
+  userid = new newUserRepo.ObjectId( userid ) if typeof userid is 'string'
+  opponentid = String opponentid if typeof opponentid isnt 'string'
+  findObj = _id : userid
+  incObj = if win then {'stats.win':1} else {'stats.loss': 1}
+  updateObj = 
+    $inc: incObj
+    
+  try
+    newUserRepo.update findObj, updateObj, callback
+  catch e
+    console.trace e
+    callback e
+
   
   
 ###
@@ -347,7 +388,7 @@ exports.addTeamInvite = (userid, teamid, callback = ->) ->
       posts: invitedPost  
   
   try
-    newUserRepo.update findObj, updateObj, callback  
+    newUserRepo.update findObj, updateObj, callback       
   catch e
     console.trace e
     callback e
@@ -369,6 +410,58 @@ exports.sortingPlayers = (player1, player2) ->
     -win1 + win2
   else
     loss1 - loss2
+    
+    
+exports.insert = (user, callback = ->) ->
+  console.assert user, 'user cannot be null'  
+  throw 'user cannot be null' unless user?
+  
+  utils.execute(newUserRepo.getByUsername, user.username)
+  .then (err, existingUser, cb) ->
+    if err?
+      callback err
+    else if existingUser?
+      callback 'You Chose an Email Address That is Already Registered, You Hacker!'
+    else
+      user.createdat = new Date()
+      user.pictureurl ?= '/images/player.jpg'
+      user.statustext ?= 'Ready for some foos'
+      user.password = hash user.password, 'a little dog'
+      try 
+        newUserRepo.create user, cb
+      catch e
+        console.trace e
+        callback e
+  .then (err, newUsers, cb) ->
+    callback err, newUsers?[0]
+  
+    
+exports.getAllPlayers = (callback = ->) -> 
+  query = {}
+  try
+    newUserRepo.read query, (readErr, cursor) ->
+      if readErr?
+        callback readErr
+      else if cursor?
+        cursor.toArray callback
+      else
+        callback()
+        
+  catch e
+    console.log e
+    throw e
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     
     
     

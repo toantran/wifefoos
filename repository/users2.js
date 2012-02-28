@@ -48,7 +48,7 @@
           } else if (users != null ? users.length : void 0) {
             return callback(null, users[0]);
           } else {
-            return callback('User not found');
+            return callback(null, null);
           }
         });
       } else {

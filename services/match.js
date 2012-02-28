@@ -3,6 +3,28 @@
 
   matchRepo = require('../repository/matches2');
 
+  exports.getCompleteMatches = function(callback) {
+    var query;
+    if (callback == null) callback = function() {};
+    query = {
+      status: 'complete'
+    };
+    try {
+      return matchRepo.read(query, function(readErr, cursor) {
+        if (readErr != null) {
+          return callback(readErr);
+        } else if (cursor != null) {
+          return cursor.toArray(callback);
+        } else {
+          return callback();
+        }
+      });
+    } catch (e) {
+      console.log(e);
+      throw e;
+    }
+  };
+
   exports.getPendingExpiredMatches = function(callback) {
     var query;
     query = {
@@ -250,11 +272,154 @@
         if (cb == null) cb = function() {};
         _ref4 = am.teams;
         _fn2 = function(team) {
-          console.time("Set team " + team._id + " match complete");
-          return teamSvc.setMatchComplete(team._id, m, function(err) {
-            console.timeEnd("Set team " + team._id + " match complete");
+          console.time("Match " + am._id + " Set team " + team._id + " match complete");
+          return teamSvc.setMatchComplete(team._id, am, function(err) {
+            console.timeEnd("Match " + am._id + " Set team " + team._id + " match complete");
             if (err != null) {
-              return console.log("Set team " + team._id + " match complete with error " + err);
+              return console.log("Match " + am._id + " Set team " + team._id + " match complete with error " + err);
+            }
+          });
+        };
+        for (_j = 0, _len2 = _ref4.length; _j < _len2; _j++) {
+          team = _ref4[_j];
+          _fn2(team);
+        }
+        return cb(null);
+      };
+    };
+    return utils.seriesAsync([makeSetMatchComplete(), makeUpdateTeamStats(), makeUpdatePlayerStats(), makeSetTeamMatchComplete()], am, function() {
+      return console.log('Done!');
+    });
+  };
+
+  /*
+  Finalize a match, silently
+  */
+
+  exports.finalizeSilent = function(am, callback) {
+    var count, makeSetMatchComplete, makeSetTeamMatchComplete, makeUpdatePlayerStats, makeUpdateTeamStats, maxCount, playerSvc, result, results, teamSvc, teamid, utils, _fn, _i, _len, _ref, _ref2, _ref3;
+    if (callback == null) callback = function() {};
+    teamSvc = require('./team');
+    playerSvc = require('./user');
+    utils = require('./utils');
+    console.log('Counting votes');
+    if ((am != null ? (_ref = am.teams) != null ? _ref.length : void 0 : void 0) !== 2) {
+      return;
+    }
+    results = {};
+    results[String(am.teams[0]._id)] = {
+      count: 0,
+      win: false,
+      opponentid: String(am.teams[1]._id)
+    };
+    results[String(am.teams[1]._id)] = {
+      count: 0,
+      win: false,
+      opponentid: String(am.teams[0]._id)
+    };
+    _ref2 = am.votes;
+    for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
+      _ref3 = _ref2[_i], teamid = _ref3.teamid, count = _ref3.count;
+      results[teamid].count += count;
+    }
+    maxCount = Math.max(results[String(am.teams[1]._id)].count, results[String(am.teams[0]._id)].count);
+    results[String(am.teams[1]._id)].win = maxCount <= results[String(am.teams[1]._id)].count;
+    results[String(am.teams[0]._id)].win = maxCount <= results[String(am.teams[0]._id)].count;
+    console.log('Result ');
+    _fn = function(teamid, result) {
+      return console.log('team %s count=%d win=%s', teamid, result.count, result.win);
+    };
+    for (teamid in results) {
+      result = results[teamid];
+      _fn(teamid, result);
+    }
+    makeSetMatchComplete = function() {
+      return function(m, cb) {
+        if (cb == null) cb = function() {};
+        console.time("Set match " + m._id + " status to complete");
+        return setStatus(m._id, 'complete', function(err) {
+          console.timeEnd("Set match " + m._id + " status to complete");
+          console.log('Set match status to complete with err %s', err != null);
+          return cb.apply(this, arguments);
+        });
+      };
+    };
+    makeUpdateTeamStats = function() {
+      return function(m, cb) {
+        var result, teamid, _results;
+        if (cb == null) cb = function() {};
+        _results = [];
+        for (teamid in results) {
+          result = results[teamid];
+          _results.push((function(teamid, result) {
+            console.time("Team " + teamid + " update stats");
+            return teamSvc.updateStatsSilent(teamid, result.opponentid, result.win, function(err) {
+              console.timeEnd("Team " + teamid + " update stats");
+              if (err != null) {
+                console.log("Team " + teamid + " update stats with error " + err);
+              }
+              return cb.apply(this, arguments);
+            });
+          })(teamid, result));
+        }
+        return _results;
+      };
+    };
+    makeUpdatePlayerStats = function() {
+      var players, team, _fn2, _j, _len2, _ref4;
+      players = [];
+      _ref4 = am.teams;
+      _fn2 = function(team) {
+        return players = players.concat(team.members);
+      };
+      for (_j = 0, _len2 = _ref4.length; _j < _len2; _j++) {
+        team = _ref4[_j];
+        _fn2(team);
+      }
+      console.log('Player Ids = ', players);
+      makeUpdatePlayerStats = function(teamidByplayerIdFn) {
+        return function(playerid, cb2) {
+          if (cb2 == null) cb2 = function() {};
+          result = results[teamidByplayerIdFn(playerid)];
+          console.log("Found result " + result + " for player " + playerid);
+          console.time("Updating player " + playerid + " stats");
+          return playerSvc.updateStatsSilent(playerid, result.opponentid, result.win, function() {
+            console.timeEnd("Updating player " + playerid + " stats");
+            return cb2.apply(this, arguments);
+          });
+        };
+      };
+      return function(m, cb) {
+        var fn;
+        if (cb == null) cb = function() {};
+        fn = function(playerid) {
+          var ids, team, _k, _len3, _ref5;
+          _ref5 = am.teams;
+          for (_k = 0, _len3 = _ref5.length; _k < _len3; _k++) {
+            team = _ref5[_k];
+            if (team.members.indexOf(playerid) >= 0) ids = team._id;
+          }
+          console.log("Found team " + ids + " for player " + playerid);
+          return String(ids);
+        };
+        console.time('Updating players stats');
+        return utils.mapAsync(players, makeUpdatePlayerStats(fn), function() {
+          console.timeEnd('Updating players stats');
+          return cb.apply(this, arguments);
+        });
+      };
+    };
+    makeSetTeamMatchComplete = function() {
+      return function(m, cb) {
+        var team, _fn2, _j, _len2, _ref4;
+        if (cb == null) cb = function() {};
+        _ref4 = am.teams;
+        _fn2 = function(team) {
+          console.time("Match " + am._id + " Set team " + team._id + " match complete");
+          return teamSvc.setMatchComplete(team._id, am, function(err) {
+            console.timeEnd("Match " + am._id + " Set team " + team._id + " match complete");
+            if (err != null) {
+              return console.log("Match " + am._id + " Set team " + team._id + " match complete with error " + err);
             }
           });
         };

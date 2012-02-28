@@ -62,6 +62,38 @@ exports.seriesAsync = (fnArray = [], initVal, callback = ->) ->
   
   
 exports.throwIfNull = () ->
+  nullArgs = arg for arg in arguments when not arg?
+  throw 'Null argument' if nullArgs? and nullArgs.length
+  
+
+  
+taskWrapper = (@task) ->
+  @next = null
+  @done = false  
+  
+taskWrapper::callback = (err, result) ->
+  @done = true
+  if @next? and typeof @next is 'function'
+    @wrapper ?= new taskWrapper @next
+    @next.call null, err, result, @wrapper.callback.bind(@wrapper)
+  else
+    @taskErr = err
+    @taskResult = result
+  
+taskWrapper::then = (@next) ->
+  if @next? and typeof @next is 'function'
+    @wrapper = new taskWrapper @next
+    @next.call null, @taskErr, @taskResult, @wrapper.callback.bind(@wrapper) if @done
+    return @wrapper      
+    
+    
+    
+exports.execute = (task, args...) ->
+  wrapper = new taskWrapper task
+  args.push wrapper.callback.bind(wrapper)
+  task.apply null, args
+  return wrapper;
+  
   
   
   

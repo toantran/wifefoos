@@ -1,7 +1,4 @@
-userSvc = require './services/user'
-teamSvc = require './services/team'
 matchSvc = require './services/match'
-utils = require './services/utils'
 
 
 updateMatchScore = (m, callback = ->) ->

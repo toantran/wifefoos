@@ -1,13 +1,7 @@
 (function() {
-  var matchSvc, processMatch, removeMatch, teamSvc, updateMatchScore, userSvc, utils;
-
-  userSvc = require('./services/user');
-
-  teamSvc = require('./services/team');
+  var matchSvc, processMatch, removeMatch, updateMatchScore;
 
   matchSvc = require('./services/match');
-
-  utils = require('./services/utils');
 
   updateMatchScore = function(m, callback) {
     if (callback == null) callback = function() {};

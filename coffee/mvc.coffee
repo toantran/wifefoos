@@ -133,11 +133,11 @@ bootController = (app, file) ->
         app.get "#{prefix}/:id.:format?", fn
         console.log "Routing GET ", "#{prefix}/:id.:format?"
       when 'add' 
-        app.get "#{prefix}/:id/add", fn
-        console.log "Routing GET ", "#{prefix}/:id/add"
+        app.get "#{prefix}/add", fn
+        console.log "Routing GET ", "#{prefix}/add"
       when 'create' 
         app.post "#{prefix}/:id", fn
-        console.log "Routing POST ", "#{prefix}/:id"
+        console.log "Routing POST ", "#{prefix}"
       when 'edit' 
         app.get "#{prefix}/:id/edit", fn
         console.log "Routing GET ", "#{prefix}/:id/edit"

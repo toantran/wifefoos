@@ -1,7 +1,5 @@
 (function() {
-  var newTeamRepo, teamRepo;
-
-  teamRepo = require('../repository/teams');
+  var newTeamRepo;
 
   newTeamRepo = require('../repository/teams2');
 
@@ -24,6 +22,28 @@
       },
       $set: {
         updatedat: new Date()
+      }
+    };
+    try {
+      return newTeamRepo.update(findObj, updateObj, callback);
+    } catch (e) {
+      console.trace(e);
+      return callback(e);
+    }
+  };
+
+  exports.resetStats = function(teamid, callback) {
+    var findObj, updateObj;
+    if (callback == null) callback = function() {};
+    console.assert(teamid != null, 'teamid cannot be null or 0');
+    if (teamid == null) throw 'teamid is null or empty';
+    if (typeof teamid === 'string') teamid = new newTeamRepo.ObjectId(teamid);
+    findObj = {
+      _id: teamid
+    };
+    updateObj = {
+      $unset: {
+        stats: 1
       }
     };
     try {
@@ -66,6 +86,41 @@
       $addToSet: {
         posts: statLog
       }
+    };
+    try {
+      return newTeamRepo.update(findObj, updateObj, callback);
+    } catch (e) {
+      console.trace(e);
+      return callback(e);
+    }
+  };
+
+  exports.updateStatsSilent = function(teamid, opponentid, win, callback) {
+    var findObj, incObj, statLog, updateObj;
+    if (callback == null) callback = function() {};
+    console.assert(teamid != null, 'teamid cannot be null or 0');
+    if (teamid == null) throw 'teamid is null or empty';
+    if (typeof teamid === 'string') teamid = new newTeamRepo.ObjectId(teamid);
+    if (typeof opponentid !== 'string') opponentid = String(opponentid);
+    findObj = {
+      _id: teamid
+    };
+    incObj = win ? {
+      'stats.win': 1
+    } : {
+      'stats.loss': 1
+    };
+    statLog = {
+      id: new newTeamRepo.ObjectId(),
+      type: 'matchresult',
+      data: {
+        opponentid: opponentid,
+        result: win ? 'win' : 'lose'
+      },
+      createdat: new Date()
+    };
+    updateObj = {
+      $inc: incObj
     };
     try {
       return newTeamRepo.update(findObj, updateObj, callback);
@@ -123,6 +178,26 @@
       return -win1 + win2;
     } else {
       return loss1 - loss2;
+    }
+  };
+
+  exports.getAllTeams = function(callback) {
+    var query;
+    if (callback == null) callback = function() {};
+    query = {};
+    try {
+      return newTeamRepo.read(query, function(readErr, cursor) {
+        if (readErr != null) {
+          return callback(readErr);
+        } else if (cursor != null) {
+          return cursor.toArray(callback);
+        } else {
+          return callback();
+        }
+      });
+    } catch (e) {
+      console.log(e);
+      throw e;
     }
   };
 

@@ -140,11 +140,11 @@
           app.get("" + prefix + "/:id.:format?", fn);
           return console.log("Routing GET ", "" + prefix + "/:id.:format?");
         case 'add':
-          app.get("" + prefix + "/:id/add", fn);
-          return console.log("Routing GET ", "" + prefix + "/:id/add");
+          app.get("" + prefix + "/add", fn);
+          return console.log("Routing GET ", "" + prefix + "/add");
         case 'create':
           app.post("" + prefix + "/:id", fn);
-          return console.log("Routing POST ", "" + prefix + "/:id");
+          return console.log("Routing POST ", "" + prefix);
         case 'edit':
           app.get("" + prefix + "/:id/edit", fn);
           return console.log("Routing GET ", "" + prefix + "/:id/edit");
