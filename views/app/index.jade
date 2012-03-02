@@ -1,20 +1,11 @@
-link(rel='stylesheet', href='/stylesheets/home.css')
+link(rel="stylesheet/less", type="text/css", href="/stylesheets/home.less")
 .row
 .row
   .span9.nuffstuff Are you up to snuff?  Let's kick some foos!
 .row
 .row.news-row
-  .span2.offset1
+  .span2
     .btn-info.news-title League news:
-  .span8
-    ul#league-news
-      li
-        span News #1
-      li
-        span News #2
-      li
-        span News #3
-script
-  $(function() {
-    $('ul#league-news').liScroll();
-  });
+  .span10
+    ul#league-news      
+script(type='text/javascript', src='/javascripts/app/home.js')

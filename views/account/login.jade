@@ -1,29 +1,30 @@
-#main.login-panel
-  #formbox-login.formbox
-    .title WFL Log In
-      span
-    != partial('../messages')
-    #formbox-login-tips.tips
-      h4 Don't have an account?
-      a(href='signup') Sign up now!
-      h4 Did you forget your password?
-      a(href='credentialrecover') Recover it here.
-    form#form-login.login-form(method='POST')
-      fieldset
-        input#form-login-validation(name='validation', type='hidden')
-        ol
-          li
+link(rel="stylesheet/less", type="text/css", href="/stylesheets/login.less")
+.row
+  .span6.offset3
+    .row
+      .span4
+        form
+          fieldset
+            legend WFL Log In
+            .space1
             label(for='form-login-username') Email address
-            input#form-login-username.text(maxlength='255', name='username', size='25', type='text')
-            .vError Please enter your email address
-          li
+            input#form-login-username(maxlength='255', name='username', size='25', type='text', required, placeholder='Enter your email address')
             label(for='form-login-password') Password
-            input#form-login-password.text(maxlength='16', name='password', size='25', type='password')
-            .vError Please enter your password
-          li#remember_me
-            input#form-login-remember.checkbox(autocomplete='off', defaultvalue='T', name='remember', type='checkbox')
-            label(for='form-login-remember') Remember my user name on this computer
-          li#login_in
-            input.submit(type='submit', value='Log In')
-    .clear-float
-script(type='text/javascript', src='/javascripts/app/login.js')
+            input#form-login-password(maxlength='16', name='password', size='25', type='password', required, placeholder='Enter your password')
+            label.checkbox
+              input(type='checkbox')
+              | Remember my user name on this computer
+            button.btn.btn-primary(type='submit') Log In
+      .span2
+        .row.space3
+        .row
+          .span2 Don't have an account?
+            a(href='/account/add')
+              button.btn.btn-info Sign Up
+        .row.space1      
+        .row
+          .span Forget your password?
+            a(href='/account/recover')
+              button.btn.btn-info Recover it             
+        
+script(type='text/javascript', src='/js/login.js')
