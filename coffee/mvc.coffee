@@ -12,11 +12,11 @@ isMobileAgent = (ua) ->
 
 mobileController = (req, res, next) ->
   ua = req.headers['user-agent'].toLowerCase()
-  
-  if isMobileAgent( ua )
-    res.rediect '/m'
-  else
-    next()
+  next()
+  #if isMobileAgent( ua )
+  #  res.rediect '/m'
+  #else
+  #  next()
 	
 # App settings and middleware
 bootApplication = (app) ->

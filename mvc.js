@@ -19,11 +19,7 @@
   mobileController = function(req, res, next) {
     var ua;
     ua = req.headers['user-agent'].toLowerCase();
-    if (isMobileAgent(ua)) {
-      return res.rediect('/m');
-    } else {
-      return next();
-    }
+    return next();
   };
 
   bootApplication = function(app) {

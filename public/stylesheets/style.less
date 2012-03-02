@@ -1,0 +1,23 @@
+@navbar-bgcolor: #1568db;
+@navbar-color: #ffffff;
+ 
+.navbar-inner {
+  color:#ffffff;
+  background:@navbar-bgcolor;
+  text-shadow:0px -1px 1px #222222;
+}
+
+.navbar-inner:active {
+  cursor:pointer;
+  position:relative;
+}
+
+.navbar .nav .active > a, .navbar .nav .active > a:hover {
+  color: @navbar-color;
+  text-decoration: none;
+  background-color: darken(@navbar-bgcolor, 10%);
+}
+
+.navbar .nav > li > a {
+  color: darken(@navbar-color, 15%);
+}

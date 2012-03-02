@@ -27,17 +27,11 @@
   color: #FF28DE;
 }
 
-.signup-box{
+.signup-box {
   background-color : #C8E2FF;
 	border-width : 1px;
 	border-color : #84AEFF;
 	border-style : solid;
-	padding : 10px;
-	position : relative;
-	top : -45px;
-	left : 600px;
-	width : 120px;
-	height : 40px;
 	font-size : 14pt;
 	color : #00607C;
 	font-weight : bold;
@@ -71,4 +65,13 @@
 .rules-body {
   font-family: cursive;
   font-size: 12px;
+}
+
+.news-row {
+  margin-top: 30px;
+}
+
+.news-title {
+  font-size: 1.5em;
+  padding: 5px;  
 }

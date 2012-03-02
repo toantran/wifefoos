@@ -1,6 +1,20 @@
 link(rel='stylesheet', href='/stylesheets/home.css')
-.intro-text
-  .nuffstuff Are you up to snuff?
-  .kickfoos Let's kick some foos!
-.signup-box
-  a(href='/account/add') Sign me up!
+.row
+.row
+  .span9.nuffstuff Are you up to snuff?  Let's kick some foos!
+.row
+.row.news-row
+  .span2.offset1
+    .btn-info.news-title League news:
+  .span8
+    ul#league-news
+      li
+        span News #1
+      li
+        span News #2
+      li
+        span News #3
+script
+  $(function() {
+    $('ul#league-news').liScroll();
+  });
