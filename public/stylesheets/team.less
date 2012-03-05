@@ -1,0 +1,55 @@
+.border-radius (@size: 5px) {
+  -webkit-border-radius: @size;
+  -moz-border-radius: @size;
+  border-radius: @size;
+}
+
+@team-bg: #f0f0f0;
+
+.team-info {
+  margin-bottom: 10px;
+  border: 1px solid #B9B9B9;
+  background-color: @team-bg;
+  padding: 5px;
+  .border-radius(5px);
+}
+
+.team-info:hover {
+  background-color: darken(@team-bg, 10%);
+}
+
+.team-name {
+  color : #00406C;
+	font-size : 2em;
+	font-weight : bold;
+	font-variant : small-caps;
+	line-height : 90%;
+	text-align : left;
+	text-decoration : none;
+	display : block;
+	margin-bottom: 5px;
+}
+
+.stats-detail {
+  color : red;
+	font-size : 24pt;
+	font-weight : bold;
+	background-color : transparent;
+	padding-top: 5px;	
+}
+
+.team-btn {
+  width: 100px;
+}
+
+.team-btn button {
+  width: 75px;
+}
+
+.challenge-form {
+  width: 320px;
+}
+
+#challenge-msg {
+  width: 100%;
+}

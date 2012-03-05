@@ -1,28 +1,35 @@
-link(rel='stylesheet', href='/stylesheets/team.css')
-.teams-list
-  != partial('team', teams)
-.clear-float
-#team-challenge.dialog(title='Challenge')
-  .title Foos off!
-  .dialog-body
-    img(src='/images/challenge.jpg')
-    form#team-challenge-form
-      label(for='#challenge-msg') Challenge message:
-      textarea#challenge-msg(name='challengemsg', cols=40, rows=2)
-      br
-      label Match type:
-      ol      
-        li 
-          input(type='radio', name='matchtype', value='1') 
-          | One game
-        li 
-          input(type='radio', name='matchtype', value='3') 
-          | Best of 3
-        li 
-          input(type='radio', name='matchtype', value='5') 
-          | Best of 5
-        li 
-          input(type='radio', name='matchtype', value='99') 
-          | Death match!
-  .clear-float
-script(type='text/javascript', src='/javascripts/app/team.js')
+link(rel="stylesheet/less", type="text/css", href="/stylesheets/team.less")
+.row
+  .span9.offset2
+    != partial('team', teams)
+#team-challenge-dlg.modal.hide.fade
+  .modal-header
+    a.close(data-dismiss='modal') x
+    h3 Foos off!
+  .modal-body
+    .row
+      .span2      
+        img(src='/images/challenge.jpg')
+      .span4.challenge-form
+        form#team-challenge-form
+          label(for='#challenge-msg') Challenge message:
+          textarea#challenge-msg(name='challengemsg', cols=40, rows=2)
+          br
+          label Match type:
+          ol      
+            li 
+              input(type='radio', name='matchtype', value='1') 
+              | One game
+            li 
+              input(type='radio', name='matchtype', value='3') 
+              | Best of 3
+            li 
+              input(type='radio', name='matchtype', value='5') 
+              | Best of 5
+            li 
+              input(type='radio', name='matchtype', value='99') 
+              | Death match!
+  .modal-footer
+    a.btn.btn-primary.pull-right Challenge!
+    a.btn.pull-left(data-toggle='modal', data-target='#team-challenge-dlg') Cancel
+script(type='text/javascript', src='/js/team.js')

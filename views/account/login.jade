@@ -3,7 +3,7 @@ link(rel="stylesheet/less", type="text/css", href="/stylesheets/login.less")
   .span6.offset3
     .row
       .span4
-        form
+        form(method='POST')
           fieldset
             legend WFL Log In
             .space1
@@ -14,6 +14,7 @@ link(rel="stylesheet/less", type="text/css", href="/stylesheets/login.less")
             label.checkbox
               input(type='checkbox')
               | Remember my user name on this computer
+            .message!= partial('../messages') 
             button.btn.btn-primary(type='submit') Log In
       .span2
         .row.space3

@@ -2,13 +2,10 @@
 URL /
 ###
 exports.index = (req, res) ->  
-  if req.session.user?
-    res.redirect '/profile'
-  else
-    res.render null, 
-      title: 'Wheels Foosball League (WFL)'
-    	user: req.session.user
-    	layout: true
+  res.render null, 
+    title: 'Wheels Foosball League (WFL)'
+  	user: req.session.user
+  	layout: true
 exports.index.methods = ['GET']
 
 

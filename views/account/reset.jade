@@ -1,0 +1,21 @@
+link(rel="stylesheet/less", type="text/css", href="/stylesheets/recover.less")
+.row
+  .span6.offset3
+    .row
+      .span4
+        - if (typeof tokenfound != 'undefined' && tokenfound)
+          form(method='POST')
+            fieldset
+              legend WFL Reset Password
+              .space1
+              label(for='form-login-password') Password
+              input#form-login-password(maxlength='16', name='password', size='25', type='password', required, placeholder='Enter your password')
+              label(for='form-login-password-confirm') Confirm Password
+              input#form-login-password-confirm(maxlength='16', name='confirmpassword', size='25', type='password', required, placeholder='Re-type your password')
+              input#form-login-userid(name='userid', type='hidden', value='#{account._id}')
+              .message!= partial('../messages') 
+              button.btn.btn-primary(type='submit') Submit        
+        - else 
+          .control-group.warning 
+            .help-block Your password reset token has expired or not found.  Please try to request a reset email again.
+script(type='text/javascript', src='/js/recover.js')

@@ -98,10 +98,9 @@
     if (username == null) throw 'username is null or empty';
     encryptedPassword = hash(password, 'a little dog');
     return newUserRepo.getByUsername(username, function(error, user) {
-      console.log('encryptedPassword %s   user.password %s', encryptedPassword, user.password);
       if (error) {
         return callback(error);
-      } else if (!user) {
+      } else if (!(user != null)) {
         return callback('User not found');
       } else if (encryptedPassword === user.password) {
         return callback(null, true, user);
@@ -116,6 +115,7 @@
   */
 
   exports.loadMobileUser = function(userid, callback) {
+    if (callback == null) callback = function() {};
     console.assert(userid, 'userid cannot be null or 0');
     if (userid == null) throw 'userid is null or empty';
     try {
@@ -144,6 +144,22 @@
           return callback(null, user);
         }
       });
+    } catch (e) {
+      console.trace(e);
+      return callback(e);
+    }
+  };
+
+  /*
+  LOAD a user document by Id
+  */
+
+  exports.getById = function(userid, callback) {
+    if (callback == null) callback = function() {};
+    console.assert(userid, 'userid cannot be null or 0');
+    if (userid == null) throw 'userid is null or empty';
+    try {
+      return newUserRepo.getById(userid, callback);
     } catch (e) {
       console.trace(e);
       return callback(e);
@@ -568,6 +584,88 @@
     } catch (e) {
       console.log(e);
       throw e;
+    }
+  };
+
+  exports.createResetPasswordToken = function(username, callback) {
+    var token,
+      _this = this;
+    if (callback == null) callback = function() {};
+    console.assert(username, 'username cannot be null');
+    if (!username) throw 'username cannot be null';
+    token = hash('' + Math.floor(Math.random() * 100001), 'a little dog');
+    return utils.execute(newUserRepo.getByUsername, username).then(function(err, existingUser, cb) {
+      var findObj, updateObj;
+      _this.existingUser = existingUser;
+      if (err != null) {
+        return callback(err);
+      } else if (existingUser != null) {
+        findObj = {
+          _id: existingUser._id
+        };
+        updateObj = {
+          $set: {
+            resettoken: token
+          }
+        };
+        return newUserRepo.update(findObj, updateObj, {}, cb);
+      } else {
+        return callback('Account not found');
+      }
+    }).then(function(err, updatedUser, cb) {
+      return callback(err, token, _this.existingUser);
+    });
+  };
+
+  exports.getUserByToken = function(token, callback) {
+    var findObj;
+    if (callback == null) callback = function() {};
+    console.assert(token, 'token cannot be null');
+    if (!token) throw 'token cannot be null';
+    findObj = {
+      resettoken: token
+    };
+    return utils.execute(newUserRepo.read, findObj).then(function(err, cursor, cb) {
+      if (cb == null) cb = function() {};
+      if (err) {
+        return callback(err);
+      } else {
+        return cursor.toArray(cb);
+      }
+    }).then(function(err, users, cb) {
+      if (cb == null) cb = function() {};
+      if (err) {
+        callback(err);
+      } else if ((users != null ? users.length : void 0) === 0) {
+        callback('Token not found.');
+      } else {
+        callback(err, users[0]);
+      }
+      return cb();
+    });
+  };
+
+  exports.setPassword = function(userid, password, callback) {
+    var encryptedPassword, findObj, updateObj;
+    if (callback == null) callback = function() {};
+    console.assert(userid, 'userid cannot be null');
+    if (!((userid != null) && userid)) throw 'userid cannot be null';
+    if (typeof userid === 'string') userid = new newUserRepo.ObjectId(userid);
+    encryptedPassword = hash(password, 'a little dog');
+    findObj = {
+      _id: userid
+    };
+    updateObj = {
+      $set: {
+        password: encryptedPassword,
+        updatedat: new Date()
+      }
+    };
+    try {
+      return newUserRepo.update(findObj, updateObj, callback);
+    } catch (e) {
+      console.trace(e);
+      return callback(e);
     }
   };
 

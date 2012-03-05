@@ -1,5 +1,11 @@
 matchRepo = require('../repository/matches2')
 
+exports.createMatch = (am, callback = ->) ->
+  console.assert am, 'Match object cannot be null'
+  throw 'Match object cannot be null' unless am?
+  
+  matchRepo.create am, callback
+  
 
 exports.getCompleteMatches = (callback = ->) ->
   query =

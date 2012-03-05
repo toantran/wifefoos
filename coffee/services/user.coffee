@@ -72,10 +72,9 @@ exports.authenticate = (username, password, callback) ->
   
   encryptedPassword = hash password, 'a little dog'
   newUserRepo.getByUsername username, (error, user) ->
-    console.log 'encryptedPassword %s   user.password %s', encryptedPassword, user.password
     if error
       callback error
-    else if not user 
+    else if not user?
       callback 'User not found'
     else if encryptedPassword is user.password
       callback null, true, user
@@ -87,7 +86,7 @@ exports.authenticate = (username, password, callback) ->
 ###
 LOAD a user document with all neccessary properties re-populated in the root object
 ###        
-exports.loadMobileUser = (userid, callback) ->
+exports.loadMobileUser = (userid, callback = ->) ->
   console.assert userid, 'userid cannot be null or 0'  
   throw 'userid is null or empty' unless userid?
   
@@ -118,7 +117,20 @@ exports.loadMobileUser = (userid, callback) ->
     console.trace e
     callback e
     
-    
+
+###
+LOAD a user document by Id
+###
+exports.getById = (userid, callback = ->) ->
+  console.assert userid, 'userid cannot be null or 0'  
+  throw 'userid is null or empty' unless userid?
+  
+  try
+    newUserRepo.getById userid, callback
+  catch e
+    console.trace e
+    callback e  
+  
 
 ###
 Update player's stats
@@ -452,9 +464,70 @@ exports.getAllPlayers = (callback = ->) ->
     throw e
     
     
+exports.createResetPasswordToken = (username, callback = ->) ->
+  console.assert username, 'username cannot be null'
+  throw 'username cannot be null' unless username
+  
+  token = hash( '' + Math.floor( Math.random() * 100001), 'a little dog')
+  
+  utils.execute(newUserRepo.getByUsername, username)
+  .then (err, @existingUser, cb) =>
+    if err?
+      callback err
+    else if existingUser?
+      findObj = _id : existingUser._id
+      updateObj = 
+        $set: 
+          resettoken: token
+          
+      newUserRepo.update findObj, updateObj, {}, cb
+    else
+      callback 'Account not found'
+  .then (err, updatedUser, cb) =>
     
+    callback err, token, @existingUser
+  
     
+exports.getUserByToken = (token, callback = ->) ->
+  console.assert token, 'token cannot be null'
+  throw 'token cannot be null' unless token
+  
+  findObj = resettoken: token
+  
+  utils.execute(newUserRepo.read, findObj)
+  .then (err, cursor, cb = ->) ->
+    if err
+      callback err
+    else
+      cursor.toArray cb
+  .then (err, users, cb = ->) ->
+    if err
+      callback err
+    else if users?.length is 0
+      callback 'Token not found.'
+    else
+      callback err, users[0]
+    cb()
+
     
+exports.setPassword = (userid, password, callback = ->) ->
+  console.assert userid, 'userid cannot be null'
+  throw 'userid cannot be null' unless userid? and userid
+  
+  userid = new newUserRepo.ObjectId( userid ) if typeof userid is 'string'
+  encryptedPassword = hash password, 'a little dog'
+  
+  findObj = _id : userid
+  updateObj = 
+    $set: 
+      password: encryptedPassword
+      updatedat: new Date()
+  
+  try
+    newUserRepo.update findObj, updateObj, callback  
+  catch e
+    console.trace e
+    callback e  
     
     
     

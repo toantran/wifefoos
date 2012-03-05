@@ -1,19 +1,20 @@
-.team-info
-  .team-picture
+.row.team-info
+  .span1    
     - if (team.pictureurl)
-      img(src='#{team.pictureurl}')
-  .team-detail.info
+      a(href='/team/#{team._id}')
+        img(src='#{team.pictureurl}')
+  .span5
     .team-name
       a(href='/team/#{team._id}')= team.teamname
     - if (team.members && team.members.length)
       .member-list
         each member in team.members
-          .member-name(memberid='#{member}')
-  .team-buttons
-    - if ((!team.members || team.members.length <= 1) && (!user.team))
-      a Join team
-    - if (user.team && (user.team._id != team._id))
-      a(challengerid='#{user._id}', challengeeteamid='#{team._id}') Challenge
-  .team-record.stats
+          .member-name
+            a(href='/player/#{member._id}')= member.nickname
+  .span1.stats
     .stats-detail #{(team.stats ? team.stats.win : 0) || '0'}-#{(team.stats ? team.stats.loss : 0) || '0'}
-  .clear-float
+  .span2.team-btn
+    - if ((!team.members || team.members.length <= 1) && (!user.team))
+      button.btn Join team
+    - if (user.team && (user.team._id != team._id))
+      button.btn.btn-danger(challengerid='#{user._id}', challengeeteamid='#{team._id}') Challenge

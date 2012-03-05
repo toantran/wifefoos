@@ -61,6 +61,7 @@ bootApplication = (app) ->
 # Check authenticated 
 restrict = (req, res, next) ->
   if req.session?.user
+    req.user = req.session.user
     next()
   else
     returnurl = encodeURIComponent req.url
@@ -80,6 +81,7 @@ controllerAction = (name, plural, action, fn) ->
       res.render = render
       # Template path
       if typeof obj is 'string'
+        options?.user ?= req.session.user
         return res.render obj, options, fn
       
       # Format support
@@ -91,13 +93,13 @@ controllerAction = (name, plural, action, fn) ->
 
       # Render template
       res.render = render
-      options = options || {};
+      options ?= {}
       # Expose obj as the "users" or "user" local
       if action is 'index'
         options[plural] = obj
       else
         options[name] = obj
-      
+      options?.user ?= req.session.user
       res.render path, options, fn
     fn.apply this, arguments
 

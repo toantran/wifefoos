@@ -33,4 +33,44 @@
 
   exports.ObjectId = ObjectId;
 
+  exports.removeChallenge = function(teamid, otherteamid, callback) {
+    var findObj, removingLog, updateObj;
+    if (callback == null) callback = function() {};
+    console.assert(teamid, 'teamid cannot be null');
+    if (!teamid) throw 'teamid cannot be null';
+    console.assert(otherteamid, 'otherteamid cannot be null');
+    if (!otherteamid) throw 'otherteamid cannot be null';
+    if (typeof teamid === 'string') teamid = new ObjectId(teamid);
+    if (typeof otherteamid === 'string') otherteamid = new ObjectId(otherteamid);
+    findObj = {
+      _id: teamid
+    };
+    removingLog = {
+      type: 'challengeremoved',
+      data: {
+        teamid: otherteamid
+      },
+      createdat: new Date()
+    };
+    updateObj = {
+      $set: {
+        updatedat: new Date()
+      },
+      $pull: {
+        challenges: {
+          teamid: otherteamid
+        }
+      },
+      $addToSet: {
+        logs: removingLog
+      }
+    };
+    try {
+      return baseRepo.update(findObj, updateObj, {}, callback);
+    } catch (e) {
+      console.trace(e);
+      return callback(e);
+    }
+  };
+
 }).call(this);

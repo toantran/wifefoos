@@ -124,13 +124,13 @@ repository::getById = (docid, callback = ->) ->
       callback null, docs[0]
 
 
-repository::update = (criteria, objNew, options = {}, callback) ->
+repository::update = (criteria, objNew, options = {}, callback ) ->
   db = getDb()
   errorFn = errorHandler db, callback
-  options.safe = if callback? then true else false
-  options.multi = true
-  options.upsert = true
-  options['new']= true
+  options.safe ?= if callback? then true else false
+  options.multi ?= true
+  options.upsert ?= true
+  options['new'] ?= true
   
   @getCollection db, (collectionErr, collection) ->
     checkError collectionErr, errorFn, ->

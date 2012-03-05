@@ -178,10 +178,10 @@
     if (options == null) options = {};
     db = getDb();
     errorFn = errorHandler(db, callback);
-    options.safe = callback != null ? true : false;
-    options.multi = true;
-    options.upsert = true;
-    options['new'] = true;
+    if (options.safe == null) options.safe = callback != null ? true : false;
+    if (options.multi == null) options.multi = true;
+    if (options.upsert == null) options.upsert = true;
+    if (options['new'] == null) options['new'] = true;
     return this.getCollection(db, function(collectionErr, collection) {
       return checkError(collectionErr, errorFn, function() {
         try {

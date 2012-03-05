@@ -5,6 +5,7 @@
   exports.map = function(array, asyncMapFn, callback) {
     var counter, index, item, new_array, runit, _len, _results;
     if (array == null) array = [];
+    if (callback == null) callback = function() {};
     counter = array.length;
     new_array = [];
     runit = function(item, index) {
@@ -29,6 +30,7 @@
   exports.mapAsync = function(array, asyncMapFn, callback) {
     var counter, index, item, new_array, runit, _len, _results;
     if (array == null) array = [];
+    if (callback == null) callback = function() {};
     counter = array.length;
     new_array = [];
     runit = function(item, index) {
@@ -53,6 +55,7 @@
   exports.parallel = function(fnArray, callback) {
     var counter, fn, index, resultArray, runit, _len, _results;
     if (fnArray == null) fnArray = [];
+    if (callback == null) callback = function() {};
     counter = fnArray.length;
     resultArray = [];
     runit = function(fn, index) {

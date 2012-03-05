@@ -6,17 +6,13 @@ URL /
 (function() {
 
   exports.index = function(req, res) {
-    if (req.session.user != null) {
-      return res.redirect('/profile');
-    } else {
-      res.render(null, {
-        title: 'Wheels Foosball League (WFL)'
-      });
-      return {
-        user: req.session.user,
-        layout: true
-      };
-    }
+    res.render(null, {
+      title: 'Wheels Foosball League (WFL)'
+    });
+    return {
+      user: req.session.user,
+      layout: true
+    };
   };
 
   exports.index.methods = ['GET'];

@@ -30,7 +30,7 @@ html.nojs
   body
     script
       window.q = [];
-      window.$ = function(f) {
+      window.$ = window.jQuery = function(f) {
         q.push(f);
       };
     .navbar.navbar-fixed-top
@@ -56,6 +56,7 @@ html.nojs
               - if (loggedIn)
                 li
                   a.userlink(href='/profile') Welcome, #{nickname}
+                li.divider-vertical
                 li
                   a(href='/account/logout') Log out
               - else
@@ -65,16 +66,18 @@ html.nojs
                 li
                   a(href='/account/login') Log in
     .container!= body             
-      footer
-        | Written and designed by Toan Tran.  All rights reserved.  Contact toantran@comcast.net
+    .footer-wrapper 
+      .container Written and designed by Toan Tran.  All rights reserved.  Contact toantran@comcast.net
       
-    script(type='text/javascript', src='/javascripts/jquery/jquery-1.7.1.min.js')
-    script(type='text/javascript', src='/javascripts/jquery/jquery-ui-1.8.17.custom.min.js')
-    script(type='text/javascript', src='/javascripts/jquery.li-scroller.1.0.js')
-    script(type='text/javascript', src='/javascripts/underscore-min.js')
-    script(type='text/javascript', src='/javascripts/backbone-min.js')
-    script(type='text/javascript', src='/javascripts/bootstrap.min.js')  
-    script(type='text/javascript', src='/javascripts/less-1.2.2.min.js')
+    script(type='text/javascript', src='/lib/jquery-1.7.1.min.js')
+    script(type='text/javascript', src='/lib/jquery-ui-1.8.17.custom.min.js')
+    script(type='text/javascript', src='/lib/jquery.li-scroller.1.0.js')
+    script(type='text/javascript', src='/lib/underscore-min.js')
+    script(type='text/javascript', src='/lib/backbone-min.js')
+    script(type='text/javascript', src='/lib/bootstrap.min.js')  
+    //script(type='text/javascript', src='/lib/bootstrap-modal.js')    
+    script(type='text/javascript', src='/lib/less-1.2.2.min.js')
+    script(type='text/javascript', src='/js/layout.js')
     script
       $.each(q,function(index,f){
         $(f)

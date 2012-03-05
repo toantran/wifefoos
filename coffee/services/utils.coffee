@@ -1,7 +1,7 @@
 
-exports.map = (array = [], asyncMapFn, callback) ->
+exports.map = (array = [], asyncMapFn, callback = ->) ->
   counter = array.length
-  new_array = []
+  new_array = []  
   runit = (item, index) ->
     asyncMapFn item, (err, result) ->
       if err
@@ -15,7 +15,7 @@ exports.map = (array = [], asyncMapFn, callback) ->
   runit item, index for item, index in array
     
     
-exports.mapAsync = (array = [], asyncMapFn, callback) ->
+exports.mapAsync = (array = [], asyncMapFn, callback = ->) ->
   counter = array.length
   new_array = []
   runit = (item, index) ->
@@ -31,7 +31,7 @@ exports.mapAsync = (array = [], asyncMapFn, callback) ->
   runit item, index for item, index in array
       
 
-exports.parallel = ( fnArray = [], callback) ->
+exports.parallel = ( fnArray = [], callback = ->) ->
   counter = fnArray.length
   resultArray = []
   runit = (fn, index) ->

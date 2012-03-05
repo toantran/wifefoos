@@ -6,40 +6,33 @@
   - email = account.username
   - password = account.password
   - confirmpass = account.passwordconfirm
-#main.signup-panel
-  #formbox-signup.formbox
-    .title WFL Sign Up
-      span
-    != partial('../messages')
-    form#form-signup.login-form(method='POST')
-      fieldset
-        input#form-signup-validation(name='validation', type='hidden')
-        ol
-          li
+.row
+  .span6.offset3
+    .row
+      .span4
+        form(method='POST')
+          fieldset
+            legend WFL Sign Up
+            .space1
             label(for='form-signup-nickname') Name (real or nick name)
-            input#form-signup-nickname.text(maxlength='255', name='nickname', size='25', type='text', value=nickname)
-            .vError Please enter your name
-          //li
-          //  label(for='form-signup-firstname') First name
-          //  input#form-signup-firstname.text(maxlength='255', name='firstname', size='25', type='text', value=firstname)
-          //  .vError Please enter your first name
-          //li
-          //  label(for='form-signup-lastname') Last name
-          //  input#form-signup-lastname.text(maxlength='255', name='lastname', size='25', type='text', value=lastname)
-          //  .vError Please enter your last name
-          li
-            label(for='form-signup-username') Email address
-            input#form-signup-username.text(maxlength='255', name='username', size='25', type='text', value=email)
-            .vError Please enter your email address
-          li
-            label(for='form-signup-password') Password
-            input#form-signup-password.text(maxlength='16', name='password', size='25', type='password', value=password)
-            .vError Please enter your password
-          li
-            label(for='form-signup-password') Confirm Password
-            input#form-signup-password.text(maxlength='16', name='passwordconfirm', size='25', type='password', value=confirmpass)
-            .vError Please enter your password
-          li#signup_in
-            input.submit(type='submit', value='Sign Up')
-    .clear-float
-script(type='text/javascript', src='/javascripts/app/signup.js')
+            input#form-signup-nickname(maxlength='255', name='nickname', size='25', type='text', required, value=nickname)
+            label(for='form-login-username') Email address
+            input#form-login-username(maxlength='255', name='username', size='25', type='text', required, placeholder='Enter your email address')
+            label(for='form-login-password') Password
+            input#form-login-password(maxlength='16', name='password', size='25', type='password', required, placeholder='Enter your password')
+            label(for='form-login-password-confirm') Confirm Password
+            input#form-login-password-confirm(maxlength='16', name='passwordconfirm', size='25', type='password', required, placeholder='Re-enter your password')
+            .message!= partial('../messages') 
+            button.btn.btn-primary(type='submit') Sign Up
+      .span2
+        .row.space3
+        .row
+          .span2 Already have an account?
+            a(href='/account/login')
+              button.btn.btn-info Log In
+        .row.space1      
+        .row
+          .span Forget your password?
+            a(href='/account/recover')
+              button.btn.btn-info Recover it  
+script(type='text/javascript', src='/js/signup.js')

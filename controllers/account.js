@@ -1,13 +1,132 @@
 
 /*
-  GET
-  URL /account/profile
+  GET 
+  URL /account/reset
 */
 
 (function() {
 
+  exports.reset = function(req, res, next) {
+    var token, userSvc;
+    token = req.param('id', '');
+    if (!(token != null)) {
+      return next();
+    } else {
+      userSvc = require('../services/user');
+      return userSvc.getUserByToken(token, function(err, user) {
+        if (err != null) req.flash('error', err);
+        if (user != null) req.session.tokenverified = true;
+        return res.render(user, {
+          tokenfound: user != null,
+          title: 'WFL - Reset Password',
+          layout: true
+        });
+      });
+    }
+  };
+
+  exports.reset.methods = ['GET'];
+
+  exports.reset.action = 'reset/:id';
+
+  /*
+    POST 
+    URL /account/reset
+  */
+
+  exports.resetpassword = function(req, res, next) {
+    var confirmpassword, password, userSvc, userid;
+    password = req.param('password', '');
+    confirmpassword = req.param('confirmpassword', '');
+    userid = req.param('userid', '');
+    if (req.session.tokenverified !== true) return next();
+    if (!password || !confirmpassword || !userid) {
+      req.flash('error', 'Your Passwords Do Not Match');
+      return res.redirect('back');
+    } else if (password !== confirmpassword) {
+      req.flash('error', 'Your Passwords Do Not Match');
+      return res.redirect('back');
+    } else {
+      userSvc = require('../services/user');
+      return userSvc.setPassword(userid, password, function(err, user) {
+        if (err != null) req.flash('error', err);
+        return res.redirect('/account/login');
+      });
+    }
+  };
+
+  exports.resetpassword.methods = ['POST'];
+
+  exports.resetpassword.action = 'reset*';
+
+  /*
+    GET
+    URL  /account/recover
+  */
+
+  exports.recover = function(req, res) {
+    return res.render(null, {
+      layout: true,
+      title: 'WFL - Reset password'
+    });
+  };
+
+  exports.recover.methods = ['GET'];
+
+  /*
+    POST
+    URL  /account/recover
+  */
+
+  exports.resettoken = function(req, res) {
+    var email, userSvc;
+    email = req.body.email;
+    console.log('reset token', email);
+    if ((email != null) && email) {
+      userSvc = require('../services/user');
+      return userSvc.createResetPasswordToken(email, function(err, token, user) {
+        var emailSvc;
+        if (err != null) {
+          req.flash('error', err);
+          return res.send({
+            success: false,
+            error: err
+          });
+        } else {
+          emailSvc = require('../services/email');
+          return emailSvc.sendmail({
+            to: email,
+            subject: 'Reset WFL password',
+            html: "A request have been made to reset your WFL password.<BR>Click on <a href='http://" + (req.header('host')) + "/account/reset/" + token + "'>this link</a> to reset your password.  If you did not or requested by mistake, please ignore this email.<BR>Thanks,<BR>WFL Game Keeper"
+          }, function(mailerr) {
+            if (mailerr != null) {
+              req.flash('error', mailerr);
+              return res.send({
+                success: false,
+                error: mailerr
+              });
+            } else {
+              return res.send({
+                success: true
+              });
+            }
+          });
+        }
+      });
+    }
+  };
+
+  exports.resettoken.methods = ['POST'];
+
+  exports.resettoken.action = 'recover';
+
+  /*
+    GET
+    URL /account/profile
+  */
+
   exports.profile = function(req, res) {
-    return res.redirect('/player');
+    return res.redirect('/profile');
   };
 
   exports.profile.methods = ['GET'];

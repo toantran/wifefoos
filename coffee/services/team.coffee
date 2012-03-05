@@ -1,5 +1,142 @@
 newTeamRepo = require '../repository/teams2'
+utils = require './utils'
+userSvc = require './user'
+matchSvc = require './match'
 
+
+exports.addMatch = addMatch = (teamid, am, callback = ->) ->
+  
+
+exports.acceptChallenge = (inputs, callback = ->) ->
+  console.assert inputs?, 'inputs cannot be null'
+  throw 'Inputs cannot be null' unless inputs?
+  
+  teamids = [inputs.challengingteamid, inputs.challengedteamid]
+    
+  utils.execute( utils.mapAsync, teamids, newTeamRepo.getById )  # get all teams
+  .then (err, @teams, cb = ->) =>
+    # create match
+    return callback(err) if err
+    start = new Date()
+    end = new Date()
+    am = 
+      start: start
+      end: new Date(end.setDate( end.getDate() + 3 ))  # ends after 3 days
+      status: 'pending'
+      teams: teams
+    matchSvc.createMatch am, cb
+  .then (err, @am, cb = ->) =>
+    return callback(err) if err
+    # add match to teams
+    utils.mapAsync @teams, (team, cb) -> 
+      addMatch( team._id, @am, cb )
+    , cb
+  .then (err, args..., cb = ->) ->
+    return callback(err) if err
+    # remove the challenge from both teams
+    newTeamRepo.removeChallenge inputs.challengedteamid, inputs.challengingteamid
+    newTeamRepo.removeChallenge inputs.challengingteamid, inputs.challengedteamid
+    cb()
+  .then (err, args..., cb = ->) ->
+    return callback(err) if err
+    for team in @teams
+      do (team) ->
+        utils.mapAsync team.members, (memberid, mapcb = ->) ->
+          post = 
+            type: 'newmatch'
+            data: 
+              matchid: String(@am._id)
+            createdat: new Date()
+            
+          userSvc.addPost memberid, post, mapcb
+        , cb
+    callback()
+      
+
+exports.cancelChallenge = (inputs, callback = ->) ->  
+  console.assert inputs?, 'inputs cannot be null'
+  throw 'Inputs cannot be null' unless inputs?
+
+  utils.execute(newTeamRepo.removeChallenge, inputs.challengingteamid, inputs.challengedteamid)
+  .then (err, others..., cb = ->) ->
+    return callback(err) if err
+    newTeamRepo.getById inputs.challengingteamid, cb
+  .then (err, team, cb = ->) ->
+    return callback(err) if err
+    if Array.isArray(team?.members)
+      for member in team.members
+        do ( member ) ->
+          post = 
+            type: 'challengecancelling'
+            data: 
+              teamid: inputs.challengedteamid
+              msg: 'Chicken dance'
+            createdat: new Date()
+          userSvc.addPost member._id, post
+    cb()
+  .then (err, args..., cb = ->) ->   
+    return callback(err) if err
+    newTeamRepo.removeChallenge inputs.challengedteamid, inputs.challengingteamid, cb
+  .then (err, others..., cb = ->) ->
+    return callback(err) if err
+    newTeamRepo.getById inputs.challengedteamid, cb
+  .then (err, team, cb = ->) ->
+    return callback(err) if err
+    if Array.isArray(team?.members)
+      for member in team.members
+        do (member) ->
+          post = 
+            type: 'challengecancelled'
+            data: 
+              teamid: inputs.challengingteamid
+              msg: 'Chicken dance'
+            createdat: new Date()
+          userSvc.addPost member._id, post
+    cb()
+    
+
+exports.declineChallenge = (inputs, callback = ->) ->  
+  console.assert inputs?, 'inputs cannot be null'
+  throw 'Inputs cannot be null' unless inputs?
+
+  utils.execute(newTeamRepo.removeChallenge, inputs.challengingteamid, inputs.challengedteamid)
+  .then (err, others..., cb = ->) ->
+    return callback(err) if err
+    newTeamRepo.getById inputs.challengingteamid, cb
+  .then (err, team, cb = ->) ->
+    return callback(err) if err
+    if Array.isArray(team?.members)
+      for member in team.members
+        do ( member ) ->
+          post = 
+            type: 'challengedeclined'
+            data: 
+              teamid: inputs.challengedteamid
+              msg: 'Chicken dance'
+            createdat: new Date()
+          userSvc.addPost member._id, post
+    cb()
+  .then (err, args..., cb = ->) ->   
+    return callback(err) if err
+    newTeamRepo.removeChallenge inputs.challengedteamid, inputs.challengingteamid, cb
+  .then (err, others..., cb = ->) ->
+    return callback(err) if err
+    newTeamRepo.getById inputs.challengedteamid, cb
+  .then (err, team, cb = ->) ->
+    return callback(err) if err
+    if Array.isArray(team?.members)
+      for member in team.members
+        do (member) ->
+          post = 
+            type: 'challengedeclining'
+            data: 
+              teamid: inputs.challengingteamid
+              msg: 'Chicken dance'
+            createdat: new Date()
+          userSvc.addPost member._id, post
+    cb()
+      
+      
 exports.cancelMatch = (teamid, matchid, callback = ->) ->
   return callback() unless teamid? and teamid isnt 'undefined' and matchid? and matchid isnt 'undefined'
   
@@ -139,8 +276,12 @@ exports.sortingTeams = (team1, team2) ->
 
 
 
-exports.getAllTeams = (callback = ->) -> 
+exports.getAll = (availableOnly, callback = ->) -> 
   query = {}
+  
+  if availableOnly
+    query = 
+      '$or': [{members: null}, {members: {$size: 0}}, {members: {$size: 1}}]
   try
     newTeamRepo.read query, (readErr, cursor) ->
       if readErr?
@@ -155,4 +296,14 @@ exports.getAllTeams = (callback = ->) ->
     throw e
 
 
-     
+exports.getById = (teamid, callback = ->) -> 
+  console.assert teamid, 'TeamId cannot be null or 0'
+  throw 'TeamId cannot be null or 0' unless teamid
+  
+  newTeamRepo.getById teamid, callback
+  
+  
+    
+    
+    
+    

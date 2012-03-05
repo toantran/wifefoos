@@ -1,0 +1,14 @@
+link(rel="stylesheet/less", type="text/css", href="/stylesheets/recover.less")
+.row
+  .span6.offset3
+    .row
+      .span4
+        form#password-recover-form(method='POST')
+          fieldset
+            legend WFL Reset Password
+            .space1
+            label(for='form-login-username') Email address
+            input#form-login-username(maxlength='255', name='email', size='25', type='text', required, placeholder='Enter your email address')
+            .message!= partial('../messages') 
+            button.btn.btn-primary(type='submit') Submit        
+script(type='text/javascript', src='/js/recover.js')

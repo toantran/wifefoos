@@ -74,6 +74,7 @@
   restrict = function(req, res, next) {
     var returnurl, _ref;
     if ((_ref = req.session) != null ? _ref.user : void 0) {
+      req.user = req.session.user;
       return next();
     } else {
       returnurl = encodeURIComponent(req.url);
@@ -90,7 +91,12 @@
       path = "" + __dirname + "/views/" + name + "/" + action + ".jade";
       res.render = function(obj, options, fn) {
         res.render = render;
-        if (typeof obj === 'string') return res.render(obj, options, fn);
+        if (typeof obj === 'string') {
+          if (options != null) {
+            if (options.user == null) options.user = req.session.user;
+          }
+          return res.render(obj, options, fn);
+        }
         if (action === 'show' && format) {
           if (format === 'json') {
             return res.send(obj);
@@ -99,11 +105,14 @@
           }
         }
         res.render = render;
-        options = options || {};
+        if (options == null) options = {};
         if (action === 'index') {
           options[plural] = obj;
         } else {
           options[name] = obj;
+        }
+        if (options != null) {
+          if (options.user == null) options.user = req.session.user;
         }
         return res.render(path, options, fn);
       };

@@ -3,6 +3,13 @@
 
   matchRepo = require('../repository/matches2');
 
+  exports.createMatch = function(am, callback) {
+    if (callback == null) callback = function() {};
+    console.assert(am, 'Match object cannot be null');
+    if (am == null) throw 'Match object cannot be null';
+    return matchRepo.create(am, callback);
+  };
+
   exports.getCompleteMatches = function(callback) {
     var query;
     if (callback == null) callback = function() {};
