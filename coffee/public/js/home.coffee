@@ -1,4 +1,5 @@
 jQuery ($) ->
+  ###
   rendernews = (news) ->
     if news? and Array.isArray(news)    
       _(news)
@@ -16,4 +17,5 @@ jQuery ($) ->
              .show('slow')
 
       $('ul#league-news').liScroll();
+  ###
                                

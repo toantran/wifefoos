@@ -1,11 +1,23 @@
 link(rel="stylesheet/less", type="text/css", href="/stylesheets/home.less")
 .row
+  .span12
+    h1 Are you up to snuff?  Let's kick some foos!
 .row
-  .span9.nuffstuff Are you up to snuff?  Let's kick some foos!
-.row
-.row.news-row
-  .span2
-    .btn-info.news-title League news
-  .span10
-    ul#league-news      
+  .span8
+    .hightlight-section
+      h4 League Highlights
+      #leaguehightlights.carousel
+        .carousel-inner
+          != partial('highlight', highlights)
+        a.carousel-control.left( href="#leaguehightlights" data-slide="prev") &lsaquo;
+        a.carousel-control.right( href="#leaguehightlights" data-slide="next") &rsaquo;
+  .span3.offset1
+    .news-section
+      h4 League News
+//
+  .row.news-row
+    .span2
+      .btn-info.news-title League news
+    .span10
+      ul#league-news      
 script(type='text/javascript', src='/js/home.js')
