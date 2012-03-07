@@ -2,9 +2,12 @@ newsSvc = require '../services/news'
 
 exports.index = (req, res, next) ->
   newsSvc.getNews (err, news) ->
-    res.send 
-      success: not err?
-      news: news,
-      error: err
+    res.render news, 
+      title: 'WFL - News'
+      layout: true
     
-    
+
+exports.add = (req, res, next) ->
+  res.render null,
+    title: 'WFL - News'
+    layout: true

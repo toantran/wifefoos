@@ -4,9 +4,232 @@ userSvc = require './user'
 matchSvc = require './match'
 
 
+###
+###
+exports.createJoinRequest = (teamid, playerid, callback = ->) ->
+  console.assert teamid?, 'teamid cannot be null'
+  throw 'teamid cannot be null' unless teamid?
+  console.assert playerid?, 'playerid cannot be null'
+  throw 'playerid cannot be null' unless playerid?
+  
+  teamid = new newTeamRepo.ObjectId(teamid) if typeof teamid is 'string'
+  findObj = 
+    _id: teamid
+  post =
+    type: 'joinrequest'
+    data:
+      userid: playerid
+    createdat: new Date()
+  joinRequest =
+    requestor: playerid
+  updateObj = 
+    $addToSet:
+      joinrequests: joinRequest
+      posts: post
+    $set:
+      updatedat: new Date()
+  
+  try
+    newTeamRepo.update findObj, updateObj, {}, callback
+  catch e
+    console.trace e
+    throw e
+
+###
+Add a match into a team
+###
 exports.addMatch = addMatch = (teamid, am, callback = ->) ->
+  console.assert teamid?, 'teamid cannot be null'
+  throw 'teamid cannot be null' unless teamid?
+  console.assert am?, 'am cannot be null'
+  throw 'am cannot be null' unless am?
+
+  am.status = 'pending'
+  teamid = new newTeamRepo.ObjectId(teamid) if typeof teamid is 'string'
+  
+  findObj = 
+    _id: teamid
+  updateObj =
+    $addToSet: 
+      matches: am
+    $set: 
+      updatedat: new Date()
+  
+  try
+    newTeamRepo.update findObj, updateObj, {}, callback  
+  catch e
+    console.trace e
+    callback e    
+
+
+###
+Retrieve an existing challenge 
+###
+exports.getChallenge = getChallenge = (teamid, opponentid, callback = ->) ->
+  console.assert teamid?, 'teamid cannot be null'
+  throw 'teamid cannot be null' unless teamid?
+  console.assert opponentid?, 'opponentid cannot be null'
+  throw 'opponentid cannot be null' unless opponentid?
+  
+  teamid = new newTeamRepo.ObjectId(teamid) if typeof teamid is 'string'
+  opponentid = new newTeamRepo.ObjectId(opponentid) if typeof opponentid is 'string'
+  
+  newTeamRepo.read
+    _id: teamid
+    challenges: 
+      '$elemMatch': 
+        teamid: opponentid
+  , {}, (err, cursor) ->
+    return callback(err) if err
+    cursor.toArray callback
+    
+    
+
+###
+Add a challenge obj in both teams, as well as the log for teams and players
+###  
+exports.createTeamChallenge = (params, callback = ->) ->
+  console.assert params?, 'params cannot be null'
+  throw 'params cannot be null' unless params?
+    
+  utils = require './utils'
+  userSvc = require './user'
+  
+  {teamid, msg, matchtype} = params
+  console.log params
+  teamid = new newTeamRepo.ObjectId(teamid) if typeof teamid is 'string'
+  opponentid = null
+  
+  try   
+    utils.execute( userSvc.getById, params.opponentplayerid ) # get the opponent player obj
+    .then (err, opponentplayer, cb = ->) =>
+      console.log 'get the existing challenge'
+      # get the existing challenge
+      return callback(err) if err    
+      params.opponentid = opponentid = opponentplayer.team._id 
+      
+      try
+        getChallenge teamid, opponentid, cb
+      catch e
+        console.trace e
+        throw e
+    .then (err, challenges, cb = ->) ->
+      console.log 'Already challenged', challenges
+      if challenges? && challenges.length
+        # already challenged
+        callback 'Already challenged'
+      else
+        cb()
+    .then (args..., cb = ->) =>
+      console.log 'Step 3'
+      # create challenge for challenged team
+      challenge = 
+        message: params.msg
+        matchtype: params.matchtype
+        teamid: opponentid
+      
+      findObj = _id : teamid
+      challengePost = 
+        type: 'challenged'
+        data: challenge
+        createdat: new Date()
+      
+      updateObj = 
+        $addToSet:
+          challenges: challenge
+          posts: challengePost
+        $set:
+          updatedat: new Date()
+      
+      console.log findObj, updateObj
+      try
+        newTeamRepo.update findObj, updateObj, {}, cb
+      catch e
+        console.trace e
+        throw e
+    .then (err, args..., cb = ->) ->
+      console.log 'Step 4', err, args
+      # get challenged team
+      try
+        newTeamRepo.getById teamid, cb
+      catch e
+        console.trace e
+        throw e
+    .then (err, challengedTeam, cb = ->) => 
+      console.log 'Step 5', err 
+      # create challenge post for members of challenged team
+      for memberid in challengedTeam?.members
+        do (memberid) ->
+          post = 
+            type: 'teamchallenged'
+            data: {teamid, msg, matchtype }
+            createdat: new Date()
+          
+          try  
+            userSvc.addPost memberid, post
+          catch e
+            console.trace e
+            throw e
+      cb()
+    .then (args..., cb = ->) ->
+      console.log 'Step 6'
+      # create challenge for challenging team
+      challenge = 
+        message: msg
+        matchtype: matchtype
+        teamid: teamid
+      
+      findObj = _id : opponentid
+      challengePost = 
+        type: 'challenging'
+        data: challenge
+        createdat: new Date()
+      
+      updateObj = 
+        $addToSet:
+          challenges: challenge
+          posts: challengePost
+        $set:
+          updatedat: new Date()
+      try
+        newTeamRepo.update findObj, updateObj, {}, cb
+      catch e
+        console.trace e
+        throw e
+    .then (err, args..., cb = ->) ->
+      console.log 'Step 7', err
+      # get challenging team
+      try
+        newTeamRepo.getById opponentid, cb
+      catch e
+        console.trace e
+        throw e
+    .then (err, challengingTeam, cb = ->) ->
+      console.log 'Step 8', err
+      for memberid in challengingTeam?.members
+        do (memberid) ->
+          post = 
+            type: 'teamchallenging'
+            data: {teamid, msg, matchtype }
+            createdat: new Date()
+          
+          try  
+            userSvc.addPost memberid, post
+          catch e
+            console.trace e
+            throw e
+      cb()
+    .then ->
+      console.log 'Step 9'
+      callback()               
+  catch e
+    console.trace e
+    throw e
   
 
+###
+Create a pending match, add it to both teams, remove the challenge
+###
 exports.acceptChallenge = (inputs, callback = ->) ->
   console.assert inputs?, 'inputs cannot be null'
   throw 'Inputs cannot be null' unless inputs?
@@ -153,7 +376,7 @@ exports.cancelMatch = (teamid, matchid, callback = ->) ->
       updatedat: new Date()
   
   try
-    newTeamRepo.update findObj, updateObj, callback  
+    newTeamRepo.update findObj, updateObj, {}, callback  
   catch e
     console.trace e
     callback e  
@@ -170,7 +393,7 @@ exports.resetStats = (teamid, callback = ->) ->
       stats: 1
     
   try
-    newTeamRepo.update findObj, updateObj, callback
+    newTeamRepo.update findObj, updateObj, {}, callback
   catch e
     console.trace e
     callback e 
@@ -199,7 +422,7 @@ exports.updateStats = (teamid, opponentid, win, callback = ->) ->
       posts: statLog
     
   try
-    newTeamRepo.update findObj, updateObj, callback
+    newTeamRepo.update findObj, updateObj, {}, callback
   catch e
     console.trace e
     callback e
@@ -224,7 +447,7 @@ exports.updateStatsSilent = (teamid, opponentid, win, callback = ->) ->
     $inc: incObj
     
   try
-    newTeamRepo.update findObj, updateObj, callback
+    newTeamRepo.update findObj, updateObj, {}, callback
   catch e
     console.trace e
     callback e            
@@ -248,7 +471,7 @@ exports.setMatchComplete = (teamid, am, callback = ->) ->
       updatedat: new Date()
   
   try
-    newTeamRepo.update findObj, updateObj, callback  
+    newTeamRepo.update findObj, updateObj, {}, callback  
     #callback()
   catch e
     console.trace e
@@ -301,6 +524,16 @@ exports.getById = (teamid, callback = ->) ->
   throw 'TeamId cannot be null or 0' unless teamid
   
   newTeamRepo.getById teamid, callback
+  
+  
+exports.create = (team, args..., callback = ->) ->
+  team = teamname : team if typeof team is 'string'
+  
+  try
+    newTeamRepo.create team, callback
+  catch e
+    console.trace e
+    throw e
   
   
     

@@ -2,10 +2,19 @@
 URL /
 ###
 exports.index = (req, res) ->  
-  res.render null, 
-    title: 'Wheels Foosball League (WFL)'
-  	user: req.session.user
-  	layout: true
+  newsSvc = require '../services/news'
+  utils = require '../services/utils'
+  
+  utils.execute( newsSvc.getNews )
+  .then ( err, @news, cb = -> ) =>
+    newsSvc.getHighlights cb
+  .then (err, @highlights, cb = ->) =>
+    res.render null, 
+      title: 'Wheels Foosball League (WFL)'
+    	user: req.session.user
+    	layout: true
+    	news: @news
+    	highlights: @highlights
 exports.index.methods = ['GET']
 
 

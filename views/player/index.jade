@@ -1,4 +1,5 @@
-link(rel='stylesheet', href='/stylesheets/players.css')
-.players-list
-  != partial('player', players)
-.clear-float
+link(rel="stylesheet/less", type="text/css", href="/stylesheets/player.less")
+.row
+  .span8.offset2
+    != partial('player', players)
+script(type='text/javascript', src='/js/player.js')

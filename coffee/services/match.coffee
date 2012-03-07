@@ -55,7 +55,7 @@ exports.setStatus = setStatus = (matchid, status, callback = ->) ->
       updatedat: new Date()
   
   try
-    matchRepo.update findObj, updateObj, callback  
+    matchRepo.update findObj, updateObj, {}, callback  
   catch e
     console.trace e
     callback e

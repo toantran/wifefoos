@@ -6,13 +6,27 @@ URL /
 (function() {
 
   exports.index = function(req, res) {
-    res.render(null, {
-      title: 'Wheels Foosball League (WFL)'
+    var newsSvc, utils,
+      _this = this;
+    newsSvc = require('../services/news');
+    utils = require('../services/utils');
+    return utils.execute(newsSvc.getNews).then(function(err, news, cb) {
+      _this.news = news;
+      if (cb == null) cb = function() {};
+      return newsSvc.getHighlights(cb);
+    }).then(function(err, highlights, cb) {
+      _this.highlights = highlights;
+      if (cb == null) cb = function() {};
+      res.render(null, {
+        title: 'Wheels Foosball League (WFL)'
+      });
+      return {
+        user: req.session.user,
+        layout: true,
+        news: _this.news,
+        highlights: _this.highlights
+      };
     });
-    return {
-      user: req.session.user,
-      layout: true
-    };
   };
 
   exports.index.methods = ['GET'];

@@ -5,11 +5,17 @@
 
   exports.index = function(req, res, next) {
     return newsSvc.getNews(function(err, news) {
-      return res.send({
-        success: !(err != null),
-        news: news,
-        error: err
+      return res.render(news, {
+        title: 'WFL - News',
+        layout: true
       });
+    });
+  };
+
+  exports.add = function(req, res, next) {
+    return res.render(null, {
+      title: 'WFL - News',
+      layout: true
     });
   };
 

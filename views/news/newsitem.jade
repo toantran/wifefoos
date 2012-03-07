@@ -1,0 +1,5 @@
+.news-item.hero-unit
+  h4 #{newsitem.createdat || ''}
+  - if (typeof newsitem.highlight !== 'undefined' && newsitem.highlight)
+    span.label.label-important Top news
+  p!= newsitem.newscontent

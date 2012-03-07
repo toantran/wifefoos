@@ -1,17 +1,15 @@
-.player-info
-  .player-detail.picture
+.row.player-info
+  .span1
     - if (player.pictureurl)
-      img(src='#{player.pictureurl || '/images/player.jpg'}')
-  .player-detail.info
-    .nickname
+      img(src="#{player.pictureurl || '/images/player.jpg'}")
+  .span5
+    .player-name
       a(href='/profile/#{player._id}')= player.nickname || player.username
     - if ((typeof player.team !== 'undefined') && player.team && player.team.teamname)
       .team Team:
         a(href='/team/#{player.team._id}')= player.team.teamname
     - else 
       .team Team: None
-  .player-detail.stats
+  .span1
     .stats-detail #{(player.stats ? player.stats.win : 0) || '0'}-#{(player.stats ? player.stats.loss : 0) || '0'}
-    //.buttons
-    //  input(type='button', value='Challenge!')      
-  .clear-float
+  .span1

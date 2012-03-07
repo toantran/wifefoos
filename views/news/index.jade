@@ -1,0 +1,7 @@
+.row.space1
+.row
+  .span8.offset2
+    h1 League News
+    - if (typeof newss !== 'undefined')
+      != partial('newsitem', newss)
+script(type='text/javascript', src='/js/news.js')

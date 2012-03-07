@@ -10,11 +10,11 @@
       .member-list
         each member in team.members
           .member-name
-            a(href='/player/#{member._id}')= member.nickname
+            a(href='/profile/#{member._id}')= member.nickname
   .span1.stats
     .stats-detail #{(team.stats ? team.stats.win : 0) || '0'}-#{(team.stats ? team.stats.loss : 0) || '0'}
   .span2.team-btn
     - if ((!team.members || team.members.length <= 1) && (!user.team))
-      button.btn Join team
+      button.btn.btn-success(data-teamid='#{team._id}', data-playerid='#{user._id}') Join team
     - if (user.team && (user.team._id != team._id))
       button.btn.btn-danger(challengerid='#{user._id}', challengeeteamid='#{team._id}') Challenge

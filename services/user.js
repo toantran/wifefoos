@@ -185,7 +185,7 @@
       }
     };
     try {
-      return newUserRepo.update(findObj, updateObj, callback);
+      return newUserRepo.update(findObj, updateObj, {}, callback);
     } catch (e) {
       console.trace(e);
       return callback(e);
@@ -230,7 +230,7 @@
       }
     };
     try {
-      return newUserRepo.update(findObj, updateObj, callback);
+      return newUserRepo.update(findObj, updateObj, {}, callback);
     } catch (e) {
       console.trace(e);
       return callback(e);
@@ -260,7 +260,7 @@
       $inc: incObj
     };
     try {
-      return newUserRepo.update(findObj, updateObj, callback);
+      return newUserRepo.update(findObj, updateObj, {}, callback);
     } catch (e) {
       console.trace(e);
       return callback(e);
@@ -287,7 +287,7 @@
       }
     };
     try {
-      return newUserRepo.update(findObj, updateObj, callback);
+      return newUserRepo.update(findObj, updateObj, {}, callback);
     } catch (e) {
       console.trace(e);
       return callback(e);
@@ -325,7 +325,7 @@
       }
     };
     try {
-      return newUserRepo.update(findObj, updateObj, callback);
+      return newUserRepo.update(findObj, updateObj, {}, callback);
     } catch (e) {
       console.trace(e);
       return callback(e);
@@ -366,7 +366,7 @@
       }
     };
     try {
-      return newUserRepo.update(findObj, updateObj, callback);
+      return newUserRepo.update(findObj, updateObj, {}, callback);
     } catch (e) {
       console.trace(e);
       return callback(e);
@@ -398,7 +398,7 @@
       }
     };
     try {
-      return newUserRepo.update(findObj, updateObj, callback);
+      return newUserRepo.update(findObj, updateObj, {}, callback);
     } catch (e) {
       console.trace(e);
       return callback(e);
@@ -432,7 +432,7 @@
       }
     };
     try {
-      return newUserRepo.update(findObj, updateObj, callback);
+      return newUserRepo.update(findObj, updateObj, {}, callback);
     } catch (e) {
       console.trace(e);
       return callback(e);
@@ -515,7 +515,7 @@
       }
     };
     try {
-      return newUserRepo.update(findObj, updateObj, callback);
+      return newUserRepo.update(findObj, updateObj, {}, callback);
     } catch (e) {
       console.trace(e);
       return callback(e);
@@ -662,7 +662,32 @@
       }
     };
     try {
-      return newUserRepo.update(findObj, updateObj, callback);
+      return newUserRepo.update(findObj, updateObj, {}, callback);
+    } catch (e) {
+      console.trace(e);
+      return callback(e);
+    }
+  };
+
+  exports.assignTeam = function(userid, team, callback) {
+    var findObj, updateObj;
+    if (callback == null) callback = function() {};
+    console.assert(userid, 'userid cannot be null');
+    if (!((userid != null) && userid)) throw 'userid cannot be null';
+    console.assert(team, 'team cannot be null');
+    if (team == null) throw 'team cannot be null';
+    if (typeof userid === 'string') userid = new newUserRepo.ObjectId(userid);
+    findObj = {
+      _id: userid
+    };
+    updateObj = {
+      $set: {
+        team: team,
+        updatedat: new Date()
+      }
+    };
+    try {
+      return newUserRepo.update(findObj, updateObj, {}, callback);
     } catch (e) {
       console.trace(e);
       return callback(e);

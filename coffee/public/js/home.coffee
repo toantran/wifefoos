@@ -1,4 +1,6 @@
 jQuery ($) ->
+  $('.carousel').carousel
+    interval: 5000
   ###
   rendernews = (news) ->
     if news? and Array.isArray(news)    

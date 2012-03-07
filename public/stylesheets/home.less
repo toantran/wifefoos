@@ -17,34 +17,6 @@
   border-radius: 7px;
 }
 
-.nuffstuff {
-  font-size : 26pt;
-}
-
-.kickfoos {
-  font-size : 20pt;
-  text-align: right;
-  color: #FF28DE;
-}
-
-.signup-box {
-  background-color : #C8E2FF;
-	border-width : 1px;
-	border-color : #84AEFF;
-	border-style : solid;
-	font-size : 14pt;
-	color : #00607C;
-	font-weight : bold;
-	-webkit-border-radius: 3px;
-  -moz-border-radius: 7px;
-  border-radius: 7px;
-}
-
-.signup-box a {
-  text-decoration: none;
-  color: inherit;
-}
-
 .rules-panel {
   width: 600px;
   height: 845px;
@@ -67,23 +39,36 @@
   font-size: 12px;
 }
 
-.news-row {
-  margin-top: 30px;
+@newssection-height: 300px;
+
+.hightlight-section {  
+  height: @newssection-height;
+  overflow: hidden;
 }
 
-.news-title {
-  font-size: 1.5em;
-  padding: 5px;  
+.hightlight-section .item {
+  .hightlight-section;
 }
 
-.tickercontainer {
+.hightlight-section img {
+  max-width: 100%;
+  border: 0;
+  -ms-interpolation-mode: bicubic;
+}
+  
+.news-section {
+  .hightlight-section;
+  overflow-y: auto;
+}
+
+.news-item {
+  margin: 5px 0 10px 0;
+}
+
+.news-header {
   width: 100%;
+  margin-top: 3px;
+  border-bottom: 1px solid #ddd;
+  font-weight: bolder;
 }
 
-.tickercontainer .mask {
-  width: 100%;
-}
-
-ul.newsticker {
-  font-size: 1em;
-}

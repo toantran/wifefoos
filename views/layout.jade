@@ -2,8 +2,10 @@
 - var nickname = ''
 - if (loggedIn)
   - var nickname = request.session.user.nickname || request.session.user.username
-
-
+- var roles = []
+- if (loggedIn)
+  roles = user.roles || []
+  
 !!! 5
 html.nojs
   head
@@ -40,7 +42,7 @@ html.nojs
             span.icon-bar
             span.icon-bar
             span.icon-bar
-          a.brand( href="#") Wheels Foosball League
+          a.brand( href="/") Wheels Foosball League
           .nav-collapse
             ul.nav
               li.active
@@ -52,6 +54,8 @@ html.nojs
                   a( href="/player") Players
                 li
                   a( href="/rules") Rules
+                li
+                  a( href="/news") News
             ul.nav.pull-right
               - if (loggedIn)
                 li
@@ -78,6 +82,7 @@ html.nojs
     //script(type='text/javascript', src='/lib/bootstrap-modal.js')    
     script(type='text/javascript', src='/lib/less-1.2.2.min.js')
     script(type='text/javascript', src='/js/layout.js')
+    script(type='text/javascript', src='/js/app.js')
     script
       $.each(q,function(index,f){
         $(f)

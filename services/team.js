@@ -1,5 +1,5 @@
 (function() {
-  var addMatch, matchSvc, newTeamRepo, userSvc, utils,
+  var addMatch, getChallenge, matchSvc, newTeamRepo, userSvc, utils,
     __slice = Array.prototype.slice;
 
   newTeamRepo = require('../repository/teams2');
@@ -10,9 +10,300 @@
 
   matchSvc = require('./match');
 
-  exports.addMatch = addMatch = function(teamid, am, callback) {
+  /*
+  */
+
+  exports.createJoinRequest = function(teamid, playerid, callback) {
+    var findObj, joinRequest, post, updateObj;
     if (callback == null) callback = function() {};
+    console.assert(teamid != null, 'teamid cannot be null');
+    if (teamid == null) throw 'teamid cannot be null';
+    console.assert(playerid != null, 'playerid cannot be null');
+    if (playerid == null) throw 'playerid cannot be null';
+    if (typeof teamid === 'string') teamid = new newTeamRepo.ObjectId(teamid);
+    findObj = {
+      _id: teamid
+    };
+    post = {
+      type: 'joinrequest',
+      data: {
+        userid: playerid
+      },
+      createdat: new Date()
+    };
+    joinRequest = {
+      requestor: playerid
+    };
+    updateObj = {
+      $addToSet: {
+        joinrequests: joinRequest,
+        posts: post
+      },
+      $set: {
+        updatedat: new Date()
+      }
+    };
+    try {
+      return newTeamRepo.update(findObj, updateObj, {}, callback);
+    } catch (e) {
+      console.trace(e);
+      throw e;
+    }
   };
+
+  /*
+  Add a match into a team
+  */
+
+  exports.addMatch = addMatch = function(teamid, am, callback) {
+    var findObj, updateObj;
+    if (callback == null) callback = function() {};
+    console.assert(teamid != null, 'teamid cannot be null');
+    if (teamid == null) throw 'teamid cannot be null';
+    console.assert(am != null, 'am cannot be null');
+    if (am == null) throw 'am cannot be null';
+    am.status = 'pending';
+    if (typeof teamid === 'string') teamid = new newTeamRepo.ObjectId(teamid);
+    findObj = {
+      _id: teamid
+    };
+    updateObj = {
+      $addToSet: {
+        matches: am
+      },
+      $set: {
+        updatedat: new Date()
+      }
+    };
+    try {
+      return newTeamRepo.update(findObj, updateObj, {}, callback);
+    } catch (e) {
+      console.trace(e);
+      return callback(e);
+    }
+  };
+
+  /*
+  Retrieve an existing challenge
+  */
+
+  exports.getChallenge = getChallenge = function(teamid, opponentid, callback) {
+    if (callback == null) callback = function() {};
+    console.assert(teamid != null, 'teamid cannot be null');
+    if (teamid == null) throw 'teamid cannot be null';
+    console.assert(opponentid != null, 'opponentid cannot be null');
+    if (opponentid == null) throw 'opponentid cannot be null';
+    if (typeof teamid === 'string') teamid = new newTeamRepo.ObjectId(teamid);
+    if (typeof opponentid === 'string') {
+      opponentid = new newTeamRepo.ObjectId(opponentid);
+    }
+    return newTeamRepo.read({
+      _id: teamid,
+      challenges: {
+        '$elemMatch': {
+          teamid: opponentid
+        }
+      }
+    }, {}, function(err, cursor) {
+      if (err) return callback(err);
+      return cursor.toArray(callback);
+    });
+  };
+
+  /*
+  Add a challenge obj in both teams, as well as the log for teams and players
+  */
+
+  exports.createTeamChallenge = function(params, callback) {
+    var matchtype, msg, opponentid, teamid,
+      _this = this;
+    if (callback == null) callback = function() {};
+    console.assert(params != null, 'params cannot be null');
+    if (params == null) throw 'params cannot be null';
+    utils = require('./utils');
+    userSvc = require('./user');
+    teamid = params.teamid, msg = params.msg, matchtype = params.matchtype;
+    console.log(params);
+    if (typeof teamid === 'string') teamid = new newTeamRepo.ObjectId(teamid);
+    opponentid = null;
+    try {
+      return utils.execute(userSvc.getById, params.opponentplayerid).then(function(err, opponentplayer, cb) {
+        if (cb == null) cb = function() {};
+        console.log('get the existing challenge');
+        if (err) return callback(err);
+        params.opponentid = opponentid = opponentplayer.team._id;
+        try {
+          return getChallenge(teamid, opponentid, cb);
+        } catch (e) {
+          console.trace(e);
+          throw e;
+        }
+      }).then(function(err, challenges, cb) {
+        if (cb == null) cb = function() {};
+        console.log('Already challenged', challenges);
+        if ((challenges != null) && challenges.length) {
+          return callback('Already challenged');
+        } else {
+          return cb();
+        }
+      }).then(function() {
+        var args, cb, challenge, challengePost, findObj, updateObj, _i;
+        args = 2 <= arguments.length ? __slice.call(arguments, 0, _i = arguments.length - 1) : (_i = 0, []), cb = arguments[_i++];
+        if (cb == null) cb = function() {};
+        console.log('Step 3');
+        challenge = {
+          message: params.msg,
+          matchtype: params.matchtype,
+          teamid: opponentid
+        };
+        findObj = {
+          _id: teamid
+        };
+        challengePost = {
+          type: 'challenged',
+          data: challenge,
+          createdat: new Date()
+        };
+        updateObj = {
+          $addToSet: {
+            challenges: challenge,
+            posts: challengePost
+          },
+          $set: {
+            updatedat: new Date()
+          }
+        };
+        console.log(findObj, updateObj);
+        try {
+          return newTeamRepo.update(findObj, updateObj, {}, cb);
+        } catch (e) {
+          console.trace(e);
+          throw e;
+        }
+      }).then(function() {
+        var args, cb, err, _i;
+        err = arguments[0], args = 3 <= arguments.length ? __slice.call(arguments, 1, _i = arguments.length - 1) : (_i = 1, []), cb = arguments[_i++];
+        if (cb == null) cb = function() {};
+        console.log('Step 4', err, args);
+        try {
+          return newTeamRepo.getById(teamid, cb);
+        } catch (e) {
+          console.trace(e);
+          throw e;
+        }
+      }).then(function(err, challengedTeam, cb) {
+        var memberid, _fn, _i, _len, _ref;
+        if (cb == null) cb = function() {};
+        console.log('Step 5', err);
+        _ref = challengedTeam != null ? challengedTeam.members : void 0;
+        _fn = function(memberid) {
+          var post;
+          post = {
+            type: 'teamchallenged',
+            data: {
+              teamid: teamid,
+              msg: msg,
+              matchtype: matchtype
+            },
+            createdat: new Date()
+          };
+          try {
+            return userSvc.addPost(memberid, post);
+          } catch (e) {
+            console.trace(e);
+            throw e;
+          }
+        };
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          memberid = _ref[_i];
+          _fn(memberid);
+        }
+        return cb();
+      }).then(function() {
+        var args, cb, challenge, challengePost, findObj, updateObj, _i;
+        args = 2 <= arguments.length ? __slice.call(arguments, 0, _i = arguments.length - 1) : (_i = 0, []), cb = arguments[_i++];
+        if (cb == null) cb = function() {};
+        console.log('Step 6');
+        challenge = {
+          message: msg,
+          matchtype: matchtype,
+          teamid: teamid
+        };
+        findObj = {
+          _id: opponentid
+        };
+        challengePost = {
+          type: 'challenging',
+          data: challenge,
+          createdat: new Date()
+        };
+        updateObj = {
+          $addToSet: {
+            challenges: challenge,
+            posts: challengePost
+          },
+          $set: {
+            updatedat: new Date()
+          }
+        };
+        try {
+          return newTeamRepo.update(findObj, updateObj, {}, cb);
+        } catch (e) {
+          console.trace(e);
+          throw e;
+        }
+      }).then(function() {
+        var args, cb, err, _i;
+        err = arguments[0], args = 3 <= arguments.length ? __slice.call(arguments, 1, _i = arguments.length - 1) : (_i = 1, []), cb = arguments[_i++];
+        if (cb == null) cb = function() {};
+        console.log('Step 7', err);
+        try {
+          return newTeamRepo.getById(opponentid, cb);
+        } catch (e) {
+          console.trace(e);
+          throw e;
+        }
+      }).then(function(err, challengingTeam, cb) {
+        var memberid, _fn, _i, _len, _ref;
+        if (cb == null) cb = function() {};
+        console.log('Step 8', err);
+        _ref = challengingTeam != null ? challengingTeam.members : void 0;
+        _fn = function(memberid) {
+          var post;
+          post = {
+            type: 'teamchallenging',
+            data: {
+              teamid: teamid,
+              msg: msg,
+              matchtype: matchtype
+            },
+            createdat: new Date()
+          };
+          try {
+            return userSvc.addPost(memberid, post);
+          } catch (e) {
+            console.trace(e);
+            throw e;
+          }
+        };
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          memberid = _ref[_i];
+          _fn(memberid);
+        }
+        return cb();
+      }).then(function() {
+        console.log('Step 9');
+        return callback();
+      });
+    } catch (e) {
+      console.trace(e);
+      throw e;
+    }
+  };
+
+  /*
+  Create a pending match, add it to both teams, remove the challenge
+  */
 
   exports.acceptChallenge = function(inputs, callback) {
     var teamids,
@@ -246,7 +537,7 @@
       }
     };
     try {
-      return newTeamRepo.update(findObj, updateObj, callback);
+      return newTeamRepo.update(findObj, updateObj, {}, callback);
     } catch (e) {
       console.trace(e);
       return callback(e);
@@ -268,7 +559,7 @@
       }
     };
     try {
-      return newTeamRepo.update(findObj, updateObj, callback);
+      return newTeamRepo.update(findObj, updateObj, {}, callback);
     } catch (e) {
       console.trace(e);
       return callback(e);
@@ -309,7 +600,7 @@
       }
     };
     try {
-      return newTeamRepo.update(findObj, updateObj, callback);
+      return newTeamRepo.update(findObj, updateObj, {}, callback);
     } catch (e) {
       console.trace(e);
       return callback(e);
@@ -344,7 +635,7 @@
       $inc: incObj
     };
     try {
-      return newTeamRepo.update(findObj, updateObj, callback);
+      return newTeamRepo.update(findObj, updateObj, {}, callback);
     } catch (e) {
       console.trace(e);
       return callback(e);
@@ -376,7 +667,7 @@
       }
     };
     try {
-      return newTeamRepo.update(findObj, updateObj, callback);
+      return newTeamRepo.update(findObj, updateObj, {}, callback);
     } catch (e) {
       console.trace(e);
       return callback(e);
@@ -444,6 +735,23 @@
     console.assert(teamid, 'TeamId cannot be null or 0');
     if (!teamid) throw 'TeamId cannot be null or 0';
     return newTeamRepo.getById(teamid, callback);
+  };
+
+  exports.create = function() {
+    var args, callback, team, _i;
+    team = arguments[0], args = 3 <= arguments.length ? __slice.call(arguments, 1, _i = arguments.length - 1) : (_i = 1, []), callback = arguments[_i++];
+    if (callback == null) callback = function() {};
+    if (typeof team === 'string') {
+      team = {
+        teamname: team
+      };
+    }
+    try {
+      return newTeamRepo.create(team, callback);
+    } catch (e) {
+      console.trace(e);
+      throw e;
+    }
   };
 
 }).call(this);

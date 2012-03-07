@@ -146,7 +146,7 @@ exports.resetStats = (userid, callback = ->) ->
       stats: 1
     
   try
-    newUserRepo.update findObj, updateObj, callback
+    newUserRepo.update findObj, updateObj, {}, callback
   catch e
     console.trace e
     callback e
@@ -178,7 +178,7 @@ exports.updateStats = (userid, opponentid, win, callback = ->) ->
       posts: statLog
     
   try
-    newUserRepo.update findObj, updateObj, callback
+    newUserRepo.update findObj, updateObj, {}, callback
   catch e
     console.trace e
     callback e
@@ -199,7 +199,7 @@ exports.updateStatsSilent = (userid, opponentid, win, callback = ->) ->
     $inc: incObj
     
   try
-    newUserRepo.update findObj, updateObj, callback
+    newUserRepo.update findObj, updateObj, {}, callback
   catch e
     console.trace e
     callback e
@@ -221,7 +221,7 @@ exports.updatePicture = (userid, pictureurl, callback = ->) ->
       updatedat: new Date()
   
   try
-    newUserRepo.update findObj, updateObj, callback  
+    newUserRepo.update findObj, updateObj, {}, callback  
   catch e
     console.trace e
     callback e
@@ -251,7 +251,7 @@ exports.addVote = (userid, vote, callback = ->) ->
       logs: logObj
   
   try
-    newUserRepo.update findObj, updateObj, callback  
+    newUserRepo.update findObj, updateObj, {}, callback  
   catch e
     console.trace e
     callback e
@@ -282,7 +282,7 @@ exports.setTeam = (userid, team, callback = ->) ->
       posts: post  
   
   try
-    newUserRepo.update findObj, updateObj, callback  
+    newUserRepo.update findObj, updateObj, {}, callback  
   catch e
     console.trace e
     callback e
@@ -308,7 +308,7 @@ exports.addPost = (userid, post, callback= ->) ->
       posts: post    
   
   try
-    newUserRepo.update findObj, updateObj, callback  
+    newUserRepo.update findObj, updateObj, {}, callback  
   catch e
     console.trace e
     callback e
@@ -334,7 +334,7 @@ exports.removePost = (userid, postid, callback = ->) ->
         id: postid
   
   try
-    newUserRepo.update findObj, updateObj, callback  
+    newUserRepo.update findObj, updateObj, {}, callback  
   catch e
     console.trace e
     callback e
@@ -400,7 +400,7 @@ exports.addTeamInvite = (userid, teamid, callback = ->) ->
       posts: invitedPost  
   
   try
-    newUserRepo.update findObj, updateObj, callback       
+    newUserRepo.update findObj, updateObj, {}, callback       
   catch e
     console.trace e
     callback e
@@ -524,16 +524,31 @@ exports.setPassword = (userid, password, callback = ->) ->
       updatedat: new Date()
   
   try
-    newUserRepo.update findObj, updateObj, callback  
+    newUserRepo.update findObj, updateObj, {}, callback  
   catch e
     console.trace e
     callback e  
     
     
+exports.assignTeam = (userid, team, callback = ->) ->
+  console.assert userid, 'userid cannot be null'
+  throw 'userid cannot be null' unless userid? and userid
+  console.assert team, 'team cannot be null'
+  throw 'team cannot be null' unless team?
+  
+  userid = new newUserRepo.ObjectId( userid ) if typeof userid is 'string'
+  
+  findObj = _id : userid
+  updateObj = 
+    $set:
+      team: team
+      updatedat: new Date()
     
-    
-    
-    
+  try
+    newUserRepo.update findObj, updateObj, {}, callback  
+  catch e
+    console.trace e
+    callback e  
     
     
     

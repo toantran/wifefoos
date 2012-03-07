@@ -3,6 +3,71 @@
 
   teamSvc = require('../services/team');
 
+  exports.join = function(req, res, next) {
+    var teamid, userid;
+    teamid = req.param('id', '');
+    userid = req.param('playerid', '');
+    if (teamid && userid) {
+      return teamSvc.createJoinRequest(teamid, userid, function(err) {
+        return res.send({
+          success: !(err != null)
+        });
+      });
+    } else {
+      return next();
+    }
+  };
+
+  exports.join.authenticated = true;
+
+  exports.join.methods = ['POST'];
+
+  exports.join.action = ':id/join';
+
+  /*
+    POST
+    URL  /team/challenge
+    Post a challenge to server
+  */
+
+  exports.challenge = function(req, res, next) {
+    var matchtype, msg, opponentplayerid, teamid,
+      _this = this;
+    teamid = req.param('challengeeteamid', '');
+    opponentplayerid = req.param('challengerid', '');
+    msg = req.param('challengemsg', '');
+    matchtype = req.param('matchtype', '');
+    if (!teamid || !opponentplayerid) {
+      return res.send({
+        success: false,
+        error: 'Ids empty'
+      });
+    } else {
+      return teamSvc.createTeamChallenge({
+        teamid: teamid,
+        opponentplayerid: opponentplayerid,
+        matchtype: matchtype,
+        msg: msg
+      }, function(error, result) {
+        if (error) {
+          return res.send({
+            success: false,
+            error: error
+          });
+        } else {
+          return res.send({
+            success: true,
+            result: result
+          });
+        }
+      });
+    }
+  };
+
+  exports.challenge.authenticated = true;
+
+  exports.challenge.methods = ['POST'];
+
   /*
     POST
     URL /team/challengedecline
@@ -221,5 +286,71 @@
   };
 
   exports.index.authenticated = true;
+
+  /*
+    POST
+    URL /team/:id
+    Create a team
+  */
+
+  exports.create = function(req, res, next) {
+    var team, teamname, userId, userSvc, utils,
+      _this = this;
+    userId = req.params.id || req.user._id;
+    teamname = req.body.teamname;
+    utils = require('../services/utils');
+    userSvc = require('../services/user');
+    team = {
+      teamname: teamname,
+      owner: userId,
+      pictureurl: '/images/the-a-team.jpg',
+      members: [userId]
+    };
+    return utils.execute(teamSvc.create, team).then(function(error, createdteam, cb) {
+      if (cb == null) cb = function() {};
+      if (error) {
+        req.flash('error', error);
+        return res.send({
+          success: false,
+          error: error
+        });
+      } else if (!(team != null)) {
+        req.flash('error', 'Could not create team');
+        return res.send({
+          success: false,
+          error: 'Could not create team'
+        });
+      } else {
+        return userSvc.assignTeam(userId, team, cb);
+      }
+    }).then(function(err, user, cb) {
+      if (cb == null) cb = function() {};
+      if (String(userId) === String(req.user._id)) {
+        return userSvc.getById(userId, cb);
+      } else {
+        return res.send({
+          success: true
+        });
+      }
+    }).then(function(err, user, cb) {
+      var _ref;
+      _this.user = user;
+      if (cb == null) cb = function() {};
+      if (!(err != null)) {
+        return (_ref = req.session) != null ? _ref.regenerate(cb) : void 0;
+      } else {
+        return res.send({
+          success: true
+        });
+      }
+    }).then(function() {
+      req.session.user = this.user;
+      return res.send({
+        success: true
+      });
+    });
+  };
+
+  exports.create.authenticated = true;
 
 }).call(this);

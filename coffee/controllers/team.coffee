@@ -1,45 +1,47 @@
 teamSvc = require( '../services/team' )
 
 
+exports.join = (req, res, next) ->
+  teamid = req.param 'id', ''
+  userid = req.param 'playerid', ''
+  
+  if teamid and userid
+    teamSvc.createJoinRequest teamid, userid, (err) ->
+      res.send 
+        success: not err?
+  else
+    next()
+exports.join.authenticated = true
+exports.join.methods = ['POST']  
+exports.join.action = ':id/join'
+
 ###
   POST
   URL  /team/challenge
   Post a challenge to server
 ###
 exports.challenge = (req, res, next) ->
-  var teamid = req.param('teamid')
-    , opponentplayerid = req.param('challengerid')
-    , msg = req.param('challengemsg')
-    , matchtype = req.param('matchtype');
+  teamid = req.param 'challengeeteamid', ''
+  opponentplayerid = req.param 'challengerid', ''
+  msg = req.param 'challengemsg', ''
+  matchtype = req.param 'matchtype', ''
     
-  if (!teamid || !opponentplayerid) {
-    res.send({success: false, error: 'Ids empty'});
-    return false;
-  }
-  
-  createTeamChallenge({
-    teamid: teamid
-    , playerid: opponentplayerid
-    , matchtype: matchtype
-    , msg: msg
-  }, function(error, result) {
-    if (error) {
-      res.send({
-        success: false
-        , error: error
-      });
-    } else {
-      res.send({
-        success: true
-        , result: result
-      });
-    }
-  });
-  
-  return true;
-}
-exports.challenge.authenticated = true;
-exports.challenge.methods = ['POST'];
+  if not teamid or not opponentplayerid
+    res.send 
+      success: false
+      error: 'Ids empty'
+  else  
+    teamSvc.createTeamChallenge {teamid, opponentplayerid, matchtype, msg }, (error, result) =>
+      if error
+        res.send
+          success: false
+          error: error
+      else 
+        res.send
+          success: true
+          result: result
+exports.challenge.authenticated = true
+exports.challenge.methods = ['POST']
 
 
 ###
@@ -204,6 +206,57 @@ exports.index = (req, res, next) ->
     else
       res.render teams, layout: true, title: 'WFL - Teams'            
 exports.index.authenticated = true;
+
+
+###
+  POST
+  URL /team/:id
+  Create a team
+###
+exports.create = (req, res, next) ->
+  userId = req.params.id || req.user._id
+  teamname = req.body.teamname
+  utils = require '../services/utils'
+  userSvc = require '../services/user'
+
+  team = 
+    teamname: teamname
+    owner: userId
+    pictureurl: '/images/the-a-team.jpg'
+    members: [userId]
+  
+  utils.execute( teamSvc.create, team )
+  .then (error, createdteam, cb = ->) ->
+    if error
+      req.flash 'error', error
+      res.send 
+        success: false
+        error: error
+    else if not team?
+      req.flash 'error', 'Could not create team'
+      res.send
+        success: false
+        error: 'Could not create team'
+    else 
+      userSvc.assignTeam userId, team, cb
+  .then (err, user, cb = ->) ->
+      if String(userId) is String(req.user._id)
+        userSvc.getById userId, cb
+      else
+        res.send
+          success: true
+          
+  .then (err, @user, cb = ->) =>
+    if not err? 
+      req.session?.regenerate cb
+    else
+      res.send
+        success: true
+  .then ->
+    req.session.user = @user
+    res.send
+      success: true
+exports.create.authenticated = true;
 
 
 

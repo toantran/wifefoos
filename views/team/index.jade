@@ -16,20 +16,38 @@ link(rel="stylesheet/less", type="text/css", href="/stylesheets/team.less")
           textarea#challenge-msg(name='challengemsg', cols=40, rows=2)
           br
           label Match type:
-          ol      
-            li 
-              input(type='radio', name='matchtype', value='1') 
-              | One game
-            li 
-              input(type='radio', name='matchtype', value='3') 
-              | Best of 3
-            li 
-              input(type='radio', name='matchtype', value='5') 
-              | Best of 5
-            li 
-              input(type='radio', name='matchtype', value='99') 
-              | Death match!
+          label.radio
+            input(type='radio', name='matchtype', value='1')
+            | One game
+          label.radio
+            input(type='radio', name='matchtype', value='3') 
+            | Best of 3
+          label.radio
+            input(type='radio', name='matchtype', value='5') 
+            | Best of 5
+          label.radio
+            input(type='radio', name='matchtype', value='99') 
+            | Death match!
+          .alert-container
   .modal-footer
     a.btn.btn-primary.pull-right Challenge!
     a.btn.pull-left(data-toggle='modal', data-target='#team-challenge-dlg') Cancel
+#team-challenge-sent-dlg.modal.hide
+  .modal-header
+    a.close(data-dismiss='modal') x
+    h4 Challenge
+  .modal-body
+    p Challenge sent!
+  .modal-footer
+    a.btn.btn-success.pull-right(data-toggle='modal', data-target='#team-challenge-sent-dlg') OK
+    a.btn.btn-primary.pull-right(data-toggle='modal', data-target='#team-challenge-sent-dlg') Publish it
+#team-joining-dlg.modal.hide
+  .modal-header
+    a.close(data-dismiss='modal') x
+    h4 Joining request
+  .modal-body
+    p Request sent!
+  .modal-footer
+    a.btn.btn-primary.pull-right(data-toggle='modal', data-target='#team-joining-dlg') OK
+      
 script(type='text/javascript', src='/js/team.js')

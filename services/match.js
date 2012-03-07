@@ -72,7 +72,7 @@
       }
     };
     try {
-      return matchRepo.update(findObj, updateObj, callback);
+      return matchRepo.update(findObj, updateObj, {}, callback);
     } catch (e) {
       console.trace(e);
       return callback(e);
