@@ -1,0 +1,107 @@
+#profile-main {
+  padding: 10px;
+}
+
+.hcenter {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.player-nickname {
+  color : #00406C;
+}
+
+.player-picture img {
+  max-height: 250px;
+  max-width: 250px;
+  .hcenter;
+  display: block;
+}
+
+#player-picture-change {
+  .hcenter;
+  text-align: center;
+  
+}
+
+.personal-info-item {
+  font-size: 14px;
+  clear: both;
+}
+
+.personal-info-item-label {
+  float: left;
+}
+
+.personal-info-item-value {
+  float: right;
+}
+
+
+.new-post, .new-comment {
+   .post-text {
+    width: 98%;
+    max-width: 98%;
+  }
+}
+
+.post-text + button {
+  //display: none;
+}
+
+.post-text:focus + button {
+  display: block;
+}
+
+.post-panel {
+  padding-bottom: 15px;
+  padding-top: 15px;
+  position: relative;
+  border-bottom: 1px solid darken(white, 5%);
+}
+
+.post-panel:hover {
+  background-color: darken(white, 2%);
+  
+  .post-close-btn {
+    display: block;  
+  }
+}
+
+.post-close-btn {
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 15px;
+  height: 16px;
+  background-image: url(/images/close.png);
+  background-position: top left;
+  background-repeat: no-repeat;
+  display: none;
+  cursor: pointer;
+}
+
+.postmark {
+  color: lighten(black, 60%);
+}
+
+a.post-close-btn:link {}
+a.post-close-btn:visited {}
+a.post-close-btn:hover {
+  background-position: 0 -48px;
+}
+
+.post-comment-list {
+  .comment-panel {
+    background-color: darken(white, 4%);
+  }
+  
+  .new-comment {
+    padding-top: 5px;
+  }
+}
+
+.comment-panel {
+  .post-panel;
+  border-bottom: 1px solid darken(white, 10%);
+}

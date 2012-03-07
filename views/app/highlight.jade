@@ -1,10 +1,17 @@
 - if (firstInCollection)
   .item.active
     img(src='#{highlight.pictureurl}')
-    .carousel-caption 
-      p= highlight.caption
+    .carousel-caption
+      h3= highlight.caption 
+      p= highlight.newscontent
+        | &nbsp;&nbsp;
+        a &nbsp;&nbsp;read more...
 - else
   .item
     img(src='#{highlight.pictureurl}')
     .carousel-caption
-      p= highlight.caption
+      h3= highlight.caption 
+      p= highlight.newscontent
+        | &nbsp;&nbsp;
+        a read more...
+

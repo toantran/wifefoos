@@ -1,44 +1,45 @@
-link(rel='stylesheet', href='/stylesheets/profile.css')
-- var team = profile.team;
-#profile-main
-  #personal-info
-    #player-name.player-nickname= profile.nickname
-    #player-status= profile.statustext
-    #player-picture
-      img(src='#{profile.pictureurl || '../../images/player.jpg'}', maxheight=100, maxwidth= 100)
+link(rel="stylesheet/less", type="text/css", href="/stylesheets/profile.less")
+- var team = profile.team
+.row
+  #profile-main.span3
+    .player-picture
+      img(src='#{profile.pictureurl || '../../images/player.jpg'}')
     - if (profile._id == user._id) 
       #player-picture-change
-        a(profileid='#{profile._id}') Change your profile picture
-    ol
-      li#player-team.personal-info-item            
-        .personal-info-item-label Team:
-        .personal-info-item-value#teamname
+        a.btn.btn-mini.btn-info(profileid='#{profile._id}')
+          i.icon-camera.icon-white
+          | &nbsp;Change your profile picture
+    .space1
+    .personal-info-item            
+       .personal-info-item-label Team:
+       .personal-info-item-value#teamname
           - if (team && team._id)
             a(href='/team/#{team._id}') #{(team && team.teamname) || 'None'}
           - else 
             #{(team && team.teamname) || 'None'}
-        .clear-float
-      li.personal-info-item            
+    .personal-info-item            
         .personal-info-item-label Team record:
         #team-record.personal-info-item-value #{(team && team.stats ? team.stats.win : 0) || 0}-#{(team && team.stats ? team.stats.loss : 0) || 0}
-        .clear-float
-      li.personal-info-item            
+    .personal-info-item            
         .personal-info-item-label Individual record:
         .personal-info-item-value #{(profile.stats ? profile.stats.win : 0 ) || 0}-#{(profile.stats ? profile.stats.loss : 0) || 0}
-        .clear-float
-      li.personal-info-item            
+    .personal-info-item            
         .personal-info-item-label Rank:
         .personal-info-item-value #{profile.rank || 'N/A'}
-        .clear-float
-  #personal-wall
-    .new-post
-      //label(for='newpost-msg') Write something
-      textarea#newpost-msg.post-text(cols='74')
-      br
-      button.post-btn(profileid='#{profile._id}', userid='#{user._id}') Post
+    
+  #personal-wall.span6
+    h1.player-nickname= profile.nickname
+    h4.player-status= profile.statustext
+    .space1
+    .row    
+      .span6.new-post
+        textarea#newpost-msg.post-text(rows=1, placeholder='Write something...')
+        button.btn.btn-mini.btn-primary.pull-right(data-profileid='#{profile._id}', data-userid='#{user._id}')
+          i.icon-comment.icon-white
+          | &nbsp;Post
     .post-list
       != partial('post', profile.posts)
-  .todo-section
+  .span3.todo-section
     != partial('todoteam')
     != partial('todorecruit')
     - if ((typeof profile !== 'undefined') && (typeof user !== 'undefined') && (profile._id == user._id))
@@ -48,8 +49,5 @@ link(rel='stylesheet', href='/stylesheets/profile.css')
         != partial('challenge', team.challenges)
       - if (team && team.matches && team.matches.length)
         != partial('match', team.matches)
-  .clear-float
-script(type='text/javascript', src='/javascripts/app/profile.js')
-script(type='text/javascript', src='/javascripts/jquery/jquery.watermark.min.js')
-script(type='text/javascript', src='/javascripts/jquery/jquery.elastic.source.js')
 
+script(type='text/javascript', src='/js/profile.js')
