@@ -5,9 +5,9 @@ a( href="/profile/#{playerid}")= playername
 - if (typeof matchtype != 'undefined')
   - if (matchtype == '1')
     |  in one game
-  - else if (matchtype = '99')
+  - else if (matchtype == '99')
     |  in a death match
   - else
     |  in a best of #{matchtype} games
 - if (typeof matchmsg != 'undefined')
-  |  with a message #{matchmsg}
+  |  with a message #{matchmsg}us

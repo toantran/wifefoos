@@ -119,7 +119,8 @@ exports.createTeamChallenge = (params, callback = ->) ->
         cb()
     .then (args..., cb = ->) =>
       # create challenge for challenged team
-      challenge = 
+      challenge =
+        type: 'challenged'
         message: params.msg
         matchtype: params.matchtype
         teamid: opponentid
@@ -167,6 +168,7 @@ exports.createTeamChallenge = (params, callback = ->) ->
     .then (args..., cb = ->) ->
       # create challenge for challenging team
       challenge = 
+        type: 'challenging'
         message: msg
         matchtype: matchtype
         teamid: teamid
@@ -237,10 +239,11 @@ exports.acceptChallenge = (inputs, callback = ->) ->
       status: 'pending'
       teams: teams
     matchSvc.createMatch am, cb
-  .then (err, @am, cb = ->) =>
+  .then (err, ams, cb = ->) =>
+    @am = ams?.[0]
     return callback(err) if err
     # add match to teams
-    utils.mapAsync @teams, (team, cb) -> 
+    utils.mapAsync @teams, (team, cb) => 
       addMatch( team._id, @am, cb )
     , cb
   .then (err, args..., cb = ->) ->
@@ -249,11 +252,11 @@ exports.acceptChallenge = (inputs, callback = ->) ->
     newTeamRepo.removeChallenge inputs.challengedteamid, inputs.challengingteamid
     newTeamRepo.removeChallenge inputs.challengingteamid, inputs.challengedteamid
     cb()
-  .then (err, args..., cb = ->) ->
+  .then (err, args..., cb = ->) =>
     return callback(err) if err
     for team in @teams
-      do (team) ->
-        utils.mapAsync team.members, (memberid, mapcb = ->) ->
+      do (team) =>
+        utils.mapAsync team.members, (memberid, mapcb = ->) =>
           post = 
             type: 'newmatch'
             data: 

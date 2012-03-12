@@ -49,9 +49,10 @@ link(rel="stylesheet/less", type="text/css", href="/stylesheets/profile.less")
       - if (typeof profile.invites !== 'undefined' && profile.invites.length)
         != partial('invite', profile.invites)
       - if (team && team.challenges && team.challenges.length)
-        != partial('challenge', team.challenges)
-      - if (team && team.matches && team.matches.length)
-        != partial('match', team.matches)
+        != partial('challenge', profile.challenges)
+        script(type='text/javascript', src='/js/todochallenge.js')
+      - if (profile && profile.matches && profile.matches.length)
+        != partial('match', profile.matches)
 #upload-picture-dlg.modal.hide
   form(method="post", enctype="multipart/form-data", action="/player/#{profile._id}/picture")
     .modal-header
@@ -63,8 +64,6 @@ link(rel="stylesheet/less", type="text/css", href="/stylesheets/profile.less")
     .modal-footer
       input.btn.btn-primary(type='submit') Save
     
-  
-  
   
   
 script(type='text/javascript', src='/js/profile.js')

@@ -10,12 +10,20 @@
     new_array = [];
     errors = [];
     runit = function(item, index) {
-      return asyncMapFn(item, function(err, result) {
-        if (err) errors.push(err);
-        new_array[index] = result;
+      try {
+        return asyncMapFn(item, function(err, result) {
+          if (err) errors.push(err);
+          new_array[index] = result;
+          counter--;
+          if (counter === 0) return callback(errors.join(','), new_array);
+        });
+      } catch (e) {
+        console.trace(e);
+        errors.push(e);
+        new_array[index] = null;
         counter--;
         if (counter === 0) return callback(errors.join(','), new_array);
-      });
+      }
     };
     _results = [];
     for (index = 0, _len = array.length; index < _len; index++) {

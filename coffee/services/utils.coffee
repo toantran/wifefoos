@@ -3,14 +3,23 @@ _mapAsync = (array = [], asyncMapFn, callback = ->) ->
   new_array = []
   errors = []
   runit = (item, index) ->
-    asyncMapFn item, (err, result) ->
-      if err
-        errors.push err
+    try
+      asyncMapFn item, (err, result) ->
+        if err
+          errors.push err
 
-      new_array[index] = result
+        new_array[index] = result
+        counter--
+        if counter is 0
+          callback errors.join(','), new_array
+    catch e
+      console.trace e
+      errors.push e
+      new_array[index] = null
       counter--
       if counter is 0
         callback errors.join(','), new_array
+      
   
   runit item, index for item, index in array
 

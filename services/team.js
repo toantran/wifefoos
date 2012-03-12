@@ -148,6 +148,7 @@
         args = 2 <= arguments.length ? __slice.call(arguments, 0, _i = arguments.length - 1) : (_i = 0, []), cb = arguments[_i++];
         if (cb == null) cb = function() {};
         challenge = {
+          type: 'challenged',
           message: params.msg,
           matchtype: params.matchtype,
           teamid: opponentid
@@ -217,6 +218,7 @@
         args = 2 <= arguments.length ? __slice.call(arguments, 0, _i = arguments.length - 1) : (_i = 0, []), cb = arguments[_i++];
         if (cb == null) cb = function() {};
         challenge = {
+          type: 'challenging',
           message: msg,
           matchtype: matchtype,
           teamid: teamid
@@ -320,7 +322,7 @@
       if (cb == null) cb = function() {};
       if (err) return callback(err);
       return utils.mapAsync(_this.teams, function(team, cb) {
-        return addMatch(team._id, this.am, cb);
+        return addMatch(team._id, _this.am, cb);
       }, cb);
     }).then(function() {
       var args, cb, err, _i;
@@ -335,7 +337,7 @@
       err = arguments[0], args = 3 <= arguments.length ? __slice.call(arguments, 1, _i = arguments.length - 1) : (_i = 1, []), cb = arguments[_i++];
       if (cb == null) cb = function() {};
       if (err) return callback(err);
-      _ref = this.teams;
+      _ref = _this.teams;
       _fn = function(team) {
         return utils.mapAsync(team.members, function(memberid, mapcb) {
           var post;
@@ -343,7 +345,7 @@
           post = {
             type: 'newmatch',
             data: {
-              matchid: String(this.am._id)
+              matchid: String(_this.am._id)
             },
             createdat: new Date()
           };

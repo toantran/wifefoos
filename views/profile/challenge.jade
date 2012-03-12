@@ -1,11 +1,11 @@
-- if (challenge.type == 'challenged')
-  .alert.alert-error
+- if (typeof challenge.type !== 'undefined' && challenge.type == 'challenged')
+  .alert.alert-block.alert-error
     a.close(data-dismiss='alert') x
-    h4 You are challenged!
+    h4.alert-heading You are challenged!
     p
       | Team&nbsp;
-      a.label.label-info(href='/team/#{challenge.teamid}')
-      |  have challenged you for a 
+      a.label.label-info(href='/team/#{challenge.teamid}')= challenge.teamname
+      |  have challenged you in a 
       - if (challenge.matchtype == '1')
         |  match
       - else if (challenge.matchtype == '99')
@@ -15,10 +15,23 @@
       - if (typeof challenge.msg != 'undefined')
         |  with message #{challenge.msg}
     .btn-group
-      button.btn.btn-mini.btn-danger(value='accept', challengingteamid='#{profile.team._id}', challengedteamid='#{challenge.teamid}') Accept
-      button.btn.btn-mini.btn-warning(value='decline', challengingteamid='#{profile.team._id}', challengedteamid='#{challenge.teamid}') Decline
-- if (challenge.type == 'challenging')
-  .team-challenge.team-challenging(challengingteamid='#{profile.team._id}', challengedteamid='#{challenge.teamid}')
-    .team-challenge-text
-    .buttons
-      button(value='cancel', challengingteamid='#{profile.team._id}', challengedteamid='#{challenge.teamid}') Cancel
+      button.btn.btn-mini.btn-danger(value='accept', data-teamid='#{profile.team._id}', data-otherteamid='#{challenge.teamid}') Accept
+      button.btn.btn-mini.btn-warning(value='decline', data-teamid='#{profile.team._id}', data-otherteamid='#{challenge.teamid}') Decline
+- else
+  .alert.alert-block.alert-info
+    a.close(data-dismiss='alert') x
+    h4.alert-heading You are challenging
+    p
+      | Team&nbsp;
+      a.label.label-info(href='/team/#{challenge.teamid}')= challenge.teamname
+      |  in a 
+      - if (challenge.matchtype == '1')
+        |  match
+      - else if (challenge.matchtype == '99')
+        |  death match
+      - else
+        | best of #{challenge.matchtype} match
+      - if (typeof challenge.msg != 'undefined')
+        |  with message #{challenge.msg}
+    .btn-group
+      button.btn.btn-mini.btn-danger(value='cancel', data-teamid='#{profile.team._id}', data-otherteamid='#{challenge.teamid}') Cancel

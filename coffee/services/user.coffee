@@ -652,7 +652,6 @@ exports.getFullUser = (userid, callback = ->) ->
       cb null, null
         
   .then (err, fullposts, cb = ->) =>    
-    
     if fullposts?
       posts = (post for post in fullposts when post?.desc?)
     else
@@ -677,6 +676,56 @@ exports.getFullUser = (userid, callback = ->) ->
     
     @user?.invites = invites
     
+    # Load challenges
+    if @team?.challenges?.length
+      
+      loadChallenge = (challenge, loadChallengeCallback = ->) ->
+        teamRepo.getById challenge?.teamid, (loadChallengeErr, team) ->
+          challenge.teamname = team?.teamname
+          loadChallengeCallback loadChallengeErr, challenge
+        
+      utils.mapAsync @team?.challenges, loadChallenge, cb           
+    else
+      cb null, null    
+  .then ( err, challenges, cb = ->) =>
+    @team.challenges = challenges
+    @user.challenges = challenges
+    
+    # Load pending matches
+    matches = (match for match in @team?.matches when match?.status is 'pending')
+    
+    console.log 'pending matches', matches, @team?.matches
+    if matches?.length
+      
+      matchsvc = require './match'
+      loadMatch = (am, loadMatchCb = ->) =>
+        matchsvc.getById am._id, (loadMatchErr, fullMatch) =>
+          fullMatch?.hometeam = @team
+          for team in fullMatch?.teams
+            do (team) =>
+              if not team?._id?.equals( @team?._id )
+                fullMatch.opponentteam = team
+          for vote in fullMatch?.votes
+            do (vote) =>
+              if String(vote?.playerid) is String(@user._id)
+                fullMatch.voted = true
+                
+          loadVote = (vote, votecb = ->) ->
+            newUserRepo.getById vote.playerid, (getByIdErr, user) ->
+              vote.playername = user?.nickname
+              votecb null, vote
+              
+          utils.mapAsync fullMatch?.votes, loadVote, (loadVoteErr, fullVotes) ->
+            fullMatch?.votes = fullVotes
+            
+          loadMatchCb loadMatchErr, fullMatch
+      
+      utils.mapAsync matches, loadMatch, cb
+    else
+      callback null, @user
+  .then ( err, matches, cb = ->) =>
+    console.log 'Matches ', err, matches
+    @user.matches = matches
     callback null, @user
     
 

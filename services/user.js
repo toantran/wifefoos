@@ -871,10 +871,89 @@
         return cb(e);
       }
     }).then(function(err, invites, cb) {
-      var _ref;
+      var _ref, _ref2, _ref3, _ref4;
       if (cb == null) cb = function() {};
       if (err) return callback(err);
       if ((_ref = _this.user) != null) _ref.invites = invites;
+      if ((_ref2 = _this.team) != null ? (_ref3 = _ref2.challenges) != null ? _ref3.length : void 0 : void 0) {
+        loadChallenge = function(challenge, loadChallengeCallback) {
+          if (loadChallengeCallback == null) loadChallengeCallback = function() {};
+          return teamRepo.getById(challenge != null ? challenge.teamid : void 0, function(loadChallengeErr, team) {
+            challenge.teamname = team != null ? team.teamname : void 0;
+            return loadChallengeCallback(loadChallengeErr, challenge);
+          });
+        };
+        return utils.mapAsync((_ref4 = _this.team) != null ? _ref4.challenges : void 0, loadChallenge, cb);
+      } else {
+        return cb(null, null);
+      }
+    }).then(function(err, challenges, cb) {
+      var match, matches, matchsvc, _ref;
+      if (cb == null) cb = function() {};
+      _this.team.challenges = challenges;
+      _this.user.challenges = challenges;
+      matches = (function() {
+        var _i, _len, _ref, _ref2, _results;
+        _ref2 = (_ref = this.team) != null ? _ref.matches : void 0;
+        _results = [];
+        for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
+          match = _ref2[_i];
+          if ((match != null ? match.status : void 0) === 'pending') {
+            _results.push(match);
+          }
+        }
+        return _results;
+      }).call(_this);
+      console.log('pending matches', matches, (_ref = _this.team) != null ? _ref.matches : void 0);
+      if (matches != null ? matches.length : void 0) {
+        matchsvc = require('./match');
+        loadMatch = function(am, loadMatchCb) {
+          if (loadMatchCb == null) loadMatchCb = function() {};
+          return matchsvc.getById(am._id, function(loadMatchErr, fullMatch) {
+            var loadVote, team, vote, _fn, _fn2, _i, _j, _len, _len2, _ref2, _ref3;
+            if (fullMatch != null) fullMatch.hometeam = _this.team;
+            _ref2 = fullMatch != null ? fullMatch.teams : void 0;
+            _fn = function(team) {
+              var _ref3, _ref4;
+              if (!(team != null ? (_ref3 = team._id) != null ? _ref3.equals((_ref4 = _this.team) != null ? _ref4._id : void 0) : void 0 : void 0)) {
+                return fullMatch.opponentteam = team;
+              }
+            };
+            for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
+              team = _ref2[_i];
+              _fn(team);
+            }
+            _ref3 = fullMatch != null ? fullMatch.votes : void 0;
+            _fn2 = function(vote) {
+              if (String(vote != null ? vote.playerid : void 0) === String(_this.user._id)) {
+                return fullMatch.voted = true;
+              }
+            };
+            for (_j = 0, _len2 = _ref3.length; _j < _len2; _j++) {
+              vote = _ref3[_j];
+              _fn2(vote);
+            }
+            loadVote = function(vote, votecb) {
+              if (votecb == null) votecb = function() {};
+              return newUserRepo.getById(vote.playerid, function(getByIdErr, user) {
+                vote.playername = user != null ? user.nickname : void 0;
+                return votecb(null, vote);
+              });
+            };
+            utils.mapAsync(fullMatch != null ? fullMatch.votes : void 0, loadVote, function(loadVoteErr, fullVotes) {
+              return fullMatch != null ? fullMatch.votes = fullVotes : void 0;
+            });
+            return loadMatchCb(loadMatchErr, fullMatch);
+          });
+        };
+        return utils.mapAsync(matches, loadMatch, cb);
+      } else {
+        return callback(null, _this.user);
+      }
+    }).then(function(err, matches, cb) {
+      if (cb == null) cb = function() {};
+      console.log('Matches ', err, matches);
+      _this.user.matches = matches;
       return callback(null, _this.user);
     });
   };
