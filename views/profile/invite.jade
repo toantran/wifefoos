@@ -1,3 +1,7 @@
-.todo-invite You have been invited to join team 
-  a(href='/team/#{invite.team._id}')= invite.team.teamname
-  button(teamid='#{invite.team._id}', userid='#{profile._id}') Accept
+.alert.alert-success.todo-invite 
+  a.close(data-dismiss='alert') x
+  h4.alert-heading You are invited!  
+  a.label.label-info(href='/team/#{invite.team._id}')= invite.team.teamname
+  |  have invited you to join their team
+  a.btn.btn-mini.btn-primary(data-teamid='#{invite.team._id}', data-userid='#{profile._id}') Accept
+script(type='text/javascript', src='/js/todoinvite.js')  

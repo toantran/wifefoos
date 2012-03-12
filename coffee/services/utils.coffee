@@ -1,35 +1,22 @@
-
-exports.map = (array = [], asyncMapFn, callback = ->) ->
-  counter = array.length
-  new_array = []  
-  runit = (item, index) ->
-    asyncMapFn item, (err, result) ->
-      if err
-        callback err
-      else
-        new_array[index] = result
-        counter--
-        if counter is 0
-          callback null, new_array
-  
-  runit item, index for item, index in array
-    
-    
-exports.mapAsync = (array = [], asyncMapFn, callback = ->) ->
+_mapAsync = (array = [], asyncMapFn, callback = ->) ->
   counter = array.length
   new_array = []
+  errors = []
   runit = (item, index) ->
     asyncMapFn item, (err, result) ->
       if err
-        callback err
-      else
-        new_array[index] = result
-        counter--
-        if counter is 0
-          callback null, new_array
+        errors.push err
+
+      new_array[index] = result
+      counter--
+      if counter is 0
+        callback errors.join(','), new_array
   
   runit item, index for item, index in array
-      
+
+
+exports.map = exports.mapAsync = _mapAsync
+    
 
 exports.parallel = ( fnArray = [], callback = ->) ->
   counter = fnArray.length
@@ -65,7 +52,6 @@ exports.throwIfNull = () ->
   nullArgs = arg for arg in arguments when not arg?
   throw 'Null argument' if nullArgs? and nullArgs.length
   
-
   
 taskWrapper = (@task) ->
   @next = null
@@ -85,7 +71,6 @@ taskWrapper::then = (@next) ->
     @wrapper = new taskWrapper @next
     @next.call null, @taskErr, @taskResult, @wrapper.callback.bind(@wrapper) if @done
     return @wrapper      
-    
     
     
 exports.execute = (task, args...) ->

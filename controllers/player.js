@@ -127,7 +127,8 @@ exports.index = function (req, res, next) {
     if (availableOnly) {
       res.send(players);
     } else {
-      players.sort( sortingPlayer );
+      userSvc = require( '../services/user' )
+      players.sort( userSvc.sortingPlayers );
       res.render(players, {
         layout: true
         , title: 'Wheels Foosball League (WFL) - Players'

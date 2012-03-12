@@ -6,9 +6,15 @@
       return this;
     };
     global = makethis.call();
+    /*
+      Publish helper
+    */
     $.publish = function(title, body) {
       return console.log(title, body);
     };
+    /*
+      Publish helper end
+    */
     /*
       Template engine
     */
@@ -33,7 +39,6 @@
       };
       setProperty = function(el, key, value) {
         var prop;
-        console.log(key, value);
         prop = directProperties[key];
         if (prop) {
           return el[prop] = '' + (value != null ? value : '');
@@ -52,10 +57,15 @@
           node = children[_i];
           if (node != null) {
             _results.push((function(node) {
+              var spanEl;
               if (node instanceof Array) {
                 return appendChildren(el, node);
               } else {
-                if (typeof node === 'string') node = doc.createTextNode(node);
+                if (typeof node === 'string') {
+                  spanEl = doc.createElement('span');
+                  spanEl.innerHTML = node;
+                  node = spanEl;
+                }
                 return el.appendChild(node);
               }
             })(node));
@@ -66,7 +76,6 @@
       splitter = /(#|\.)/;
       return create = function(tag, props, children) {
         var index, name, part, parts, prop, propVal, thisEl, _len, _step;
-        console.log(tag, props, children);
         if (props instanceof Array) {
           children = props;
           props = null;
@@ -98,6 +107,9 @@
       };
     };
     return $.el = el();
+    /*
+      Template engine end
+    */
   });
 
 }).call(this);

@@ -3,6 +3,18 @@
 
   matchRepo = require('../repository/matches2');
 
+  exports.getById = function(matchid, callback) {
+    if (callback == null) callback = function() {};
+    console.assert(matchid, 'matchid cannot be null or 0');
+    if (!matchid) throw 'matchid cannot be null or 0';
+    try {
+      return matchRepo.getById(matchid, callback);
+    } catch (e) {
+      console.trace(e);
+      throw e;
+    }
+  };
+
   exports.createMatch = function(am, callback) {
     if (callback == null) callback = function() {};
     console.assert(am, 'Match object cannot be null');

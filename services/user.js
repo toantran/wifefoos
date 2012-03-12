@@ -1,11 +1,11 @@
 (function() {
-  var crypto, hash, loadChallenge, loadChallenges, loadMatch, loadMatches, loadUserTeam, newUserRepo, teamRepo, utils;
+  var crypto, hash, loadChallenge, loadChallenges, loadFullInvite, loadMatch, loadMatches, loadUserTeam, newUserRepo, teamRepo, utils;
 
   crypto = require('crypto');
 
   newUserRepo = require('../repository/users2');
 
-  teamRepo = require('../repository/teams');
+  teamRepo = require('../repository/teams2');
 
   utils = require('./utils');
 
@@ -460,17 +460,89 @@
     };
     try {
       return newUserRepo.getById(userid, function(getErr, user) {
-        var post, _i, _len, _ref, _ref2;
+        var post, _i, _len, _ref, _ref2, _results;
         if (getErr != null) return callback(getErr);
         _ref = user != null ? user.posts : void 0;
+        _results = [];
         for (_i = 0, _len = _ref.length; _i < _len; _i++) {
           post = _ref[_i];
           if (post != null ? (_ref2 = post.id) != null ? _ref2.equals(postid) : void 0 : void 0) {
-            post.comments || (post.comments = []);
-            post.comments.push(data);
+            _results.push((function(post) {
+              var updateObj;
+              post.comments || (post.comments = []);
+              post.comments.push(data);
+              updateObj = {
+                $set: {
+                  posts: user != null ? user.posts : void 0,
+                  updatedat: new Date()
+                }
+              };
+              return newUserRepo.update(findObj, updateObj, {}, callback);
+            })(post));
           }
         }
-        return newUserRepo.save(user, callback);
+        return _results;
+      });
+    } catch (e) {
+      console.trace(e);
+      return callback(e);
+    }
+  };
+
+  /*
+  Remove a comment
+  */
+
+  exports.removeComment = function(userid, postid, commentid, callback) {
+    var findObj;
+    if (callback == null) callback = function() {};
+    console.assert(userid, 'userid cannot be null or 0');
+    if (userid == null) throw 'userid is null or empty';
+    console.assert(postid, 'postid cannot be null or 0');
+    if (postid == null) throw 'postid is null or empty';
+    console.assert(commentid, 'commentid cannot be null or 0');
+    if (commentid == null) throw 'commentid is null or empty';
+    if (typeof userid === 'string') userid = new newUserRepo.ObjectId(userid);
+    if (typeof postid === 'string') postid = new newUserRepo.ObjectId(postid);
+    if (typeof commentid === 'string') {
+      commentid = new newUserRepo.ObjectId(commentid);
+    }
+    findObj = {
+      _id: userid
+    };
+    try {
+      return newUserRepo.getById(userid, function(getErr, user) {
+        var post, _i, _len, _ref, _ref2, _results;
+        if (getErr != null) return callback(getErr);
+        _ref = user != null ? user.posts : void 0;
+        _results = [];
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          post = _ref[_i];
+          if (post != null ? (_ref2 = post.id) != null ? _ref2.equals(postid) : void 0 : void 0) {
+            _results.push((function(post) {
+              var comment, index, updateObj, _fn, _len2, _ref3;
+              _ref3 = post != null ? post.comments : void 0;
+              _fn = function(comment, index) {
+                var _ref4;
+                if (comment != null ? (_ref4 = comment.id) != null ? _ref4.equals(commentid) : void 0 : void 0) {
+                  return post != null ? post.comments.splice(index, 1) : void 0;
+                }
+              };
+              for (index = 0, _len2 = _ref3.length; index < _len2; index++) {
+                comment = _ref3[index];
+                _fn(comment, index);
+              }
+              updateObj = {
+                $set: {
+                  posts: user != null ? user.posts : void 0,
+                  updatedat: new Date()
+                }
+              };
+              return newUserRepo.update(findObj, updateObj, {}, callback);
+            })(post));
+          }
+        }
+        return _results;
       });
     } catch (e) {
       console.trace(e);
@@ -692,6 +764,119 @@
       console.trace(e);
       return callback(e);
     }
+  };
+
+  /*
+  take in a brief invite obj and return a full Invite object
+  */
+
+  loadFullInvite = function(invite, callback) {
+    var teamid, userid;
+    if (callback == null) callback = function() {};
+    teamid = invite != null ? invite.teamid : void 0;
+    userid = invite != null ? invite.invitor : void 0;
+    try {
+      return utils.execute(teamRepo.getById, teamid).then(function(err, team, cb) {
+        if (cb == null) cb = function() {};
+        invite.team = team;
+        try {
+          return newUserRepo.getById(userid, cb);
+        } catch (e) {
+          console.trace(e);
+          return callback(e);
+        }
+      }).then(function(err, user, cb) {
+        if (cb == null) cb = function() {};
+        invite.invitor = user;
+        return callback(null, invite);
+      });
+    } catch (e) {
+      console.trace(e);
+      return callback(e);
+    }
+  };
+
+  /*
+  GET user object with all full properties
+  */
+
+  exports.getFullUser = function(userid, callback) {
+    var _this = this;
+    if (callback == null) callback = function() {};
+    console.assert(userid, 'userid cannot be null or 0');
+    if (!userid) throw 'userid cannot be null or 0';
+    return utils.execute(newUserRepo.getById, userid).then(function(err, user, cb) {
+      var _ref, _ref2, _ref3;
+      _this.user = user;
+      if (cb == null) cb = function() {};
+      if (err) return callback(err);
+      if (((_ref = _this.user) != null ? _ref.team : void 0) != null) {
+        try {
+          return teamRepo.getById((_ref2 = _this.user) != null ? (_ref3 = _ref2.team) != null ? _ref3._id : void 0 : void 0, cb);
+        } catch (e) {
+          console.trace(e);
+          return cb(e);
+        }
+      } else {
+        return cb();
+      }
+    }).then(function(err, team, cb) {
+      var postGen, _ref, _ref2, _ref3, _ref4, _ref5;
+      _this.team = team;
+      if (cb == null) cb = function() {};
+      if (err) return callback(err);
+      if ((_ref = _this.user) != null) _ref.team = _this.team;
+      if ((((_ref2 = _this.user) != null ? _ref2.posts : void 0) != null) && ((_ref3 = _this.user) != null ? (_ref4 = _ref3.posts) != null ? _ref4.length : void 0 : void 0)) {
+        try {
+          postGen = require('./post');
+          postGen.init();
+          return utils.mapAsync((_ref5 = _this.user) != null ? _ref5.posts : void 0, postGen.makePostGen(_this.user), cb);
+        } catch (e) {
+          console.trace(e);
+          return cb(e);
+        }
+      } else {
+        return cb(null, null);
+      }
+    }).then(function(err, fullposts, cb) {
+      var post, posts, _ref, _ref2, _ref3, _ref4, _ref5;
+      if (cb == null) cb = function() {};
+      if (fullposts != null) {
+        posts = (function() {
+          var _i, _len, _results;
+          _results = [];
+          for (_i = 0, _len = fullposts.length; _i < _len; _i++) {
+            post = fullposts[_i];
+            if ((post != null ? post.desc : void 0) != null) _results.push(post);
+          }
+          return _results;
+        })();
+      } else {
+        posts = fullposts;
+      }
+      if (posts != null) {
+        posts.sort(function(p1, p2) {
+          return (p2 != null ? p2.createdat : void 0) - (p1 != null ? p1.createdat : void 0);
+        });
+      }
+      if ((_ref = _this.user) != null) _ref.posts = posts;
+      try {
+        if (((_ref2 = _this.user) != null ? _ref2.invites : void 0) && ((_ref3 = _this.user) != null ? (_ref4 = _ref3.invites) != null ? _ref4.length : void 0 : void 0)) {
+          return utils.mapAsync((_ref5 = _this.user) != null ? _ref5.invites : void 0, loadFullInvite, cb);
+        } else {
+          return cb();
+        }
+      } catch (e) {
+        console.trace(e);
+        return cb(e);
+      }
+    }).then(function(err, invites, cb) {
+      var _ref;
+      if (cb == null) cb = function() {};
+      if (err) return callback(err);
+      if ((_ref = _this.user) != null) _ref.invites = invites;
+      return callback(null, _this.user);
+    });
   };
 
 }).call(this);

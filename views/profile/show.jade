@@ -6,7 +6,7 @@ link(rel="stylesheet/less", type="text/css", href="/stylesheets/profile.less")
       img(src='#{profile.pictureurl || '../../images/player.jpg'}')
     - if (profile._id == user._id) 
       #player-picture-change
-        a.btn.btn-mini.btn-info(profileid='#{profile._id}')
+        a.btn.btn-mini.btn-info(data-profileid='#{profile._id}')
           i.icon-camera.icon-white
           | &nbsp;Change your profile picture
     .space1
@@ -19,10 +19,12 @@ link(rel="stylesheet/less", type="text/css", href="/stylesheets/profile.less")
             #{(team && team.teamname) || 'None'}
     .personal-info-item            
         .personal-info-item-label Team record:
-        #team-record.personal-info-item-value #{(team && team.stats ? team.stats.win : 0) || 0}-#{(team && team.stats ? team.stats.loss : 0) || 0}
+        #team-record.personal-info-item-value 
+          a(href='#').label.label-info #{(team && team.stats ? team.stats.win : 0) || 0}-#{(team && team.stats ? team.stats.loss : 0) || 0}
     .personal-info-item            
         .personal-info-item-label Individual record:
-        .personal-info-item-value #{(profile.stats ? profile.stats.win : 0 ) || 0}-#{(profile.stats ? profile.stats.loss : 0) || 0}
+        .personal-info-item-value 
+          a(href='#').label.label-info #{(profile.stats ? profile.stats.win : 0 ) || 0}-#{(profile.stats ? profile.stats.loss : 0) || 0}
     .personal-info-item            
         .personal-info-item-label Rank:
         .personal-info-item-value #{profile.rank || 'N/A'}
@@ -40,8 +42,9 @@ link(rel="stylesheet/less", type="text/css", href="/stylesheets/profile.less")
     .post-list
       != partial('post', profile.posts)
   .span3.todo-section
-    != partial('todoteam')
-    != partial('todorecruit')
+    != partial('todoteam')    
+    //
+      != partial('todorecruit')
     - if ((typeof profile !== 'undefined') && (typeof user !== 'undefined') && (profile._id == user._id))
       - if (typeof profile.invites !== 'undefined' && profile.invites.length)
         != partial('invite', profile.invites)
@@ -49,5 +52,19 @@ link(rel="stylesheet/less", type="text/css", href="/stylesheets/profile.less")
         != partial('challenge', team.challenges)
       - if (team && team.matches && team.matches.length)
         != partial('match', team.matches)
-
+#upload-picture-dlg.modal.hide
+  form(method="post", enctype="multipart/form-data", action="/player/#{profile._id}/picture")
+    .modal-header
+      a.close(data-dismiss='modal') x
+      h3 Upload new picture
+    .modal-body
+      label Image:
+      input(name='image', type='file')
+    .modal-footer
+      input.btn.btn-primary(type='submit') Save
+    
+  
+  
+  
+  
 script(type='text/javascript', src='/js/profile.js')

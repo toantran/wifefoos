@@ -1,10 +1,12 @@
 - if (typeof post !== 'undefined')
-  .row.post-panel(postid='#{post.id}', profileid='#{profile._id}')    
+  .row.post-panel(data-postid='#{post.id}', data-profileid='#{profile._id}')    
     - if ((profile._id == user._id) || (post.posterid == user._id))
       a.post-close-btn
     .span1
       - if (post.pictureurl)
-        img(src='#{post.pictureurl}')
+        img(src="#{post.pictureurl}")
+      - else
+        img()      
     .span5
       .post-item!= post.desc
       .postmark on #{post.createdat}
@@ -12,18 +14,21 @@
         - if (typeof post.comments !== 'undefined')          
           - each comment in post.comments
             - if (typeof comment !== 'undefined')
-              .row.comment-panel(commentid='#{comment.id}', profileid='#{profile._id}')    
+              .row.comment-panel(data-commentid='#{comment.id}', data-profileid='#{profile._id}')    
                 - if ((profile._id == user._id) || (comment.posterid == user._id))
                   a.post-close-btn
                 .span1.poster-picture
                   - if (comment.pictureurl)
                     img(src='#{comment.pictureurl}')
-                .span4.comment-item!= comment.desc
+                .span4.comment-item
+                  a(href='/profile/#{comment.posterid}')= comment.postername
+                  |  wrote
+                  p!= comment.msg
                   .postmark on #{comment.createdat}        
         .row.new-comment
           .span5
-            textarea(rows=1, placeholder='Type your comment...').post-text
-            button.btn.btn-mini.btn-primary.pull-right(postid='#{post.id}', profileid='#{profile._id}', posterid='#{user._id}')
+            textarea.post-text(rows=1, placeholder='Type your comment...')
+            button.btn.btn-mini.btn-primary.pull-right(data-postid='#{post.id}', data-profileid='#{profile._id}', data-posterid='#{user._id}')
               i.icon-comment.icon-white
               | &nbsp;Post
 

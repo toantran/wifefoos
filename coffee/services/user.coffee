@@ -1,6 +1,6 @@
 crypto = require 'crypto'
 newUserRepo = require '../repository/users2'
-teamRepo = require '../repository/teams'
+teamRepo = require '../repository/teams2'
 utils = require './utils'
 
 hash = (msg, key) ->
@@ -361,15 +361,54 @@ exports.addComment = (userid, postid, data, callback = ->) ->
   try
     newUserRepo.getById userid, (getErr, user) ->
       return callback( getErr ) if getErr?
-      for post in user?.posts
-        if post?.id?.equals( postid )
+      for post in user?.posts when post?.id?.equals( postid )
+        do (post) ->
           post.comments or= []
-          post.comments.push data
-      newUserRepo.save user, callback
+          post.comments.push data     
+          updateObj = 
+            $set:
+              posts: user?.posts
+              updatedat: new Date()
+          newUserRepo.update findObj, updateObj, {}, callback
   catch e
     console.trace e
     callback e
+
+
+###
+Remove a comment
+###
+exports.removeComment = (userid, postid, commentid, callback = ->) ->
+  console.assert userid, 'userid cannot be null or 0'  
+  throw 'userid is null or empty' unless userid?
+  console.assert postid, 'postid cannot be null or 0'  
+  throw 'postid is null or empty' unless postid?
+  console.assert commentid, 'commentid cannot be null or 0'  
+  throw 'commentid is null or empty' unless commentid?
+
+  userid = new newUserRepo.ObjectId( userid ) if typeof userid is 'string'
+  postid = new newUserRepo.ObjectId( postid ) if typeof postid is 'string'
+  commentid = new newUserRepo.ObjectId( commentid ) if typeof commentid is 'string'
   
+  findObj = _id : userid
+  
+  try
+    newUserRepo.getById userid, (getErr, user) ->
+      return callback( getErr ) if getErr?
+      for post in user?.posts when post?.id?.equals( postid )
+        do (post) ->
+          for comment, index in post?.comments
+            do (comment, index) ->
+              if comment?.id?.equals(commentid)
+                post?.comments.splice index, 1
+          updateObj = 
+            $set:
+              posts: user?.posts
+              updatedat: new Date()
+          newUserRepo.update findObj, updateObj, {}, callback
+  catch e
+    console.trace e
+    callback e
 
 ###
 Add a vote record into player's record
@@ -550,7 +589,97 @@ exports.assignTeam = (userid, team, callback = ->) ->
     console.trace e
     callback e  
     
+
+
+###
+take in a brief invite obj and return a full Invite object
+###
+loadFullInvite = (invite, callback = ->) ->
+  teamid = invite?.teamid
+  userid = invite?.invitor
+  
+  try
+    utils.execute( teamRepo.getById, teamid )
+    .then (err, team, cb = ->) ->
+      invite.team = team
+      
+      try
+        newUserRepo.getById userid, cb
+      catch e
+        console.trace e
+        callback e
+    .then (err, user, cb = ->) ->
+      invite.invitor = user
+      callback null, invite
+  catch e
+    console.trace e
+    callback e
+
+###
+GET user object with all full properties
+###    
+exports.getFullUser = (userid, callback = ->) ->
+  console.assert userid, 'userid cannot be null or 0'
+  throw 'userid cannot be null or 0' unless userid
+  
+  utils.execute( newUserRepo.getById, userid )  # load user
+  .then (err, @user, cb = ->) =>
+    # load team
+    return callback( err ) if err
     
+    if @user?.team?
+      try
+        teamRepo.getById @user?.team?._id, cb
+      catch e
+        console.trace e
+        cb e
+    else 
+      cb()
+  .then (err, @team, cb = ->) =>   
+    # Load posts
+    return callback( err ) if err    
+    @user?.team = @team
+
+    if @user?.posts? and @user?.posts?.length
+      try
+        postGen = require './post'
+        postGen.init()
+        utils.mapAsync @user?.posts, postGen.makePostGen(@user), cb
+      catch e
+        console.trace e
+        cb e
+    else
+      cb null, null
+        
+  .then (err, fullposts, cb = ->) =>    
+    
+    if fullposts?
+      posts = (post for post in fullposts when post?.desc?)
+    else
+      posts = fullposts
+      
+    if posts?
+      posts.sort (p1, p2) ->
+        p2?.createdat - p1?.createdat
+        
+    @user?.posts = posts
+    # Load invites
+    try
+      if @user?.invites and @user?.invites?.length
+        utils.mapAsync @user?.invites, loadFullInvite, cb
+      else
+        cb()
+    catch e
+      console.trace e
+      cb e
+  .then (err, invites, cb = ->) =>
+    return callback( err ) if err
+    
+    @user?.invites = invites
+    
+    callback null, @user
+    
+
     
     
     

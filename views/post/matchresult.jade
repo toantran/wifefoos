@@ -1,0 +1,10 @@
+- if (result === 'win')
+  a( href="/profile/#{playerid}")= playername
+  |  won a match against team 
+  a( href="/team/#{teamid}")= teamname
+  | .  Rub it on them!
+- else
+  a( href="/profile/#{playerid}")= playername
+  |  lost a match to team 
+  a( href="/team/#{teamid}")= teamname
+  | .  That has got to hurt!

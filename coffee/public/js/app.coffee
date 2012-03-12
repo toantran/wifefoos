@@ -3,9 +3,15 @@ jQuery ($) ->
     
   global = makethis.call()
   
+  
+  ###
+  Publish helper
+  ###
   $.publish = (title, body) ->
       console.log title, body
-      
+  ###
+  Publish helper end
+  ###
       
   ###
   Template engine
@@ -31,7 +37,6 @@ jQuery ($) ->
       selected: 1
 
     setProperty = ( el, key, value ) ->
-      console.log key, value
       prop = directProperties[ key ]
       if prop
         el[ prop ] = '' + (value  ? '')
@@ -50,7 +55,9 @@ jQuery ($) ->
             appendChildren el, node
           else
             if typeof node is 'string'
-              node = doc.createTextNode node
+              spanEl = doc.createElement 'span'
+              spanEl.innerHTML = node
+              node = spanEl
             el.appendChild node
               
       
@@ -58,7 +65,6 @@ jQuery ($) ->
     splitter = /(#|\.)/
 
     create = ( tag, props, children ) ->
-      console.log tag, props, children
       if props instanceof Array
         children = props;
         props = null;
@@ -89,3 +95,7 @@ jQuery ($) ->
       thisEl
 
   $.el = el()
+  
+  ###
+  Template engine end
+  ###

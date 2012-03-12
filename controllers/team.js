@@ -138,7 +138,7 @@
         });
       }
     } catch (e) {
-      console.log(e);
+      console.trace(e);
       return res.send({
         success: false,
         error: e
@@ -179,7 +179,7 @@
         });
       }
     } catch (e) {
-      console.log(e);
+      console.trace(e);
       return res.send({
         success: false,
         error: e
@@ -222,7 +222,7 @@
         }
       });
     } catch (e) {
-      console.log(e);
+      console.trace(e);
       return res.send({
         success: false,
         error: e
@@ -249,7 +249,7 @@
     return utils.execute(teamSvc.getAll, availableOnly).then(function(err, teams, cb) {
       var makeMemberMapper, makeTeamMapper;
       if (cb == null) cb = function() {};
-      if (err != null) return next();
+      if (err) return next(err);
       makeMemberMapper = function() {
         var userSvc;
         userSvc = require('../services/user');
@@ -262,8 +262,8 @@
         return function(team, teammapcb) {
           if (teammapcb == null) teammapcb = function() {};
           if (team == null) return teammapcb();
-          return utils.mapAsync(team.members, makeMemberMapper(), function(err, members) {
-            if (err != null) return teammapcb(err);
+          return utils.mapAsync(team != null ? team.members : void 0, makeMemberMapper(), function(err, members) {
+            if (err) return teammapcb(err);
             team.members = members;
             return teammapcb(null, team);
           });
@@ -272,7 +272,7 @@
       return utils.mapAsync(teams, makeTeamMapper(), cb);
     }).then(function(err, teams, cb) {
       if (cb == null) cb = function() {};
-      if ((err != null) || !(teams != null)) return next();
+      if (err || !(teams != null)) return next(err);
       teams.sort(teamSvc.sortingTeams);
       if (availableOnly) {
         return res.send(teams);
@@ -352,5 +352,26 @@
   };
 
   exports.create.authenticated = true;
+
+  /*
+    GET
+    URL /team/:id
+    Render a team detail page
+  */
+
+  exports.show = function(req, res, next) {
+    var teamId;
+    teamId = req.params.id;
+    return teamSvc.getById(teamId, function(error, team) {
+      if (error) req.flash('error', error);
+      return res.render(team, {
+        layout: true,
+        title: 'WFL - Team',
+        user: req.session.user
+      });
+    });
+  };
+
+  exports.show.authenticated = true;
 
 }).call(this);

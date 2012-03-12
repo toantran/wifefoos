@@ -1,9 +1,22 @@
 - if (challenge.type == 'challenged')
-  .team-challenge.team-challenged(challengedteamid='#{profile.team._id}', challengingteamid='#{challenge.teamid}')
-    .team-challenge-text
-    .buttons
-      button(value='accept', challengingteamid='#{profile.team._id}', challengedteamid='#{challenge.teamid}') Accept
-      button(value='decline', challengingteamid='#{profile.team._id}', challengedteamid='#{challenge.teamid}') Decline
+  .alert.alert-error
+    a.close(data-dismiss='alert') x
+    h4 You are challenged!
+    p
+      | Team&nbsp;
+      a.label.label-info(href='/team/#{challenge.teamid}')
+      |  have challenged you for a 
+      - if (challenge.matchtype == '1')
+        |  match
+      - else if (challenge.matchtype == '99')
+        |  death match
+      - else
+        | best of #{challenge.matchtype} match
+      - if (typeof challenge.msg != 'undefined')
+        |  with message #{challenge.msg}
+    .btn-group
+      button.btn.btn-mini.btn-danger(value='accept', challengingteamid='#{profile.team._id}', challengedteamid='#{challenge.teamid}') Accept
+      button.btn.btn-mini.btn-warning(value='decline', challengingteamid='#{profile.team._id}', challengedteamid='#{challenge.teamid}') Decline
 - if (challenge.type == 'challenging')
   .team-challenge.team-challenging(challengingteamid='#{profile.team._id}', challengedteamid='#{challenge.teamid}')
     .team-challenge-text

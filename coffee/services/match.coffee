@@ -1,5 +1,16 @@
 matchRepo = require('../repository/matches2')
 
+
+exports.getById = (matchid, callback = ->) ->
+  console.assert matchid, 'matchid cannot be null or 0'
+  throw 'matchid cannot be null or 0' unless matchid
+  
+  try
+    matchRepo.getById matchid, callback
+  catch e
+    console.trace e
+    throw e 
+
 exports.createMatch = (am, callback = ->) ->
   console.assert am, 'Match object cannot be null'
   throw 'Match object cannot be null' unless am?

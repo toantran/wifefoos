@@ -96,14 +96,12 @@ exports.createTeamChallenge = (params, callback = ->) ->
   userSvc = require './user'
   
   {teamid, msg, matchtype} = params
-  console.log params
   teamid = new newTeamRepo.ObjectId(teamid) if typeof teamid is 'string'
   opponentid = null
   
   try   
     utils.execute( userSvc.getById, params.opponentplayerid ) # get the opponent player obj
     .then (err, opponentplayer, cb = ->) =>
-      console.log 'get the existing challenge'
       # get the existing challenge
       return callback(err) if err    
       params.opponentid = opponentid = opponentplayer.team._id 
@@ -114,14 +112,12 @@ exports.createTeamChallenge = (params, callback = ->) ->
         console.trace e
         throw e
     .then (err, challenges, cb = ->) ->
-      console.log 'Already challenged', challenges
       if challenges? && challenges.length
         # already challenged
         callback 'Already challenged'
       else
         cb()
     .then (args..., cb = ->) =>
-      console.log 'Step 3'
       # create challenge for challenged team
       challenge = 
         message: params.msg
@@ -141,14 +137,12 @@ exports.createTeamChallenge = (params, callback = ->) ->
         $set:
           updatedat: new Date()
       
-      console.log findObj, updateObj
       try
         newTeamRepo.update findObj, updateObj, {}, cb
       catch e
         console.trace e
         throw e
     .then (err, args..., cb = ->) ->
-      console.log 'Step 4', err, args
       # get challenged team
       try
         newTeamRepo.getById teamid, cb
@@ -156,7 +150,6 @@ exports.createTeamChallenge = (params, callback = ->) ->
         console.trace e
         throw e
     .then (err, challengedTeam, cb = ->) => 
-      console.log 'Step 5', err 
       # create challenge post for members of challenged team
       for memberid in challengedTeam?.members
         do (memberid) ->
@@ -172,7 +165,6 @@ exports.createTeamChallenge = (params, callback = ->) ->
             throw e
       cb()
     .then (args..., cb = ->) ->
-      console.log 'Step 6'
       # create challenge for challenging team
       challenge = 
         message: msg
@@ -197,7 +189,6 @@ exports.createTeamChallenge = (params, callback = ->) ->
         console.trace e
         throw e
     .then (err, args..., cb = ->) ->
-      console.log 'Step 7', err
       # get challenging team
       try
         newTeamRepo.getById opponentid, cb
@@ -205,7 +196,6 @@ exports.createTeamChallenge = (params, callback = ->) ->
         console.trace e
         throw e
     .then (err, challengingTeam, cb = ->) ->
-      console.log 'Step 8', err
       for memberid in challengingTeam?.members
         do (memberid) ->
           post = 
@@ -220,7 +210,6 @@ exports.createTeamChallenge = (params, callback = ->) ->
             throw e
       cb()
     .then ->
-      console.log 'Step 9'
       callback()               
   catch e
     console.trace e
@@ -515,7 +504,7 @@ exports.getAll = (availableOnly, callback = ->) ->
         callback()
         
   catch e
-    console.log e
+    console.trace e
     throw e
 
 

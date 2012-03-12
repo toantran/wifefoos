@@ -99,7 +99,7 @@ exports.challengeaccept = (req, res, next) ->
         success: false
         error: 'Ids empty'
   catch e
-    console.log e
+    console.trace e
     res.send 
       success: false
       error: e
@@ -130,7 +130,7 @@ exports.challengecancel = (req, res) ->
         success: false
         error: 'Ids empty'
   catch e
-    console.log e
+    console.trace e
     res.send 
       success: false
       error: e
@@ -161,7 +161,7 @@ exports.getChallenge = (req, res, next) ->
           success: true
           result: result
   catch e
-    console.log e
+    console.trace e
     res.send 
       success: false
       error: e      
@@ -178,10 +178,10 @@ exports.getChallenge.methods = ['GET']
 exports.index = (req, res, next) ->
   availableOnly = req.param 'available', ''
   utils = require '../services/utils'
-    
+  
   utils.execute( teamSvc.getAll, availableOnly )  # get all teams
   .then (err, teams, cb = ->) ->
-    return next() if err?
+    return next( err ) if err
     
     makeMemberMapper = ->
       userSvc = require '../services/user'
@@ -191,14 +191,14 @@ exports.index = (req, res, next) ->
     makeTeamMapper = ->
       (team, teammapcb = ->) ->
         return teammapcb() unless team?
-        utils.mapAsync team.members, makeMemberMapper(), (err, members) ->
-          return teammapcb(err) if err?
+        utils.mapAsync team?.members, makeMemberMapper(), (err, members) ->
+          return teammapcb(err) if err
           team.members = members
           teammapcb null, team
       
     utils.mapAsync teams, makeTeamMapper(), cb
   .then (err, teams, cb = ->) ->
-    return next() if err? or not teams?
+    return next(err) if err or not teams?
     teams.sort teamSvc.sortingTeams
     
     if (availableOnly)
@@ -256,8 +256,23 @@ exports.create = (req, res, next) ->
     req.session.user = @user
     res.send
       success: true
-exports.create.authenticated = true;
+exports.create.authenticated = true
 
 
-
+###
+  GET
+  URL /team/:id
+  Render a team detail page
+###
+exports.show = (req, res, next) ->
+  teamId = req.params.id
+  
+  teamSvc.getById teamId, (error, team) ->
+    if error
+      req.flash 'error', error
+    res.render team, 
+      layout: true
+      title: 'WFL - Team'
+      user: req.session.user
+exports.show.authenticated = true 
 

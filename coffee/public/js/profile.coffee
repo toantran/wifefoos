@@ -1,10 +1,93 @@
 jQuery ($) ->
   makethis = -> @
+  
+  $('#upload-picture-dlg').modal
+    backdrop: true
+    keyboard: true
+    show: false
+  
+  changePictureClick = ->
+    profileid = $(@).attr('data-profileid')
+    $('#upload-picture-dlg').modal 'show'
     
+  $('#player-picture-change a').on 'click', changePictureClick  
+   
   global = makethis.call()
   global.setActiveMenu 5
   
-  $('.new-post button').on 'click', ->
+  $('.post-text').on 'focus', ->
+    $(@).addClass 'active'
+    
+  $('.post-text').on 'blur', ->
+    val = $(@).val()
+    if not val
+      $(@).removeClass 'active'
+      
+  onpostcloseclick = ->
+    postpnl = $(@).closest('.post-panel')
+    postid = $(postpnl).attr 'data-postid'
+    profileid = $(postpnl).attr 'data-profileid'
+    
+    if postid and profileid
+      $.post("/profile/#{profileid}/removepost", postid: postid )
+      .success (data) ->
+        $(postpnl).hide 'slow'
+    
+  $('.post-panel > a.post-close-btn').on 'click', onpostcloseclick
+  
+  oncommentcloseclick = ->
+    commentpnl = $(@).closest('.comment-panel')
+    postpnl = $(@).closest('.post-panel')
+    commentid = $(commentpnl).attr 'data-commentid'
+    profileid = $(commentpnl).attr 'data-profileid'
+    postid = $(postpnl).attr 'data-postid'
+    
+    if commentid and profileid
+      $.post("/profile/#{profileid}/removecomment", {postid: postid, profileid: profileid, commentid: commentid} )
+      .success (data) ->
+        $(commentpnl).hide 'slow'
+  
+  $('.comment-panel > a.post-close-btn').on 'click', oncommentcloseclick
+      
+  $('textarea').autoResize( extraSpace: 16)
+  
+  newcommentclick = ->
+    profileid = $(@).attr('data-profileid')
+    posterid = $(@).attr('data-posterid')
+    postid = $(@).attr('data-postid')
+    input = $(@).closest('.new-comment').find('textarea.post-text')[0]
+    msg = $(input).val()
+    
+    if msg # has a comment
+      $.post("/profile/#{profileid}/addcomment", {postid, posterid, msg})
+      .success (data) =>
+        if data?.success
+          comment = data.comment
+          
+          el = $.el('div.row.comment-panel', {'data-commentid':comment.id, 'data-profileid':profileid}, [
+            $.el('a.post-close-btn'),
+            $.el('div.span1.poster-picture', {}, [
+              $.el('img', {src:comment.pictureurl}, []) if comment.pictureurl
+            ]),
+            $.el('div.span4.comment-item', {}, [
+              $.el('a', {href: "/profile/#{comment.posterid}"}, [comment.postername]),
+              ' wrote', 
+              $.el('p', {}, [comment.msg]),
+              $.el('div.postmark', {}, ["on #{comment.createdat}"])
+            ])            
+          ])
+          
+          $(@).closest('.new-comment').before(el).show('slow')
+          console.log $(el)
+          $(el).find('a.post-close-btn').on 'click', oncommentcloseclick
+          
+          $(input).val('')
+    
+  
+  $('.new-comment button').on 'click', newcommentclick
+
+
+  newpostclick = ->
     profileid = $(@).attr('data-profileid')
     userid = $(@).attr('data-userid')
     msg = $('#newpost-msg').val()
@@ -15,18 +98,18 @@ jQuery ($) ->
         if data?.success
           post = data.post
           
-          el = $.el( 'div.row.post-panel', {postid: post.id, profileid: profileid}, [
+          el = $.el( 'div.row.post-panel', {'data-postid': post.id, 'data-profileid': profileid}, [
             $.el('a.post-close-btn'),
             $.el('div.span1', [$.el('img', {src: post.pictureurl} if post.pictureurl)]),
             $.el('div.span5', [
-              $.el('div.post-item', , post.desc),
-              $.el('div.postmark', ,"on #{post.createdat}"),
+              $.el('div.post-item', null, [post.desc]),
+              $.el('div.postmark', null,["on #{post.createdat}"]),
               $.el('div.post-comment-list', [
                 
                 $.el('div.row.new-comment', [
                   $.el('div.span5', [
                     $.el('textarea.post-text', {rows:1, placeholder:'Type your comment...'}),
-                    $.el('button.btn.btn-mini.btn-primary.pull-right', {postid: post.id, profileid:profileid, posterid:userid}, [
+                    $.el('button.btn.btn-mini.btn-primary.pull-right', {'data-postid': post.id, 'data-profileid':profileid, 'data-posterid':userid}, [
                       $.el('i.icon-comment.icon-white'),
                       '&nbsp;Post'
                     ])
@@ -37,11 +120,22 @@ jQuery ($) ->
           ])
             
           el = $(el).prependTo('.post-list').show('slow')
+          
+          el.find('textarea').autoResize extraSpace: 16
                            
-#          el.find('.post-new-comment textarea')
-#            .watermark('Write something...')
-#            .elastic();
-#          el.find('.post-new-comment button').button();
-#          el.find('.post-new-comment button').click(profile.newcommentclick);
+          el.find('.post-text').on 'focus', ->
+            $(@).addClass 'active'
+            
+          el.find('.post-text').on 'blur', ->
+            val = $(@).val()
+            if not val
+              $(@).removeClass 'active'
+          
+          el.find('.new-comment button').on 'click', newcommentclick
+          el.find('.post-panel > a.post-close-btn').on 'click', onpostcloseclick
+          
           $('#newpost-msg').val('')
+  
+  $('.new-post button').on 'click', newpostclick
+    
     

@@ -123,13 +123,11 @@
     utils = require('./utils');
     userSvc = require('./user');
     teamid = params.teamid, msg = params.msg, matchtype = params.matchtype;
-    console.log(params);
     if (typeof teamid === 'string') teamid = new newTeamRepo.ObjectId(teamid);
     opponentid = null;
     try {
       return utils.execute(userSvc.getById, params.opponentplayerid).then(function(err, opponentplayer, cb) {
         if (cb == null) cb = function() {};
-        console.log('get the existing challenge');
         if (err) return callback(err);
         params.opponentid = opponentid = opponentplayer.team._id;
         try {
@@ -140,7 +138,6 @@
         }
       }).then(function(err, challenges, cb) {
         if (cb == null) cb = function() {};
-        console.log('Already challenged', challenges);
         if ((challenges != null) && challenges.length) {
           return callback('Already challenged');
         } else {
@@ -150,7 +147,6 @@
         var args, cb, challenge, challengePost, findObj, updateObj, _i;
         args = 2 <= arguments.length ? __slice.call(arguments, 0, _i = arguments.length - 1) : (_i = 0, []), cb = arguments[_i++];
         if (cb == null) cb = function() {};
-        console.log('Step 3');
         challenge = {
           message: params.msg,
           matchtype: params.matchtype,
@@ -173,7 +169,6 @@
             updatedat: new Date()
           }
         };
-        console.log(findObj, updateObj);
         try {
           return newTeamRepo.update(findObj, updateObj, {}, cb);
         } catch (e) {
@@ -184,7 +179,6 @@
         var args, cb, err, _i;
         err = arguments[0], args = 3 <= arguments.length ? __slice.call(arguments, 1, _i = arguments.length - 1) : (_i = 1, []), cb = arguments[_i++];
         if (cb == null) cb = function() {};
-        console.log('Step 4', err, args);
         try {
           return newTeamRepo.getById(teamid, cb);
         } catch (e) {
@@ -194,7 +188,6 @@
       }).then(function(err, challengedTeam, cb) {
         var memberid, _fn, _i, _len, _ref;
         if (cb == null) cb = function() {};
-        console.log('Step 5', err);
         _ref = challengedTeam != null ? challengedTeam.members : void 0;
         _fn = function(memberid) {
           var post;
@@ -223,7 +216,6 @@
         var args, cb, challenge, challengePost, findObj, updateObj, _i;
         args = 2 <= arguments.length ? __slice.call(arguments, 0, _i = arguments.length - 1) : (_i = 0, []), cb = arguments[_i++];
         if (cb == null) cb = function() {};
-        console.log('Step 6');
         challenge = {
           message: msg,
           matchtype: matchtype,
@@ -256,7 +248,6 @@
         var args, cb, err, _i;
         err = arguments[0], args = 3 <= arguments.length ? __slice.call(arguments, 1, _i = arguments.length - 1) : (_i = 1, []), cb = arguments[_i++];
         if (cb == null) cb = function() {};
-        console.log('Step 7', err);
         try {
           return newTeamRepo.getById(opponentid, cb);
         } catch (e) {
@@ -266,7 +257,6 @@
       }).then(function(err, challengingTeam, cb) {
         var memberid, _fn, _i, _len, _ref;
         if (cb == null) cb = function() {};
-        console.log('Step 8', err);
         _ref = challengingTeam != null ? challengingTeam.members : void 0;
         _fn = function(memberid) {
           var post;
@@ -292,7 +282,6 @@
         }
         return cb();
       }).then(function() {
-        console.log('Step 9');
         return callback();
       });
     } catch (e) {
@@ -725,7 +714,7 @@
         }
       });
     } catch (e) {
-      console.log(e);
+      console.trace(e);
       throw e;
     }
   };
