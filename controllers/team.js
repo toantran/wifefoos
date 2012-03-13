@@ -8,13 +8,18 @@
     teamid = req.param('id', '');
     userid = req.param('playerid', '');
     if (teamid && userid) {
-      return teamSvc.createJoinRequest(teamid, userid, function(err) {
-        return res.send({
-          success: !(err != null)
+      try {
+        return teamSvc.createJoinRequest(teamid, userid, function(err) {
+          return res.send({
+            success: !(err != null)
+          });
         });
-      });
+      } catch (e) {
+        console.trace(e);
+        return next(e);
+      }
     } else {
-      return next();
+      return next('ids cannot be empty or 0');
     }
   };
 
@@ -43,24 +48,29 @@
         error: 'Ids empty'
       });
     } else {
-      return teamSvc.createTeamChallenge({
-        teamid: teamid,
-        opponentplayerid: opponentplayerid,
-        matchtype: matchtype,
-        msg: msg
-      }, function(error, result) {
-        if (error) {
-          return res.send({
-            success: false,
-            error: error
-          });
-        } else {
-          return res.send({
-            success: true,
-            result: result
-          });
-        }
-      });
+      try {
+        return teamSvc.createTeamChallenge({
+          teamid: teamid,
+          opponentplayerid: opponentplayerid,
+          matchtype: matchtype,
+          msg: msg
+        }, function(error, result) {
+          if (error) {
+            return res.send({
+              success: false,
+              error: error
+            });
+          } else {
+            return res.send({
+              success: true,
+              result: result
+            });
+          }
+        });
+      } catch (e) {
+        console.trace(e);
+        return next(e);
+      }
     }
   };
 

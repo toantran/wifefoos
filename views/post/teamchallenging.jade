@@ -1,4 +1,3 @@
-  
 a( href="/profile/#{playerid}")= playername
 |  challenged team 
 a( href="/team/#{teamid}")= teamname
@@ -7,7 +6,8 @@ a( href="/team/#{teamid}")= teamname
     |  in one game
   - else if (matchtype === '99')
     |  in a death match
-  - else
+  - else if (matchtype)
     |  in a best of #{matchtype} games
 - if (typeof matchmsg !== 'undefined')
-  |  with a message #{matchmsg}  
+  - if (matchmsg)
+    |  with a message #{matchmsg}  

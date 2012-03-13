@@ -33,7 +33,7 @@
       }
       return $.post(url, data).success(function(resp) {
         if (resp != null ? resp.success : void 0) {
-          return $(btn).closest('alert').alert('close');
+          return $(btn).closest('.alert').alert('close');
         }
       });
     };

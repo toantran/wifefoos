@@ -1,16 +1,21 @@
-- var playerteam = profile.team
-- var otherteamname = null
-- if (typeof match.teams !== 'undefined')
-  - each team in match.teams
-    - if (String(team._id) != String(playerteam._id))
-      - otherteamname = team.teamname;
-- voted = false
-- if (profile.votes)
-  - each vote in profile.votes
-    - if ( String(vote.matchid) == String(match._id))
-      - voted = true
-- if (!voted) 
-  .match-update-panel Did you win the match against team 
-    a #{otherteamname || 'N/A'}?
-    button(matchid='#{match._id}', teamid='#{playerteam._id}', playerid='#{profile._id}', action='win') Yes, we won
-    button(matchid='#{match._id}', teamid='#{playerteam._id}', playerid='#{profile._id}', action='lose') No, we lost
+.alert.alert-info.alert-block.todo-match
+  a.close(data-dismiss='alert') x
+  h4.alert-heading Pending match
+  - if ((typeof match.voted === 'undefined') || (!match.voted))
+    .match-update-panel Did you win the match against team 
+      a(href='/team/#{match.opponentteam._id}') #{match.opponentteam.teamname || 'N/A'}?
+      .btn-group
+        button.btn.btn-danger.btn-mini(data-matchid='#{match._id}', data-teamid='#{profile.team._id}', data-playerid='#{profile._id}', data-vote='lose') No, we lost
+        button.btn.btn-success.btn-mini(data-matchid='#{match._id}', data-teamid='#{profile.team._id}', data-playerid='#{profile._id}', data-vote='win') Yes, we won
+      //button(matchid='#{match._id}', teamid='#{playerteam._id}', playerid='#{profile._id}', action='win') Yes, we won
+      //button(matchid='#{match._id}', teamid='#{playerteam._id}', playerid='#{profile._id}', action='lose') No, we lost
+  - else
+    | Match against team 
+    a(href='/team/#{match.opponentteam._id}') #{match.opponentteam.teamname || 'N/A'}
+    |  is still pending
+    ul
+      each vote in match.votes
+        if (vote.playerid !== profile._id)
+          li 
+            a(href='/profile/#{vote.playerid}')= vote.playername
+            |  voted

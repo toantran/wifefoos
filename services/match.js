@@ -172,6 +172,39 @@
     });
   };
 
+  exports.addVote = function(matchid, playerid, teamid, result, callback) {
+    var vote;
+    if (callback == null) callback = function() {};
+    return vote = {
+      playerid: playerid,
+      teamid: teamid,
+      count: result === 'win' ? 1 : -1
+    };
+  };
+
+  exports.countVotes = function(am, callback) {
+    var count, results, teamid, _i, _len, _ref, _ref2;
+    if (callback == null) callback = function() {};
+    if ((am != null ? am.votes : void 0) == null) callback(0);
+    results = {};
+    results[String(am.teams[0]._id)] = {
+      count: 0,
+      win: false,
+      opponentid: String(am.teams[1]._id)
+    };
+    results[String(am.teams[1]._id)] = {
+      count: 0,
+      win: false,
+      opponentid: String(am.teams[0]._id)
+    };
+    _ref = am.votes;
+    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+      _ref2 = _ref[_i], teamid = _ref2.teamid, count = _ref2.count;
+      results[teamid].count += count;
+    }
+    return Math.abs(results[String(am.teams[1]._id)].count - results[String(am.teams[0]._id)].count);
+  };
+
   exports.finalize = function(am, callback) {
     var count, makeSetMatchComplete, makeSetTeamMatchComplete, makeUpdatePlayerStats, makeUpdateTeamStats, maxCount, playerSvc, result, results, teamSvc, teamid, utils, _fn, _i, _len, _ref, _ref2, _ref3;
     if (callback == null) callback = function() {};
@@ -193,7 +226,7 @@
       win: false,
       opponentid: String(am.teams[0]._id)
     };
-    _ref2 = am.votes;
+    _ref2 = am != null ? am.votes : void 0;
     for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
       _ref3 = _ref2[_i], teamid = _ref3.teamid, count = _ref3.count;
       results[teamid].count += count;

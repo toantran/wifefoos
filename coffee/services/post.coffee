@@ -147,8 +147,22 @@ exports.makePostGen = (user) ->
           catch e
             console.trace e
             returnback e
-        
-      when 'teamchallenging', 'challengedeclined', 'challengedeclining', 'challengecancelled', 'challengeremoved'
+      when 'challengecancelled'
+        teamsvc.getById post?.data?.teamid, (err, team) ->
+          return returnback(err) if err
+          
+          setPictureUrl team?.pictureurl
+          data.teamid = team?._id
+          data.teamname = team?.teamname
+          
+          try
+            genDesc()
+            returnback null
+          catch e
+            console.trace e
+            returnback e
+            
+      when 'teamchallenging', 'challengedeclined', 'challengedeclining', 'challengeremoved', 'challengecancelling'
         setPictureUrl user?.pictureurl
         
         data.matchtype = post?.data?.matchtype

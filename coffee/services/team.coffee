@@ -59,7 +59,7 @@ exports.addMatch = addMatch = (teamid, am, callback = ->) ->
     newTeamRepo.update findObj, updateObj, {}, callback  
   catch e
     console.trace e
-    callback e    
+    throw e    
 
 
 ###
@@ -74,15 +74,18 @@ exports.getChallenge = getChallenge = (teamid, opponentid, callback = ->) ->
   teamid = new newTeamRepo.ObjectId(teamid) if typeof teamid is 'string'
   opponentid = new newTeamRepo.ObjectId(opponentid) if typeof opponentid is 'string'
   
-  newTeamRepo.read
-    _id: teamid
-    challenges: 
-      '$elemMatch': 
-        teamid: opponentid
-  , {}, (err, cursor) ->
-    return callback(err) if err
-    cursor.toArray callback
-    
+  try
+    newTeamRepo.read
+      _id: teamid
+      challenges: 
+        '$elemMatch': 
+          teamid: opponentid
+    , {}, (err, cursor) ->
+      return callback(err) if err
+      cursor.toArray callback
+  catch e
+    console.trace e
+    throw e    
     
 
 ###
@@ -110,9 +113,9 @@ exports.createTeamChallenge = (params, callback = ->) ->
         getChallenge teamid, opponentid, cb
       catch e
         console.trace e
-        throw e
+        callback e
     .then (err, challenges, cb = ->) ->
-      if challenges? && challenges.length
+      if challenges?.length
         # already challenged
         callback 'Already challenged'
       else
@@ -142,28 +145,27 @@ exports.createTeamChallenge = (params, callback = ->) ->
         newTeamRepo.update findObj, updateObj, {}, cb
       catch e
         console.trace e
-        throw e
+        callback e
     .then (err, args..., cb = ->) ->
       # get challenged team
       try
         newTeamRepo.getById teamid, cb
       catch e
         console.trace e
-        throw e
+        callback e
     .then (err, challengedTeam, cb = ->) => 
       # create challenge post for members of challenged team
       for memberid in challengedTeam?.members
         do (memberid) ->
           post = 
             type: 'teamchallenged'
-            data: {teamid, msg, matchtype }
+            data: {teamid: opponentid, msg, matchtype }
             createdat: new Date()
           
           try  
             userSvc.addPost memberid, post
           catch e
             console.trace e
-            throw e
       cb()
     .then (args..., cb = ->) ->
       # create challenge for challenging team
@@ -189,14 +191,14 @@ exports.createTeamChallenge = (params, callback = ->) ->
         newTeamRepo.update findObj, updateObj, {}, cb
       catch e
         console.trace e
-        throw e
+        callback e
     .then (err, args..., cb = ->) ->
       # get challenging team
       try
         newTeamRepo.getById opponentid, cb
       catch e
         console.trace e
-        throw e
+        callback e
     .then (err, challengingTeam, cb = ->) ->
       for memberid in challengingTeam?.members
         do (memberid) ->
@@ -209,7 +211,6 @@ exports.createTeamChallenge = (params, callback = ->) ->
             userSvc.addPost memberid, post
           catch e
             console.trace e
-            throw e
       cb()
     .then ->
       callback()               
@@ -227,130 +228,207 @@ exports.acceptChallenge = (inputs, callback = ->) ->
   
   teamids = [inputs.challengingteamid, inputs.challengedteamid]
     
-  utils.execute( utils.mapAsync, teamids, newTeamRepo.getById )  # get all teams
-  .then (err, @teams, cb = ->) =>
-    # create match
-    return callback(err) if err
-    start = new Date()
-    end = new Date()
-    am = 
-      start: start
-      end: new Date(end.setDate( end.getDate() + 3 ))  # ends after 3 days
-      status: 'pending'
-      teams: teams
-    matchSvc.createMatch am, cb
-  .then (err, ams, cb = ->) =>
-    @am = ams?.[0]
-    return callback(err) if err
-    # add match to teams
-    utils.mapAsync @teams, (team, cb) => 
-      addMatch( team._id, @am, cb )
-    , cb
-  .then (err, args..., cb = ->) ->
-    return callback(err) if err
-    # remove the challenge from both teams
-    newTeamRepo.removeChallenge inputs.challengedteamid, inputs.challengingteamid
-    newTeamRepo.removeChallenge inputs.challengingteamid, inputs.challengedteamid
-    cb()
-  .then (err, args..., cb = ->) =>
-    return callback(err) if err
-    for team in @teams
-      do (team) =>
-        utils.mapAsync team.members, (memberid, mapcb = ->) =>
-          post = 
-            type: 'newmatch'
-            data: 
-              matchid: String(@am._id)
-            createdat: new Date()
-            
-          userSvc.addPost memberid, post, mapcb
+  try
+    utils.execute( utils.mapAsync, teamids, newTeamRepo.getById )  # get all teams
+    .then (err, @teams, cb = ->) =>
+      # create match
+      return callback(err) if err
+      start = new Date()
+      end = new Date()
+      am = 
+        start: start
+        end: new Date(end.setDate( end.getDate() + 3 ))  # ends after 3 days
+        status: 'pending'
+        teams: teams
+      try
+        matchSvc.createMatch am, cb
+      catch e
+        console.trace e
+        throw e
+    .then (err, ams, cb = ->) =>
+      @am = ams?[0]
+      return callback(err) if err
+      # add match to teams
+      try
+        utils.mapAsync @teams, (team, cb) => 
+          addMatch( team._id, @am, cb )
         , cb
-    callback()
-      
+      catch e
+        console.trace e
+        throw e
+    .then (err, args..., cb = ->) ->
+      return callback(err) if err
+      # remove the challenge from both teams
+      try
+        newTeamRepo.removeChallenge inputs.challengedteamid, inputs.challengingteamid
+        newTeamRepo.removeChallenge inputs.challengingteamid, inputs.challengedteamid
+      catch e
+        console.trace e
+        throw e
+      cb()
+    .then (err, args..., cb = ->) =>
+      return callback(err) if err
+      for team in @teams
+        do (team) =>
+          try
+            utils.mapAsync team.members, (memberid, mapcb = ->) =>
+              post = 
+                type: 'newmatch'
+                data: 
+                  matchid: String(@am._id)
+                createdat: new Date()
+                
+              try
+                userSvc.addPost memberid, post, mapcb
+              catch e
+                console.trace e
+                throw e
+            , cb
+          catch e
+            console.trace e
+            throw e
+      callback()
+  catch e
+    console.trace e
+    throw e
 
 exports.cancelChallenge = (inputs, callback = ->) ->  
   console.assert inputs?, 'inputs cannot be null'
   throw 'Inputs cannot be null' unless inputs?
 
-  utils.execute(newTeamRepo.removeChallenge, inputs.challengingteamid, inputs.challengedteamid)
-  .then (err, others..., cb = ->) ->
-    return callback(err) if err
-    newTeamRepo.getById inputs.challengingteamid, cb
-  .then (err, team, cb = ->) ->
-    return callback(err) if err
-    if Array.isArray(team?.members)
-      for member in team.members
-        do ( member ) ->
-          post = 
-            type: 'challengecancelling'
-            data: 
-              teamid: inputs.challengedteamid
-              msg: 'Chicken dance'
-            createdat: new Date()
-          userSvc.addPost member._id, post
-    cb()
-  .then (err, args..., cb = ->) ->   
-    return callback(err) if err
-    newTeamRepo.removeChallenge inputs.challengedteamid, inputs.challengingteamid, cb
-  .then (err, others..., cb = ->) ->
-    return callback(err) if err
-    newTeamRepo.getById inputs.challengedteamid, cb
-  .then (err, team, cb = ->) ->
-    return callback(err) if err
-    if Array.isArray(team?.members)
-      for member in team.members
-        do (member) ->
-          post = 
-            type: 'challengecancelled'
-            data: 
-              teamid: inputs.challengingteamid
-              msg: 'Chicken dance'
-            createdat: new Date()
-          userSvc.addPost member._id, post
-    cb()
+  try
+    utils.execute(newTeamRepo.removeChallenge, inputs.challengingteamid, inputs.challengedteamid)
+    .then (err, others..., cb = ->) ->
+      return callback(err) if err
+      
+      try
+        newTeamRepo.getById inputs.challengingteamid, cb
+      catch e
+        console.trace e
+        callback e
+    .then (err, team, cb = ->) ->
+      return callback(err) if err
+      if Array.isArray(team?.members)
+        for memberid in team.members
+          do ( memberid ) ->
+            post = 
+              type: 'challengecancelling'
+              data: 
+                teamid: inputs.challengedteamid
+                msg: 'Chicken dance'
+              createdat: new Date()
+            try
+              userSvc.addPost memberid, post
+            catch e
+              console.trace e
+      cb()
+    .then (err, args..., cb = ->) ->  
+      return callback(err) if err
+      
+      try
+        newTeamRepo.removeChallenge inputs.challengedteamid, inputs.challengingteamid, cb
+      catch e
+        console.trace e
+        callback e
+    .then (err, others..., cb = ->) ->
+      console.log 'Step 5', err
+      return callback(err) if err
+      
+      try
+        newTeamRepo.getById inputs.challengedteamid, cb
+      catch e
+        console.trace e
+        callback e
+    .then (err, team, cb = ->) ->
+      return callback(err) if err
+      if Array.isArray(team?.members)
+        for memberid in team.members
+          do (memberid) ->
+            post = 
+              type: 'challengecancelled'
+              data: 
+                teamid: inputs.challengingteamid
+                msg: 'Chicken dance'
+              createdat: new Date()
+            
+            try
+              userSvc.addPost memberid, post
+            catch e
+              console.trace e
+      callback()
+  catch e
+    console.trace e
+    throw e
     
 
 exports.declineChallenge = (inputs, callback = ->) ->  
   console.assert inputs?, 'inputs cannot be null'
   throw 'Inputs cannot be null' unless inputs?
 
-  utils.execute(newTeamRepo.removeChallenge, inputs.challengingteamid, inputs.challengedteamid)
-  .then (err, others..., cb = ->) ->
-    return callback(err) if err
-    newTeamRepo.getById inputs.challengingteamid, cb
-  .then (err, team, cb = ->) ->
-    return callback(err) if err
-    if Array.isArray(team?.members)
-      for member in team.members
-        do ( member ) ->
-          post = 
-            type: 'challengedeclined'
-            data: 
-              teamid: inputs.challengedteamid
-              msg: 'Chicken dance'
-            createdat: new Date()
-          userSvc.addPost member._id, post
-    cb()
-  .then (err, args..., cb = ->) ->   
-    return callback(err) if err
-    newTeamRepo.removeChallenge inputs.challengedteamid, inputs.challengingteamid, cb
-  .then (err, others..., cb = ->) ->
-    return callback(err) if err
-    newTeamRepo.getById inputs.challengedteamid, cb
-  .then (err, team, cb = ->) ->
-    return callback(err) if err
-    if Array.isArray(team?.members)
-      for member in team.members
-        do (member) ->
-          post = 
-            type: 'challengedeclining'
-            data: 
-              teamid: inputs.challengingteamid
-              msg: 'Chicken dance'
-            createdat: new Date()
-          userSvc.addPost member._id, post
-    cb()
+  try
+    utils.execute(newTeamRepo.removeChallenge, inputs.challengingteamid, inputs.challengedteamid)
+    .then (err, others..., cb = ->) ->
+      return callback(err) if err
       
+      try
+        newTeamRepo.getById inputs.challengingteamid, cb
+      catch e
+        console.trace e
+        callback e
+    .then (err, team, cb = ->) ->
+      return callback(err) if err
+      if Array.isArray(team?.members)
+        for memberid in team.members
+          do ( memberid ) ->
+            post = 
+              type: 'challengedeclined'
+              data: 
+                teamid: inputs.challengedteamid
+                msg: 'Chicken dance'
+              createdat: new Date()
+              
+            try
+              userSvc.addPost memberid, post
+            catch e
+              console.trace e
+      cb()
+    .then (err, args..., cb = ->) ->   
+      return callback(err) if err
+      
+      try
+        newTeamRepo.removeChallenge inputs.challengedteamid, inputs.challengingteamid, cb
+      catch e
+        console.trace e
+        callback e
+    .then (err, others..., cb = ->) ->
+      return callback(err) if err
+      
+      try
+        newTeamRepo.getById inputs.challengedteamid, cb
+      catch e
+        console.trace e
+        callback e
+    .then (err, team, cb = ->) ->
+      return callback(err) if err
+      if Array.isArray(team?.members)
+        for memberid in team.members
+          do (memberid) ->
+            post = 
+              type: 'challengedeclining'
+              data: 
+                teamid: inputs.challengingteamid
+                msg: 'Chicken dance'
+              createdat: new Date()
+              
+            try
+              userSvc.addPost memberid, post
+            catch e
+              console.trace e
+      callback()
+  catch e
+    console.trace e
+    throw e
+    
       
 exports.cancelMatch = (teamid, matchid, callback = ->) ->
   return callback() unless teamid? and teamid isnt 'undefined' and matchid? and matchid isnt 'undefined'
@@ -388,7 +466,7 @@ exports.resetStats = (teamid, callback = ->) ->
     newTeamRepo.update findObj, updateObj, {}, callback
   catch e
     console.trace e
-    callback e 
+    throw e 
   
   
 exports.updateStats = (teamid, opponentid, win, callback = ->) ->
@@ -417,7 +495,7 @@ exports.updateStats = (teamid, opponentid, win, callback = ->) ->
     newTeamRepo.update findObj, updateObj, {}, callback
   catch e
     console.trace e
-    callback e
+    throw e
     
     
 exports.updateStatsSilent = (teamid, opponentid, win, callback = ->) ->
@@ -442,7 +520,7 @@ exports.updateStatsSilent = (teamid, opponentid, win, callback = ->) ->
     newTeamRepo.update findObj, updateObj, {}, callback
   catch e
     console.trace e
-    callback e            
+    throw e            
   
   
 exports.setMatchComplete = (teamid, am, callback = ->) ->
@@ -467,7 +545,7 @@ exports.setMatchComplete = (teamid, am, callback = ->) ->
     #callback()
   catch e
     console.trace e
-    callback e 
+    throw e 
   
   
   

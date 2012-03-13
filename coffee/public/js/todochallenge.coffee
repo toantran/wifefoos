@@ -18,9 +18,9 @@ jQuery ($) ->
         data = challengingteamid: teamid, challengedteamid: otherteamid
     
     $.post(url, data)
-    .success (resp) =>
+    .success (resp) =>      
       if resp?.success
-        $(btn).closest('alert').alert 'close'
+        $(btn).closest('.alert').alert 'close'
       
   $('button').on 'click', onbuttonclick
 

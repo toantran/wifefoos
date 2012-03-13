@@ -127,6 +127,31 @@ exports.cancel = (am, callback = ->) ->
   utils.seriesAsync [makeSetMatchStatus('cancelled'), makeRemoveTeamsMatch(am.teams), makeCreatePlayersPost(am.teams)], am, (err, result) ->
     console.timeEnd 'Match cancelling'
     callback.apply @, arguments
+
+
+exports.addVote = (matchid, playerid, teamid, result, callback = ->) ->
+  vote = {playerid, teamid, count: if result is 'win' then 1 else -1}
+  
+  
+
+exports.countVotes = (am, callback = ->) ->
+  callback 0 unless am?.votes?
+  
+  results = {}
+  # initialize the result object
+  results[String(am.teams[0]._id)] = 
+    count: 0
+    win: false
+    opponentid: String(am.teams[1]._id)
+  results[String(am.teams[1]._id)] = 
+    count: 0
+    win: false
+    opponentid: String(am.teams[0]._id)
+  
+  for {teamid, count} in am.votes
+    results[teamid].count += count
+    
+  Math.abs (results[String(am.teams[1]._id)].count - results[String(am.teams[0]._id)].count)
     
                             
 exports.finalize = (am, callback = -> ) ->
@@ -148,7 +173,7 @@ exports.finalize = (am, callback = -> ) ->
     win: false
     opponentid: String(am.teams[0]._id)
   
-  for {teamid, count} in am.votes
+  for {teamid, count} in am?.votes
     results[teamid].count += count
     
   maxCount = Math.max results[String(am.teams[1]._id)].count, results[String(am.teams[0]._id)].count

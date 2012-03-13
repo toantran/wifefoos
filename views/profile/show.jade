@@ -53,6 +53,7 @@ link(rel="stylesheet/less", type="text/css", href="/stylesheets/profile.less")
         script(type='text/javascript', src='/js/todochallenge.js')
       - if (profile && profile.matches && profile.matches.length)
         != partial('match', profile.matches)
+        script(type='text/javascript', src='/js/todomatch.js')
 #upload-picture-dlg.modal.hide
   form(method="post", enctype="multipart/form-data", action="/player/#{profile._id}/picture")
     .modal-header

@@ -6,14 +6,19 @@ exports.join = (req, res, next) ->
   userid = req.param 'playerid', ''
   
   if teamid and userid
-    teamSvc.createJoinRequest teamid, userid, (err) ->
-      res.send 
-        success: not err?
+    try
+      teamSvc.createJoinRequest teamid, userid, (err) ->
+        res.send 
+          success: not err?
+    catch e
+      console.trace e
+      next e
   else
-    next()
+    next 'ids cannot be empty or 0'
 exports.join.authenticated = true
 exports.join.methods = ['POST']  
 exports.join.action = ':id/join'
+
 
 ###
   POST
@@ -31,15 +36,19 @@ exports.challenge = (req, res, next) ->
       success: false
       error: 'Ids empty'
   else  
-    teamSvc.createTeamChallenge {teamid, opponentplayerid, matchtype, msg }, (error, result) =>
-      if error
-        res.send
-          success: false
-          error: error
-      else 
-        res.send
-          success: true
-          result: result
+    try
+      teamSvc.createTeamChallenge {teamid, opponentplayerid, matchtype, msg }, (error, result) =>
+        if error
+          res.send
+            success: false
+            error: error
+        else 
+          res.send
+            success: true
+            result: result
+    catch e
+      console.trace e
+      next e
 exports.challenge.authenticated = true
 exports.challenge.methods = ['POST']
 

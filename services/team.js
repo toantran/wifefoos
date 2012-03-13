@@ -79,7 +79,7 @@
       return newTeamRepo.update(findObj, updateObj, {}, callback);
     } catch (e) {
       console.trace(e);
-      return callback(e);
+      throw e;
     }
   };
 
@@ -97,17 +97,22 @@
     if (typeof opponentid === 'string') {
       opponentid = new newTeamRepo.ObjectId(opponentid);
     }
-    return newTeamRepo.read({
-      _id: teamid,
-      challenges: {
-        '$elemMatch': {
-          teamid: opponentid
+    try {
+      return newTeamRepo.read({
+        _id: teamid,
+        challenges: {
+          '$elemMatch': {
+            teamid: opponentid
+          }
         }
-      }
-    }, {}, function(err, cursor) {
-      if (err) return callback(err);
-      return cursor.toArray(callback);
-    });
+      }, {}, function(err, cursor) {
+        if (err) return callback(err);
+        return cursor.toArray(callback);
+      });
+    } catch (e) {
+      console.trace(e);
+      throw e;
+    }
   };
 
   /*
@@ -134,11 +139,11 @@
           return getChallenge(teamid, opponentid, cb);
         } catch (e) {
           console.trace(e);
-          throw e;
+          return callback(e);
         }
       }).then(function(err, challenges, cb) {
         if (cb == null) cb = function() {};
-        if ((challenges != null) && challenges.length) {
+        if (challenges != null ? challenges.length : void 0) {
           return callback('Already challenged');
         } else {
           return cb();
@@ -174,7 +179,7 @@
           return newTeamRepo.update(findObj, updateObj, {}, cb);
         } catch (e) {
           console.trace(e);
-          throw e;
+          return callback(e);
         }
       }).then(function() {
         var args, cb, err, _i;
@@ -184,7 +189,7 @@
           return newTeamRepo.getById(teamid, cb);
         } catch (e) {
           console.trace(e);
-          throw e;
+          return callback(e);
         }
       }).then(function(err, challengedTeam, cb) {
         var memberid, _fn, _i, _len, _ref;
@@ -195,7 +200,7 @@
           post = {
             type: 'teamchallenged',
             data: {
-              teamid: teamid,
+              teamid: opponentid,
               msg: msg,
               matchtype: matchtype
             },
@@ -204,8 +209,7 @@
           try {
             return userSvc.addPost(memberid, post);
           } catch (e) {
-            console.trace(e);
-            throw e;
+            return console.trace(e);
           }
         };
         for (_i = 0, _len = _ref.length; _i < _len; _i++) {
@@ -244,7 +248,7 @@
           return newTeamRepo.update(findObj, updateObj, {}, cb);
         } catch (e) {
           console.trace(e);
-          throw e;
+          return callback(e);
         }
       }).then(function() {
         var args, cb, err, _i;
@@ -254,7 +258,7 @@
           return newTeamRepo.getById(opponentid, cb);
         } catch (e) {
           console.trace(e);
-          throw e;
+          return callback(e);
         }
       }).then(function(err, challengingTeam, cb) {
         var memberid, _fn, _i, _len, _ref;
@@ -274,8 +278,7 @@
           try {
             return userSvc.addPost(memberid, post);
           } catch (e) {
-            console.trace(e);
-            throw e;
+            return console.trace(e);
           }
         };
         for (_i = 0, _len = _ref.length; _i < _len; _i++) {
@@ -303,207 +306,294 @@
     console.assert(inputs != null, 'inputs cannot be null');
     if (inputs == null) throw 'Inputs cannot be null';
     teamids = [inputs.challengingteamid, inputs.challengedteamid];
-    return utils.execute(utils.mapAsync, teamids, newTeamRepo.getById).then(function(err, teams, cb) {
-      var am, end, start;
-      _this.teams = teams;
-      if (cb == null) cb = function() {};
-      if (err) return callback(err);
-      start = new Date();
-      end = new Date();
-      am = {
-        start: start,
-        end: new Date(end.setDate(end.getDate() + 3)),
-        status: 'pending',
-        teams: teams
-      };
-      return matchSvc.createMatch(am, cb);
-    }).then(function(err, am, cb) {
-      _this.am = am;
-      if (cb == null) cb = function() {};
-      if (err) return callback(err);
-      return utils.mapAsync(_this.teams, function(team, cb) {
-        return addMatch(team._id, _this.am, cb);
-      }, cb);
-    }).then(function() {
-      var args, cb, err, _i;
-      err = arguments[0], args = 3 <= arguments.length ? __slice.call(arguments, 1, _i = arguments.length - 1) : (_i = 1, []), cb = arguments[_i++];
-      if (cb == null) cb = function() {};
-      if (err) return callback(err);
-      newTeamRepo.removeChallenge(inputs.challengedteamid, inputs.challengingteamid);
-      newTeamRepo.removeChallenge(inputs.challengingteamid, inputs.challengedteamid);
-      return cb();
-    }).then(function() {
-      var args, cb, err, team, _fn, _i, _j, _len, _ref;
-      err = arguments[0], args = 3 <= arguments.length ? __slice.call(arguments, 1, _i = arguments.length - 1) : (_i = 1, []), cb = arguments[_i++];
-      if (cb == null) cb = function() {};
-      if (err) return callback(err);
-      _ref = _this.teams;
-      _fn = function(team) {
-        return utils.mapAsync(team.members, function(memberid, mapcb) {
-          var post;
-          if (mapcb == null) mapcb = function() {};
-          post = {
-            type: 'newmatch',
-            data: {
-              matchid: String(_this.am._id)
-            },
-            createdat: new Date()
-          };
-          return userSvc.addPost(memberid, post, mapcb);
-        }, cb);
-      };
-      for (_j = 0, _len = _ref.length; _j < _len; _j++) {
-        team = _ref[_j];
-        _fn(team);
-      }
-      return callback();
-    });
+    try {
+      return utils.execute(utils.mapAsync, teamids, newTeamRepo.getById).then(function(err, teams, cb) {
+        var am, end, start;
+        _this.teams = teams;
+        if (cb == null) cb = function() {};
+        if (err) return callback(err);
+        start = new Date();
+        end = new Date();
+        am = {
+          start: start,
+          end: new Date(end.setDate(end.getDate() + 3)),
+          status: 'pending',
+          teams: teams
+        };
+        try {
+          return matchSvc.createMatch(am, cb);
+        } catch (e) {
+          console.trace(e);
+          throw e;
+        }
+      }).then(function(err, ams, cb) {
+        if (cb == null) cb = function() {};
+        _this.am = ams != null ? ams[0] : void 0;
+        if (err) return callback(err);
+        try {
+          return utils.mapAsync(_this.teams, function(team, cb) {
+            return addMatch(team._id, _this.am, cb);
+          }, cb);
+        } catch (e) {
+          console.trace(e);
+          throw e;
+        }
+      }).then(function() {
+        var args, cb, err, _i;
+        err = arguments[0], args = 3 <= arguments.length ? __slice.call(arguments, 1, _i = arguments.length - 1) : (_i = 1, []), cb = arguments[_i++];
+        if (cb == null) cb = function() {};
+        if (err) return callback(err);
+        try {
+          newTeamRepo.removeChallenge(inputs.challengedteamid, inputs.challengingteamid);
+          newTeamRepo.removeChallenge(inputs.challengingteamid, inputs.challengedteamid);
+        } catch (e) {
+          console.trace(e);
+          throw e;
+        }
+        return cb();
+      }).then(function() {
+        var args, cb, err, team, _fn, _i, _j, _len, _ref;
+        err = arguments[0], args = 3 <= arguments.length ? __slice.call(arguments, 1, _i = arguments.length - 1) : (_i = 1, []), cb = arguments[_i++];
+        if (cb == null) cb = function() {};
+        if (err) return callback(err);
+        _ref = _this.teams;
+        _fn = function(team) {
+          try {
+            return utils.mapAsync(team.members, function(memberid, mapcb) {
+              var post;
+              if (mapcb == null) mapcb = function() {};
+              post = {
+                type: 'newmatch',
+                data: {
+                  matchid: String(_this.am._id)
+                },
+                createdat: new Date()
+              };
+              try {
+                return userSvc.addPost(memberid, post, mapcb);
+              } catch (e) {
+                console.trace(e);
+                throw e;
+              }
+            }, cb);
+          } catch (e) {
+            console.trace(e);
+            throw e;
+          }
+        };
+        for (_j = 0, _len = _ref.length; _j < _len; _j++) {
+          team = _ref[_j];
+          _fn(team);
+        }
+        return callback();
+      });
+    } catch (e) {
+      console.trace(e);
+      throw e;
+    }
   };
 
   exports.cancelChallenge = function(inputs, callback) {
     if (callback == null) callback = function() {};
     console.assert(inputs != null, 'inputs cannot be null');
     if (inputs == null) throw 'Inputs cannot be null';
-    return utils.execute(newTeamRepo.removeChallenge, inputs.challengingteamid, inputs.challengedteamid).then(function() {
-      var cb, err, others, _i;
-      err = arguments[0], others = 3 <= arguments.length ? __slice.call(arguments, 1, _i = arguments.length - 1) : (_i = 1, []), cb = arguments[_i++];
-      if (cb == null) cb = function() {};
-      if (err) return callback(err);
-      return newTeamRepo.getById(inputs.challengingteamid, cb);
-    }).then(function(err, team, cb) {
-      var member, _fn, _i, _len, _ref;
-      if (cb == null) cb = function() {};
-      if (err) return callback(err);
-      if (Array.isArray(team != null ? team.members : void 0)) {
-        _ref = team.members;
-        _fn = function(member) {
-          var post;
-          post = {
-            type: 'challengecancelling',
-            data: {
-              teamid: inputs.challengedteamid,
-              msg: 'Chicken dance'
-            },
-            createdat: new Date()
-          };
-          return userSvc.addPost(member._id, post);
-        };
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          member = _ref[_i];
-          _fn(member);
+    try {
+      return utils.execute(newTeamRepo.removeChallenge, inputs.challengingteamid, inputs.challengedteamid).then(function() {
+        var cb, err, others, _i;
+        err = arguments[0], others = 3 <= arguments.length ? __slice.call(arguments, 1, _i = arguments.length - 1) : (_i = 1, []), cb = arguments[_i++];
+        if (cb == null) cb = function() {};
+        if (err) return callback(err);
+        try {
+          return newTeamRepo.getById(inputs.challengingteamid, cb);
+        } catch (e) {
+          console.trace(e);
+          return callback(e);
         }
-      }
-      return cb();
-    }).then(function() {
-      var args, cb, err, _i;
-      err = arguments[0], args = 3 <= arguments.length ? __slice.call(arguments, 1, _i = arguments.length - 1) : (_i = 1, []), cb = arguments[_i++];
-      if (cb == null) cb = function() {};
-      if (err) return callback(err);
-      return newTeamRepo.removeChallenge(inputs.challengedteamid, inputs.challengingteamid, cb);
-    }).then(function() {
-      var cb, err, others, _i;
-      err = arguments[0], others = 3 <= arguments.length ? __slice.call(arguments, 1, _i = arguments.length - 1) : (_i = 1, []), cb = arguments[_i++];
-      if (cb == null) cb = function() {};
-      if (err) return callback(err);
-      return newTeamRepo.getById(inputs.challengedteamid, cb);
-    }).then(function(err, team, cb) {
-      var member, _fn, _i, _len, _ref;
-      if (cb == null) cb = function() {};
-      if (err) return callback(err);
-      if (Array.isArray(team != null ? team.members : void 0)) {
-        _ref = team.members;
-        _fn = function(member) {
-          var post;
-          post = {
-            type: 'challengecancelled',
-            data: {
-              teamid: inputs.challengingteamid,
-              msg: 'Chicken dance'
-            },
-            createdat: new Date()
+      }).then(function(err, team, cb) {
+        var memberid, _fn, _i, _len, _ref;
+        if (cb == null) cb = function() {};
+        if (err) return callback(err);
+        if (Array.isArray(team != null ? team.members : void 0)) {
+          _ref = team.members;
+          _fn = function(memberid) {
+            var post;
+            post = {
+              type: 'challengecancelling',
+              data: {
+                teamid: inputs.challengedteamid,
+                msg: 'Chicken dance'
+              },
+              createdat: new Date()
+            };
+            try {
+              return userSvc.addPost(memberid, post);
+            } catch (e) {
+              return console.trace(e);
+            }
           };
-          return userSvc.addPost(member._id, post);
-        };
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          member = _ref[_i];
-          _fn(member);
+          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+            memberid = _ref[_i];
+            _fn(memberid);
+          }
         }
-      }
-      return cb();
-    });
+        return cb();
+      }).then(function() {
+        var args, cb, err, _i;
+        err = arguments[0], args = 3 <= arguments.length ? __slice.call(arguments, 1, _i = arguments.length - 1) : (_i = 1, []), cb = arguments[_i++];
+        if (cb == null) cb = function() {};
+        if (err) return callback(err);
+        try {
+          return newTeamRepo.removeChallenge(inputs.challengedteamid, inputs.challengingteamid, cb);
+        } catch (e) {
+          console.trace(e);
+          return callback(e);
+        }
+      }).then(function() {
+        var cb, err, others, _i;
+        err = arguments[0], others = 3 <= arguments.length ? __slice.call(arguments, 1, _i = arguments.length - 1) : (_i = 1, []), cb = arguments[_i++];
+        if (cb == null) cb = function() {};
+        console.log('Step 5', err);
+        if (err) return callback(err);
+        try {
+          return newTeamRepo.getById(inputs.challengedteamid, cb);
+        } catch (e) {
+          console.trace(e);
+          return callback(e);
+        }
+      }).then(function(err, team, cb) {
+        var memberid, _fn, _i, _len, _ref;
+        if (cb == null) cb = function() {};
+        if (err) return callback(err);
+        if (Array.isArray(team != null ? team.members : void 0)) {
+          _ref = team.members;
+          _fn = function(memberid) {
+            var post;
+            post = {
+              type: 'challengecancelled',
+              data: {
+                teamid: inputs.challengingteamid,
+                msg: 'Chicken dance'
+              },
+              createdat: new Date()
+            };
+            try {
+              return userSvc.addPost(memberid, post);
+            } catch (e) {
+              return console.trace(e);
+            }
+          };
+          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+            memberid = _ref[_i];
+            _fn(memberid);
+          }
+        }
+        return callback();
+      });
+    } catch (e) {
+      console.trace(e);
+      throw e;
+    }
   };
 
   exports.declineChallenge = function(inputs, callback) {
     if (callback == null) callback = function() {};
     console.assert(inputs != null, 'inputs cannot be null');
     if (inputs == null) throw 'Inputs cannot be null';
-    return utils.execute(newTeamRepo.removeChallenge, inputs.challengingteamid, inputs.challengedteamid).then(function() {
-      var cb, err, others, _i;
-      err = arguments[0], others = 3 <= arguments.length ? __slice.call(arguments, 1, _i = arguments.length - 1) : (_i = 1, []), cb = arguments[_i++];
-      if (cb == null) cb = function() {};
-      if (err) return callback(err);
-      return newTeamRepo.getById(inputs.challengingteamid, cb);
-    }).then(function(err, team, cb) {
-      var member, _fn, _i, _len, _ref;
-      if (cb == null) cb = function() {};
-      if (err) return callback(err);
-      if (Array.isArray(team != null ? team.members : void 0)) {
-        _ref = team.members;
-        _fn = function(member) {
-          var post;
-          post = {
-            type: 'challengedeclined',
-            data: {
-              teamid: inputs.challengedteamid,
-              msg: 'Chicken dance'
-            },
-            createdat: new Date()
-          };
-          return userSvc.addPost(member._id, post);
-        };
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          member = _ref[_i];
-          _fn(member);
+    try {
+      return utils.execute(newTeamRepo.removeChallenge, inputs.challengingteamid, inputs.challengedteamid).then(function() {
+        var cb, err, others, _i;
+        err = arguments[0], others = 3 <= arguments.length ? __slice.call(arguments, 1, _i = arguments.length - 1) : (_i = 1, []), cb = arguments[_i++];
+        if (cb == null) cb = function() {};
+        if (err) return callback(err);
+        try {
+          return newTeamRepo.getById(inputs.challengingteamid, cb);
+        } catch (e) {
+          console.trace(e);
+          return callback(e);
         }
-      }
-      return cb();
-    }).then(function() {
-      var args, cb, err, _i;
-      err = arguments[0], args = 3 <= arguments.length ? __slice.call(arguments, 1, _i = arguments.length - 1) : (_i = 1, []), cb = arguments[_i++];
-      if (cb == null) cb = function() {};
-      if (err) return callback(err);
-      return newTeamRepo.removeChallenge(inputs.challengedteamid, inputs.challengingteamid, cb);
-    }).then(function() {
-      var cb, err, others, _i;
-      err = arguments[0], others = 3 <= arguments.length ? __slice.call(arguments, 1, _i = arguments.length - 1) : (_i = 1, []), cb = arguments[_i++];
-      if (cb == null) cb = function() {};
-      if (err) return callback(err);
-      return newTeamRepo.getById(inputs.challengedteamid, cb);
-    }).then(function(err, team, cb) {
-      var member, _fn, _i, _len, _ref;
-      if (cb == null) cb = function() {};
-      if (err) return callback(err);
-      if (Array.isArray(team != null ? team.members : void 0)) {
-        _ref = team.members;
-        _fn = function(member) {
-          var post;
-          post = {
-            type: 'challengedeclining',
-            data: {
-              teamid: inputs.challengingteamid,
-              msg: 'Chicken dance'
-            },
-            createdat: new Date()
+      }).then(function(err, team, cb) {
+        var memberid, _fn, _i, _len, _ref;
+        if (cb == null) cb = function() {};
+        if (err) return callback(err);
+        if (Array.isArray(team != null ? team.members : void 0)) {
+          _ref = team.members;
+          _fn = function(memberid) {
+            var post;
+            post = {
+              type: 'challengedeclined',
+              data: {
+                teamid: inputs.challengedteamid,
+                msg: 'Chicken dance'
+              },
+              createdat: new Date()
+            };
+            try {
+              return userSvc.addPost(memberid, post);
+            } catch (e) {
+              return console.trace(e);
+            }
           };
-          return userSvc.addPost(member._id, post);
-        };
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          member = _ref[_i];
-          _fn(member);
+          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+            memberid = _ref[_i];
+            _fn(memberid);
+          }
         }
-      }
-      return cb();
-    });
+        return cb();
+      }).then(function() {
+        var args, cb, err, _i;
+        err = arguments[0], args = 3 <= arguments.length ? __slice.call(arguments, 1, _i = arguments.length - 1) : (_i = 1, []), cb = arguments[_i++];
+        if (cb == null) cb = function() {};
+        if (err) return callback(err);
+        try {
+          return newTeamRepo.removeChallenge(inputs.challengedteamid, inputs.challengingteamid, cb);
+        } catch (e) {
+          console.trace(e);
+          return callback(e);
+        }
+      }).then(function() {
+        var cb, err, others, _i;
+        err = arguments[0], others = 3 <= arguments.length ? __slice.call(arguments, 1, _i = arguments.length - 1) : (_i = 1, []), cb = arguments[_i++];
+        if (cb == null) cb = function() {};
+        if (err) return callback(err);
+        try {
+          return newTeamRepo.getById(inputs.challengedteamid, cb);
+        } catch (e) {
+          console.trace(e);
+          return callback(e);
+        }
+      }).then(function(err, team, cb) {
+        var memberid, _fn, _i, _len, _ref;
+        if (cb == null) cb = function() {};
+        if (err) return callback(err);
+        if (Array.isArray(team != null ? team.members : void 0)) {
+          _ref = team.members;
+          _fn = function(memberid) {
+            var post;
+            post = {
+              type: 'challengedeclining',
+              data: {
+                teamid: inputs.challengingteamid,
+                msg: 'Chicken dance'
+              },
+              createdat: new Date()
+            };
+            try {
+              return userSvc.addPost(memberid, post);
+            } catch (e) {
+              return console.trace(e);
+            }
+          };
+          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+            memberid = _ref[_i];
+            _fn(memberid);
+          }
+        }
+        return callback();
+      });
+    } catch (e) {
+      console.trace(e);
+      throw e;
+    }
   };
 
   exports.cancelMatch = function(teamid, matchid, callback) {
@@ -553,7 +643,7 @@
       return newTeamRepo.update(findObj, updateObj, {}, callback);
     } catch (e) {
       console.trace(e);
-      return callback(e);
+      throw e;
     }
   };
 
@@ -594,7 +684,7 @@
       return newTeamRepo.update(findObj, updateObj, {}, callback);
     } catch (e) {
       console.trace(e);
-      return callback(e);
+      throw e;
     }
   };
 
@@ -629,7 +719,7 @@
       return newTeamRepo.update(findObj, updateObj, {}, callback);
     } catch (e) {
       console.trace(e);
-      return callback(e);
+      throw e;
     }
   };
 
@@ -661,7 +751,7 @@
       return newTeamRepo.update(findObj, updateObj, {}, callback);
     } catch (e) {
       console.trace(e);
-      return callback(e);
+      throw e;
     }
   };
 
