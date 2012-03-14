@@ -173,19 +173,46 @@
   };
 
   exports.addVote = function(matchid, playerid, teamid, result, callback) {
-    var vote;
+    var findObj, updateObj, vote;
     if (callback == null) callback = function() {};
-    return vote = {
+    console.assert(matchid, 'matchid cannot be null or 0');
+    if (!matchid) throw 'matchid cannot be null or 0';
+    console.assert(playerid, 'playerid cannot be null or 0');
+    if (!matchid) throw 'playerid cannot be null or 0';
+    console.assert(teamid, 'teamid cannot be null or 0');
+    if (!matchid) throw 'teamid cannot be null or 0';
+    console.assert(result === 'win' || result === 'lose', 'result must be win or lose');
+    if (!(result === 'win' || result === 'lose')) {
+      throw 'result must be win or lose';
+    }
+    vote = {
       playerid: playerid,
       teamid: teamid,
       count: result === 'win' ? 1 : -1
     };
+    if (typeof matchid === 'string') matchid = new matchRepo.ObjectId(matchid);
+    findObj = {
+      _id: matchid
+    };
+    updateObj = {
+      $addToSet: {
+        votes: vote
+      },
+      $set: {
+        updatedat: new Date()
+      }
+    };
+    try {
+      return matchRepo.update(findObj, updateObj, {}, callback);
+    } catch (e) {
+      console.trace(e);
+      throw e;
+    }
   };
 
-  exports.countVotes = function(am, callback) {
+  exports.countDecisions = function(am) {
     var count, results, teamid, _i, _len, _ref, _ref2;
-    if (callback == null) callback = function() {};
-    if ((am != null ? am.votes : void 0) == null) callback(0);
+    if ((am != null ? am.votes : void 0) == null) return 0;
     results = {};
     results[String(am.teams[0]._id)] = {
       count: 0,
@@ -206,7 +233,7 @@
   };
 
   exports.finalize = function(am, callback) {
-    var count, makeSetMatchComplete, makeSetTeamMatchComplete, makeUpdatePlayerStats, makeUpdateTeamStats, maxCount, playerSvc, result, results, teamSvc, teamid, utils, _fn, _i, _len, _ref, _ref2, _ref3;
+    var count, makeSetMatchComplete, makeSetTeamMatchComplete, makeUpdatePlayersStats, makeUpdateTeamStats, maxCount, playerSvc, result, results, teamSvc, teamid, utils, _fn, _i, _len, _ref, _ref2, _ref3;
     if (callback == null) callback = function() {};
     teamSvc = require('./team');
     playerSvc = require('./user');
@@ -274,8 +301,8 @@
         return _results;
       };
     };
-    makeUpdatePlayerStats = function() {
-      var players, team, _fn2, _j, _len2, _ref4;
+    makeUpdatePlayersStats = function() {
+      var makeUpdatePlayerStats, players, team, _fn2, _j, _len2, _ref4;
       players = [];
       _ref4 = am.teams;
       _fn2 = function(team) {
@@ -339,7 +366,7 @@
         return cb(null);
       };
     };
-    return utils.seriesAsync([makeSetMatchComplete(), makeUpdateTeamStats(), makeUpdatePlayerStats(), makeSetTeamMatchComplete()], am, function() {
+    return utils.seriesAsync([makeSetMatchComplete(), makeUpdateTeamStats(), makeUpdatePlayersStats(), makeSetTeamMatchComplete()], am, function() {
       return console.log('Done!');
     });
   };

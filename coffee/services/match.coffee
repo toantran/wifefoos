@@ -130,12 +130,35 @@ exports.cancel = (am, callback = ->) ->
 
 
 exports.addVote = (matchid, playerid, teamid, result, callback = ->) ->
+  console.assert matchid, 'matchid cannot be null or 0'
+  throw 'matchid cannot be null or 0' unless matchid
+  console.assert playerid, 'playerid cannot be null or 0'
+  throw 'playerid cannot be null or 0' unless matchid
+  console.assert teamid, 'teamid cannot be null or 0'
+  throw 'teamid cannot be null or 0' unless matchid
+  console.assert result is 'win' or result is 'lose', 'result must be win or lose'
+  throw 'result must be win or lose' unless result is 'win' or result is 'lose'
+  
   vote = {playerid, teamid, count: if result is 'win' then 1 else -1}
+  matchid = new matchRepo.ObjectId(matchid) if typeof matchid is 'string'
+  findObj = 
+    _id: matchid
+  updateObj = 
+    $addToSet: 
+      votes: vote
+    $set: 
+      updatedat: new Date()
+  
+  try
+    matchRepo.update findObj, updateObj, {}, callback
+  catch e
+    console.trace e
+    throw e
   
   
 
-exports.countVotes = (am, callback = ->) ->
-  callback 0 unless am?.votes?
+exports.countDecisions = (am) ->
+  return 0 unless am?.votes?
   
   results = {}
   # initialize the result object
@@ -152,6 +175,7 @@ exports.countVotes = (am, callback = ->) ->
     results[teamid].count += count
     
   Math.abs (results[String(am.teams[1]._id)].count - results[String(am.teams[0]._id)].count)
+        
     
                             
 exports.finalize = (am, callback = -> ) ->
@@ -205,7 +229,7 @@ exports.finalize = (am, callback = -> ) ->
             console.log "Team #{teamid} update stats with error #{err}" if err?
             cb.apply @, arguments
             
-  makeUpdatePlayerStats = () ->
+  makeUpdatePlayersStats = () ->
     players = []
     for team in am.teams
       do (team) ->
@@ -242,7 +266,7 @@ exports.finalize = (am, callback = -> ) ->
             console.log "Match #{am._id} Set team #{team._id} match complete with error #{err}" if err?
       cb null
   
-  utils.seriesAsync [makeSetMatchComplete(), makeUpdateTeamStats(), makeUpdatePlayerStats(), makeSetTeamMatchComplete()], am, () ->
+  utils.seriesAsync [makeSetMatchComplete(), makeUpdateTeamStats(), makeUpdatePlayersStats(), makeSetTeamMatchComplete()], am, () ->
     console.log 'Done!'
     
     
