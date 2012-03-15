@@ -461,6 +461,7 @@ exports.resetStats = (teamid, callback = ->) ->
   updateObj = 
     $unset: 
       stats: 1
+      records: 1
     
   try
     newTeamRepo.update findObj, updateObj, {}, callback
@@ -490,6 +491,7 @@ exports.updateStats = (teamid, opponentid, win, callback = ->) ->
       updatedat: new Date()
     $addToSet: 
       posts: statLog
+      records: statLog
     
   try
     newTeamRepo.update findObj, updateObj, {}, callback
@@ -515,6 +517,8 @@ exports.updateStatsSilent = (teamid, opponentid, win, callback = ->) ->
     createdat: new Date()
   updateObj = 
     $inc: incObj
+    $addToSet: 
+      records: statLog
     
   try
     newTeamRepo.update findObj, updateObj, {}, callback
@@ -570,11 +574,12 @@ exports.sortingTeams = (team1, team2) ->
 
 
 exports.getAll = (availableOnly, callback = ->) -> 
-  query = {}
+  query = 
+    hidden: 
+      $ne: 1
   
   if availableOnly
-    query = 
-      '$or': [{members: null}, {members: {$size: 0}}, {members: {$size: 1}}]
+    query.$or = [{members: null}, {members: {$size: 0}}, {members: {$size: 1}}]
   try
     newTeamRepo.read query, (readErr, cursor) ->
       if readErr?

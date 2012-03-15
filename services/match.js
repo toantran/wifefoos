@@ -233,7 +233,7 @@
   };
 
   exports.finalize = function(am, callback) {
-    var count, makeSetMatchComplete, makeSetTeamMatchComplete, makeUpdatePlayersStats, makeUpdateTeamStats, maxCount, playerSvc, result, results, teamSvc, teamid, utils, _fn, _i, _len, _ref, _ref2, _ref3;
+    var count, makeCreateNews, makeSetMatchComplete, makeSetTeamMatchComplete, makeUpdatePlayersStats, makeUpdateTeamStats, maxCount, news, playerSvc, result, results, teamSvc, teamid, utils, _fn, _i, _len, _ref, _ref2, _ref3;
     if (callback == null) callback = function() {};
     teamSvc = require('./team');
     playerSvc = require('./user');
@@ -269,6 +269,11 @@
       result = results[teamid];
       _fn(teamid, result);
     }
+    news = {
+      matchid: am != null ? am._id : void 0,
+      winningteamid: results[String(am.teams[1]._id)].win ? am.teams[1]._id : am.teams[0]._id,
+      losingteamid: results[String(am.teams[1]._id)].win ? am.teams[0]._id : am.teams[1]._id
+    };
     makeSetMatchComplete = function() {
       return function(m, cb) {
         if (cb == null) cb = function() {};
@@ -366,7 +371,25 @@
         return cb(null);
       };
     };
-    return utils.seriesAsync([makeSetMatchComplete(), makeUpdateTeamStats(), makeUpdatePlayersStats(), makeSetTeamMatchComplete()], am, function() {
+    makeCreateNews = function() {
+      return function(m, maincb) {
+        if (maincb == null) maincb = function() {};
+        return utils.execute(teamSvc.getById, news.winningteamid).then(function(err, winningteam, cb) {
+          if (cb == null) cb = function() {};
+          news.winningteamname = winningteam != null ? winningteam.teamname : void 0;
+          return teamSvc.getById(news.losingteamid, cb);
+        }).then(function(err, losingteam, cb) {
+          var newsSvc;
+          if (cb == null) cb = function() {};
+          news.losingteamname = losingteam != null ? losingteam.teamname : void 0;
+          newsSvc = require('./news');
+          return newsSvc.createMatchResultNews(news, cb);
+        }).then(function() {
+          return maincb(null, m);
+        });
+      };
+    };
+    return utils.seriesAsync([makeSetMatchComplete(), makeUpdateTeamStats(), makeUpdatePlayersStats(), makeSetTeamMatchComplete(), makeCreateNews()], am, function() {
       return console.log('Done!');
     });
   };

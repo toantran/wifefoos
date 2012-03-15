@@ -210,6 +210,10 @@ exports.finalize = (am, callback = -> ) ->
     do (teamid, result) ->
       console.log 'team %s count=%d win=%s', teamid, result.count, result.win 
   
+  news = 
+    matchid: am?._id
+    winningteamid: if results[String(am.teams[1]._id)].win then am.teams[1]._id else am.teams[0]._id
+    losingteamid: if results[String(am.teams[1]._id)].win then am.teams[0]._id else am.teams[1]._id
   
   makeSetMatchComplete = () ->
     (m, cb = ->) ->
@@ -265,8 +269,22 @@ exports.finalize = (am, callback = -> ) ->
             console.timeEnd "Match #{am._id} Set team #{team._id} match complete"
             console.log "Match #{am._id} Set team #{team._id} match complete with error #{err}" if err?
       cb null
+      
+  makeCreateNews = () ->
+    (m, maincb = ->) ->
+      utils.execute( teamSvc.getById, news.winningteamid )
+      .then (err, winningteam, cb = ->) ->
+        news.winningteamname = winningteam?.teamname
+        teamSvc.getById news.losingteamid, cb
+      .then (err, losingteam, cb = ->) ->
+        news.losingteamname = losingteam?.teamname
+        
+        newsSvc = require './news'
+        newsSvc.createMatchResultNews news, cb
+      .then ->
+        maincb null, m
   
-  utils.seriesAsync [makeSetMatchComplete(), makeUpdateTeamStats(), makeUpdatePlayersStats(), makeSetTeamMatchComplete()], am, () ->
+  utils.seriesAsync [makeSetMatchComplete(), makeUpdateTeamStats(), makeUpdatePlayersStats(), makeSetTeamMatchComplete(), makeCreateNews()], am, () ->
     console.log 'Done!'
     
     

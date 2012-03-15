@@ -144,6 +144,7 @@ exports.resetStats = (userid, callback = ->) ->
   updateObj = 
     $unset: 
       stats: 1
+      records: 1
     
   try
     newUserRepo.update findObj, updateObj, {}, callback
@@ -169,13 +170,14 @@ exports.updateStats = (userid, opponentid, win, callback = ->) ->
     data: 
       opponentid: opponentid
       result: if win then 'win' else 'lose'
-    createdat: new Date()
+    createdat: new Date()  
   updateObj = 
     $inc: incObj
     $set: 
       updatedat: new Date()
     $addToSet: 
       posts: statLog
+      records: statLog
     
   try
     newUserRepo.update findObj, updateObj, {}, callback
@@ -195,8 +197,17 @@ exports.updateStatsSilent = (userid, opponentid, win, callback = ->) ->
   opponentid = String opponentid if typeof opponentid isnt 'string'
   findObj = _id : userid
   incObj = if win then {'stats.win':1} else {'stats.loss': 1}
+  statLog = 
+    id: new newUserRepo.ObjectId()
+    type: 'matchresult'
+    data: 
+      opponentid: opponentid
+      result: if win then 'win' else 'lose'
+    createdat: new Date()  
   updateObj = 
     $inc: incObj
+    $addToSet: 
+      records: statLog
     
   try
     newUserRepo.update findObj, updateObj, {}, callback

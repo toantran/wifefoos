@@ -181,7 +181,8 @@
     };
     updateObj = {
       $unset: {
-        stats: 1
+        stats: 1,
+        records: 1
       }
     };
     try {
@@ -226,7 +227,8 @@
         updatedat: new Date()
       },
       $addToSet: {
-        posts: statLog
+        posts: statLog,
+        records: statLog
       }
     };
     try {
@@ -242,7 +244,7 @@
   */
 
   exports.updateStatsSilent = function(userid, opponentid, win, callback) {
-    var findObj, incObj, updateObj;
+    var findObj, incObj, statLog, updateObj;
     if (callback == null) callback = function() {};
     console.assert(userid, 'userid cannot be null or 0');
     if (userid == null) throw 'userid is null or empty';
@@ -256,8 +258,20 @@
     } : {
       'stats.loss': 1
     };
+    statLog = {
+      id: new newUserRepo.ObjectId(),
+      type: 'matchresult',
+      data: {
+        opponentid: opponentid,
+        result: win ? 'win' : 'lose'
+      },
+      createdat: new Date()
+    };
     updateObj = {
-      $inc: incObj
+      $inc: incObj,
+      $addToSet: {
+        records: statLog
+      }
     };
     try {
       return newUserRepo.update(findObj, updateObj, {}, callback);

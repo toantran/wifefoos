@@ -11,3 +11,36 @@ exports.getHighlights = (callback = ->) ->
     return callback(err) if err? or not cursor?
     cursor.sort createdat: -1
     cursor.toArray callback
+    
+    
+exports.createNews = createNews = (news..., callback = ->) ->
+  [newsObj, newsTpl, newsData] = news
+  
+  if typeof newsObj is 'string'
+    [newsTpl, newsData] = [newsObj, newsTpl]
+    newsObj =
+      newstpl : newsTpl
+      newsdata : newsData
+  
+  newsObj.newstpl ?= newsTpl
+  newsObj.newsdata ?= newsData
+  newsObj.newsstatus ?= 'active'
+  newsObj.newsdate ?= new Date()
+  
+  newsrepo.create newsObj, (err, insertedObjs) ->
+    insertedNews = insertedObjs?[0]
+    callback err, insertedNews
+    
+    
+exports.createMatchResultNews = (matchdata, callback = ->) ->
+  news = 
+    highlight: 1
+    newsdate: new Date()
+    newsstatus: 'active'
+    newsdata: matchdata
+    caption: 'Match Result'
+    pictureurl: '/images/matchresult.jpg'
+  createNews news, 'matchresult', matchdata, callback
+    
+  
+    

@@ -636,7 +636,8 @@
     };
     updateObj = {
       $unset: {
-        stats: 1
+        stats: 1,
+        records: 1
       }
     };
     try {
@@ -677,7 +678,8 @@
         updatedat: new Date()
       },
       $addToSet: {
-        posts: statLog
+        posts: statLog,
+        records: statLog
       }
     };
     try {
@@ -713,7 +715,10 @@
       createdat: new Date()
     };
     updateObj = {
-      $inc: incObj
+      $inc: incObj,
+      $addToSet: {
+        records: statLog
+      }
     };
     try {
       return newTeamRepo.update(findObj, updateObj, {}, callback);
@@ -777,23 +782,25 @@
   exports.getAll = function(availableOnly, callback) {
     var query;
     if (callback == null) callback = function() {};
-    query = {};
+    query = {
+      hidden: {
+        $ne: 1
+      }
+    };
     if (availableOnly) {
-      query = {
-        '$or': [
-          {
-            members: null
-          }, {
-            members: {
-              $size: 0
-            }
-          }, {
-            members: {
-              $size: 1
-            }
+      query.$or = [
+        {
+          members: null
+        }, {
+          members: {
+            $size: 0
           }
-        ]
-      };
+        }, {
+          members: {
+            $size: 1
+          }
+        }
+      ];
     }
     try {
       return newTeamRepo.read(query, function(readErr, cursor) {
