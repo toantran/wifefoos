@@ -11,4 +11,21 @@ link(rel="stylesheet/less", type="text/css", href="/stylesheets/recover.less")
             input#form-login-username(maxlength='255', name='email', size='25', type='text', required, placeholder='Enter your email address')
             .message!= partial('../messages') 
             button.btn.btn-primary(type='submit') Submit        
+            
+#recover-ok-dlg.modal.hide
+  .modal-header
+    a.close(data-dismiss='modal') x
+    h4 OK
+  .modal-body
+    p A reset password instruction email has been sent to your email account.
+  .modal-footer
+    a.btn.btn-success.pull-right(data-dismiss='modal') OK
+#recover-failed-dlg.modal.hide
+  .modal-header
+    a.close(data-dismiss='modal') x
+    h4 Failed
+  .modal-body
+    p An error has occurred while trying to send your reset password email.  Please try again later.
+  .modal-footer
+    a.btn.btn-success.pull-right(data-dismiss='modal') OK    
 script(type='text/javascript', src='/js/recover.js')

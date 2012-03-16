@@ -9,23 +9,9 @@
         email: email
       }).success(function(data) {
         if (data != null ? data.success : void 0) {
-          return $('<div>A reset password instruction email has been sent to your email account.</div>').dialog({
-            autoOpen: true,
-            buttons: {
-              'Ok': function() {
-                return $(this).dialog('close');
-              }
-            }
-          });
+          return $('#recover-ok-dlg').modal('show');
         } else {
-          return $("<div>An error has occurred while trying to send your reset password email.  Please try again later.</div>").dialog({
-            autoOpen: true,
-            buttons: {
-              'Ok': function() {
-                return $(this).dialog('close');
-              }
-            }
-          });
+          return $('#recover-failed-dlg').modal('show');
         }
       });
       return false;
