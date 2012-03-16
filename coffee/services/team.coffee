@@ -179,9 +179,9 @@ exports.createTeamChallenge = (params, callback = ->) ->
       catch e
         console.trace e
         callback e
-    .then (err, challengedTeam, cb = ->) => 
+    .then (err, @challengedTeam, cb = ->) => 
       # create challenge post for members of challenged team
-      for memberid in challengedTeam?.members
+      for memberid in @challengedTeam?.members
         do (memberid) ->
           post = 
             type: 'teamchallenged'
@@ -225,8 +225,8 @@ exports.createTeamChallenge = (params, callback = ->) ->
       catch e
         console.trace e
         callback e
-    .then (err, challengingTeam, cb = ->) ->
-      for memberid in challengingTeam?.members
+    .then (err, @challengingTeam, cb = ->) =>
+      for memberid in @challengingTeam?.members
         do (memberid) ->
           post = 
             type: 'teamchallenging'
@@ -235,6 +235,22 @@ exports.createTeamChallenge = (params, callback = ->) ->
           
           try  
             userSvc.addPost memberid, post
+          catch e
+            console.trace e
+      cb()
+    .then (args..., cb = ->) =>
+      # email challenged team's members
+      for memberid in @challengedTeam?.members
+        do (memberid) =>
+          post = 
+            type: 'teamchallenged'
+            teamid: opponentid
+            teamname: @challengingTeam?.teamname
+            msg: msg
+            matchtype: matchtype
+          
+          try  
+            userSvc.notifyChallenge memberid, post
           catch e
             console.trace e
       cb()

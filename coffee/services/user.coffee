@@ -63,6 +63,46 @@ loadUserTeam = (teamid, callback) ->
       callback err, team
 
 
+createEmailContent = (tpl, data) ->
+  jade = require 'jade'
+  fs = require 'fs'
+  path = "#{__dirname}/../views/emails/#{tpl}.jade"
+  str = fs.readFileSync(path, 'utf8')
+  fn = jade.compile str, 
+    filename: path
+    pretty: true  
+  fn data
+  
+
+exports.notifyChallenge = (userid, data, callback = ->) ->
+  console.assert userid, 'userid cannot be null or 0'  
+  throw 'userid is null or empty' unless userid?
+  
+  try
+    utils.execute( newUserRepo.getById,  userid )
+    .then (err, user, cb = ->) ->
+      return callback(err) if err
+      
+      emailSvc = require './email'
+      
+      if user?.username
+        data.tpl = 'challenge'
+        data.to = user?.username
+        data.playername = user?.nickname
+        data.subject = 'You has been challenged'
+        data.html = createEmailContent 'challenged', data
+        emailSvc.sendmail data
+      else
+        cb()
+    .then (err, recs, cb = ->) ->
+      callback()
+      
+  catch e
+    console.trace e
+    callback e  
+
+###
+###
 exports.getrecords = (userid, callback = ->) ->
   console.assert userid, 'userid cannot be null or 0'  
   throw 'userid is null or empty' unless userid?

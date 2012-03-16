@@ -231,9 +231,10 @@
           return callback(e);
         }
       }).then(function(err, challengedTeam, cb) {
-        var memberid, _fn, _i, _len, _ref;
+        var memberid, _fn, _i, _len, _ref, _ref2;
+        _this.challengedTeam = challengedTeam;
         if (cb == null) cb = function() {};
-        _ref = challengedTeam != null ? challengedTeam.members : void 0;
+        _ref2 = (_ref = _this.challengedTeam) != null ? _ref.members : void 0;
         _fn = function(memberid) {
           var post;
           post = {
@@ -251,8 +252,8 @@
             return console.trace(e);
           }
         };
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          memberid = _ref[_i];
+        for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
+          memberid = _ref2[_i];
           _fn(memberid);
         }
         return cb();
@@ -300,9 +301,10 @@
           return callback(e);
         }
       }).then(function(err, challengingTeam, cb) {
-        var memberid, _fn, _i, _len, _ref;
+        var memberid, _fn, _i, _len, _ref, _ref2;
+        _this.challengingTeam = challengingTeam;
         if (cb == null) cb = function() {};
-        _ref = challengingTeam != null ? challengingTeam.members : void 0;
+        _ref2 = (_ref = _this.challengingTeam) != null ? _ref.members : void 0;
         _fn = function(memberid) {
           var post;
           post = {
@@ -320,8 +322,33 @@
             return console.trace(e);
           }
         };
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          memberid = _ref[_i];
+        for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
+          memberid = _ref2[_i];
+          _fn(memberid);
+        }
+        return cb();
+      }).then(function() {
+        var args, cb, memberid, _fn, _i, _j, _len, _ref, _ref2;
+        args = 2 <= arguments.length ? __slice.call(arguments, 0, _i = arguments.length - 1) : (_i = 0, []), cb = arguments[_i++];
+        if (cb == null) cb = function() {};
+        _ref2 = (_ref = _this.challengedTeam) != null ? _ref.members : void 0;
+        _fn = function(memberid) {
+          var post, _ref3;
+          post = {
+            type: 'teamchallenged',
+            teamid: opponentid,
+            teamname: (_ref3 = _this.challengingTeam) != null ? _ref3.teamname : void 0,
+            msg: msg,
+            matchtype: matchtype
+          };
+          try {
+            return userSvc.notifyChallenge(memberid, post);
+          } catch (e) {
+            return console.trace(e);
+          }
+        };
+        for (_j = 0, _len = _ref2.length; _j < _len; _j++) {
+          memberid = _ref2[_j];
           _fn(memberid);
         }
         return cb();

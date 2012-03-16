@@ -1,5 +1,5 @@
 (function() {
-  var crypto, hash, loadChallenge, loadChallenges, loadFullInvite, loadMatch, loadMatches, loadUserTeam, newUserRepo, teamRepo, utils;
+  var createEmailContent, crypto, hash, loadChallenge, loadChallenges, loadFullInvite, loadMatch, loadMatches, loadUserTeam, newUserRepo, teamRepo, utils;
 
   crypto = require('crypto');
 
@@ -87,6 +87,52 @@
       });
     });
   };
+
+  createEmailContent = function(tpl, data) {
+    var fn, fs, jade, path, str;
+    jade = require('jade');
+    fs = require('fs');
+    path = "" + __dirname + "/../views/emails/" + tpl + ".jade";
+    str = fs.readFileSync(path, 'utf8');
+    fn = jade.compile(str, {
+      filename: path,
+      pretty: true
+    });
+    return fn(data);
+  };
+
+  exports.notifyChallenge = function(userid, data, callback) {
+    if (callback == null) callback = function() {};
+    console.assert(userid, 'userid cannot be null or 0');
+    if (userid == null) throw 'userid is null or empty';
+    try {
+      return utils.execute(newUserRepo.getById, userid).then(function(err, user, cb) {
+        var emailSvc;
+        if (cb == null) cb = function() {};
+        if (err) return callback(err);
+        emailSvc = require('./email');
+        if (user != null ? user.username : void 0) {
+          data.tpl = 'challenge';
+          data.to = user != null ? user.username : void 0;
+          data.playername = user != null ? user.nickname : void 0;
+          data.subject = 'You has been challenged';
+          data.html = createEmailContent('challenged', data);
+          return emailSvc.sendmail(data);
+        } else {
+          return cb();
+        }
+      }).then(function(err, recs, cb) {
+        if (cb == null) cb = function() {};
+        return callback();
+      });
+    } catch (e) {
+      console.trace(e);
+      return callback(e);
+    }
+  };
+
+  /*
+  */
 
   exports.getrecords = function(userid, callback) {
     if (callback == null) callback = function() {};
