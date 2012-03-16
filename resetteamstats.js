@@ -48,7 +48,7 @@
       }, function(val, cb) {
         if (cb == null) cb = function() {};
         console.time('Getting all teams');
-        return teamSvc.getAllTeams(function(err, teams) {
+        return teamSvc.getAll(false, function(err, teams) {
           console.timeEnd('Getting all teams');
           if (teams != null) {
             return utils.mapAsync(teams, function(team, iteratorCb) {
@@ -77,6 +77,7 @@
         });
       }
     ], null, function(err, result) {
+      console.log(err);
       return console.log('DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE  ');
     });
   } catch (e) {

@@ -4,6 +4,32 @@ userSvc = require './user'
 matchSvc = require './match'
 
 
+exports.getrecords = (teamid, callback = ->) ->
+  console.assert teamid, 'teamid cannot be null or 0'  
+  throw 'teamid is null or empty' unless teamid?
+  
+  try
+    utils.execute( newTeamRepo.getById,  teamid )
+    .then (err, hostteam, cb = ->) ->
+      return callback(err) if err
+      
+      if hostteam?.records?.length
+        utils.mapAsync hostteam?.records, (rec, iteratorcb = ->) ->
+            rec?.result = if rec?.data?.result is 'win' then 'W' else 'L'
+            rec?.teamid = rec?.data?.opponentid
+            newTeamRepo.getById rec?.data?.opponentid, (getteamerr, team) ->
+              rec?.teamname = team?.teamname
+              iteratorcb getteamerr, rec
+          , cb
+      else
+        cb()
+    .then (err, recs, cb = ->) ->
+      callback err, recs
+      
+  catch e
+    console.trace e
+    callback e  
+
 ###
 ###
 exports.createJoinRequest = (teamid, playerid, callback = ->) ->

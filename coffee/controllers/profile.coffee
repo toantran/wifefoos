@@ -1,6 +1,25 @@
 userSvc = require '../services/user'
 
 
+exports.records = (req, res, next) ->
+  playerid = req.params.id
+  
+  return res.send() if not playerid
+  
+  try
+    
+    userSvc.getrecords playerid, (err, records) ->
+      res.send
+        success: not (not (not err))
+        records: records
+  catch e
+    console.trace e
+    next e
+  
+exports.records.authenticated = true
+exports.records.methods = ['GET']
+exports.records.action = ':id/records'
+  
 ###
   POST
   URL /profile/:id/removecomment

@@ -1,5 +1,5 @@
 .news-item
   .news-header
-    span.news-date #{newsitem.createdat || ''}
+    span.news-date #{newsitem.createdat ? newsitem.createdat.toLocaleDateString() : ''}
   .news-body
     != newsitem.newscontent

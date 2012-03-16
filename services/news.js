@@ -1,5 +1,5 @@
 (function() {
-  var createNews, newsrepo,
+  var createNews, createNewsContent, newsrepo,
     __slice = Array.prototype.slice;
 
   newsrepo = require('../repository/news');
@@ -28,6 +28,19 @@
     });
   };
 
+  createNewsContent = function(tpl, data) {
+    var fn, fs, jade, path, str;
+    jade = require('jade');
+    fs = require('fs');
+    path = "" + __dirname + "/../views/news/" + tpl + ".jade";
+    str = fs.readFileSync(path, 'utf8');
+    fn = jade.compile(str, {
+      filename: path,
+      pretty: true
+    });
+    return fn(data);
+  };
+
   exports.createNews = createNews = function() {
     var callback, news, newsData, newsObj, newsTpl, _i, _ref;
     news = 2 <= arguments.length ? __slice.call(arguments, 0, _i = arguments.length - 1) : (_i = 0, []), callback = arguments[_i++];
@@ -44,6 +57,9 @@
     if (newsObj.newsdata == null) newsObj.newsdata = newsData;
     if (newsObj.newsstatus == null) newsObj.newsstatus = 'active';
     if (newsObj.newsdate == null) newsObj.newsdate = new Date();
+    if (((newsObj != null ? newsObj.newstpl : void 0) != null) && ((newsObj != null ? newsObj.newsdata : void 0) != null)) {
+      newsObj.newscontent = createNewsContent(newsObj != null ? newsObj.newstpl : void 0, newsObj != null ? newsObj.newsdata : void 0);
+    }
     return newsrepo.create(newsObj, function(err, insertedObjs) {
       var insertedNews;
       insertedNews = insertedObjs != null ? insertedObjs[0] : void 0;

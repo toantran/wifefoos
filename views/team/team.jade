@@ -11,7 +11,7 @@
         each member in team.members
           .member-name
             a(href='/profile/#{member._id}')= member.nickname
-  .span1.stats
+  .span2.stats
     .stats-detail #{(team.stats ? team.stats.win : 0) || '0'}-#{(team.stats ? team.stats.loss : 0) || '0'}
   .span2.team-btn
     - if ((!team.members || team.members.length <= 1) && (!user.team))

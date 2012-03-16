@@ -68,7 +68,7 @@
     val = initVal;
     next = function(prevErr, prevVal) {
       var fn;
-      if (prevErr != null) return callback(prevErr);
+      if (prevErr) return callback(prevErr);
       fn = fns.shift();
       if ((fn != null) && typeof fn === 'function') {
         return fn(prevVal, next);

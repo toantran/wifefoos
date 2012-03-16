@@ -13,6 +13,17 @@ exports.getHighlights = (callback = ->) ->
     cursor.toArray callback
     
     
+createNewsContent = (tpl, data) ->
+  jade = require 'jade'
+  fs = require 'fs'
+  path = "#{__dirname}/../views/news/#{tpl}.jade"
+  str = fs.readFileSync(path, 'utf8')
+  fn = jade.compile str, 
+    filename: path
+    pretty: true  
+  fn data
+  
+    
 exports.createNews = createNews = (news..., callback = ->) ->
   [newsObj, newsTpl, newsData] = news
   
@@ -26,6 +37,9 @@ exports.createNews = createNews = (news..., callback = ->) ->
   newsObj.newsdata ?= newsData
   newsObj.newsstatus ?= 'active'
   newsObj.newsdate ?= new Date()
+  
+  if newsObj?.newstpl? and newsObj?.newsdata?
+    newsObj.newscontent = createNewsContent newsObj?.newstpl, newsObj?.newsdata
   
   newsrepo.create newsObj, (err, insertedObjs) ->
     insertedNews = insertedObjs?[0]

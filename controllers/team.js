@@ -3,6 +3,29 @@
 
   teamSvc = require('../services/team');
 
+  exports.records = function(req, res, next) {
+    var teamid;
+    teamid = req.params.id;
+    if (!teamid) return res.send();
+    try {
+      return teamSvc.getrecords(teamid, function(err, records) {
+        return res.send({
+          success: !(!(!err)),
+          records: records
+        });
+      });
+    } catch (e) {
+      console.trace(e);
+      return next(e);
+    }
+  };
+
+  exports.records.authenticated = true;
+
+  exports.records.methods = ['GET'];
+
+  exports.records.action = ':id/records';
+
   exports.join = function(req, res, next) {
     var teamid, userid;
     teamid = req.param('id', '');

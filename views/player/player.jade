@@ -2,7 +2,7 @@
   .span1
     - if (player.pictureurl)
       img(src="#{player.pictureurl || '/images/player.jpg'}")
-  .span5
+  .span4
     .player-name
       a(href='/profile/#{player._id}')= player.nickname || player.username
     - if ((typeof player.team !== 'undefined') && player.team && player.team.teamname)
@@ -10,6 +10,6 @@
         a(href='/team/#{player.team._id}')= player.team.teamname
     - else 
       .team Team: None
-  .span1
+  .span2
     .stats-detail #{(player.stats ? player.stats.win : 0) || '0'}-#{(player.stats ? player.stats.loss : 0) || '0'}
   .span1

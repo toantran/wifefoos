@@ -3,7 +3,7 @@
     img(src='#{highlight.pictureurl}')
     .carousel-caption
       h3= highlight.caption 
-      p= highlight.newscontent
+      p!= highlight.newscontent
         | &nbsp;&nbsp;
         a &nbsp;&nbsp;read more...
 - else
@@ -11,7 +11,7 @@
     img(src='#{highlight.pictureurl}')
     .carousel-caption
       h3= highlight.caption 
-      p= highlight.newscontent
+      p!= highlight.newscontent
         | &nbsp;&nbsp;
         a read more...
 

@@ -1,6 +1,27 @@
 teamSvc = require( '../services/team' )
 
 
+exports.records = (req, res, next) ->
+  teamid = req.params.id
+  
+  return res.send() if not teamid
+  
+  try
+    
+    teamSvc.getrecords teamid, (err, records) ->
+      res.send
+        success: not (not (not err))
+        records: records
+  catch e
+    console.trace e
+    next e
+  
+exports.records.authenticated = true
+exports.records.methods = ['GET']
+exports.records.action = ':id/records'
+
+
+
 exports.join = (req, res, next) ->
   teamid = req.param 'id', ''
   userid = req.param 'playerid', ''

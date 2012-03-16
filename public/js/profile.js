@@ -1,10 +1,86 @@
 (function() {
 
   jQuery(function($) {
-    var changePictureClick, global, makethis, newcommentclick, newpostclick, oncommentcloseclick, onpostcloseclick;
+    var changePictureClick, global, makerow, makethis, newcommentclick, newpostclick, oncommentcloseclick, onplayerrecordwindowshow, onpostcloseclick, onteamrecordwindowshow;
     makethis = function() {
       return this;
     };
+    makerow = function(rec) {
+      var dt;
+      if (!(rec != null)) return null;
+      dt = new Date(rec.createdat);
+      return $.el('div.row', {}, [
+        $.el('div.span3', {}, [dt.toLocaleDateString()]), $.el('div.span2', {}, [
+          'vs ', $.el('a', {
+            href: rec.teamid
+          }, [rec.teamname])
+        ]), $.el('div.span1', {}, [rec.result])
+      ]);
+    };
+    onplayerrecordwindowshow = function() {
+      var container, playerid;
+      container = $(this).find('.records-container');
+      playerid = $(this).attr('data-playerid');
+      return $.get("/profile/" + playerid + "/records").success(function(data) {
+        var rec, rows, _ref;
+        if (data != null ? data.success : void 0) {
+          $(container).empty();
+          if (data != null) {
+            if ((_ref = data.records) != null) {
+              _ref.sort(function(rec1, rec2) {
+                var dt1, dt2;
+                dt1 = new Date(rec1 != null ? rec1.createdat : void 0);
+                dt2 = new Date(rec2 != null ? rec2.createdat : void 0);
+                return dt2 - dt1;
+              });
+            }
+          }
+          return rows = (function() {
+            var _i, _len, _ref2, _results;
+            _ref2 = data != null ? data.records : void 0;
+            _results = [];
+            for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
+              rec = _ref2[_i];
+              _results.push($(container).append(makerow(rec)));
+            }
+            return _results;
+          })();
+        }
+      });
+    };
+    $('#player-records-dlg').on('show', onplayerrecordwindowshow);
+    onteamrecordwindowshow = function() {
+      var container, teamid;
+      container = $(this).find('.records-container');
+      teamid = $(this).attr('data-teamid');
+      return $.get("/team/" + teamid + "/records").success(function(data) {
+        var rec, rows, _ref;
+        if (data != null ? data.success : void 0) {
+          $(container).empty();
+          if (data != null) {
+            if ((_ref = data.records) != null) {
+              _ref.sort(function(rec1, rec2) {
+                var dt1, dt2;
+                dt1 = new Date(rec1 != null ? rec1.createdat : void 0);
+                dt2 = new Date(rec2 != null ? rec2.createdat : void 0);
+                return dt2 - dt1;
+              });
+            }
+          }
+          return rows = (function() {
+            var _i, _len, _ref2, _results;
+            _ref2 = data != null ? data.records : void 0;
+            _results = [];
+            for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
+              rec = _ref2[_i];
+              _results.push($(container).append(makerow(rec)));
+            }
+            return _results;
+          })();
+        }
+      });
+    };
+    $('#team-records-dlg').on('show', onteamrecordwindowshow);
     $('#upload-picture-dlg').modal({
       backdrop: true,
       keyboard: true,

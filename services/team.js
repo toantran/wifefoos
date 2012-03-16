@@ -10,6 +10,45 @@
 
   matchSvc = require('./match');
 
+  exports.getrecords = function(teamid, callback) {
+    if (callback == null) callback = function() {};
+    console.assert(teamid, 'teamid cannot be null or 0');
+    if (teamid == null) throw 'teamid is null or empty';
+    try {
+      return utils.execute(newTeamRepo.getById, teamid).then(function(err, hostteam, cb) {
+        var _ref;
+        if (cb == null) cb = function() {};
+        if (err) return callback(err);
+        if (hostteam != null ? (_ref = hostteam.records) != null ? _ref.length : void 0 : void 0) {
+          return utils.mapAsync(hostteam != null ? hostteam.records : void 0, function(rec, iteratorcb) {
+            var _ref2, _ref3, _ref4;
+            if (iteratorcb == null) iteratorcb = function() {};
+            if (rec != null) {
+              rec.result = (rec != null ? (_ref2 = rec.data) != null ? _ref2.result : void 0 : void 0) === 'win' ? 'W' : 'L';
+            }
+            if (rec != null) {
+              rec.teamid = rec != null ? (_ref3 = rec.data) != null ? _ref3.opponentid : void 0 : void 0;
+            }
+            return newTeamRepo.getById(rec != null ? (_ref4 = rec.data) != null ? _ref4.opponentid : void 0 : void 0, function(getteamerr, team) {
+              if (rec != null) {
+                rec.teamname = team != null ? team.teamname : void 0;
+              }
+              return iteratorcb(getteamerr, rec);
+            });
+          }, cb);
+        } else {
+          return cb();
+        }
+      }).then(function(err, recs, cb) {
+        if (cb == null) cb = function() {};
+        return callback(err, recs);
+      });
+    } catch (e) {
+      console.trace(e);
+      return callback(e);
+    }
+  };
+
   /*
   */
 

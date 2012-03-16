@@ -18,16 +18,16 @@ link(rel="stylesheet/less", type="text/css", href="/stylesheets/profile.less")
           - else 
             #{(team && team.teamname) || 'None'}
     .personal-info-item            
-        .personal-info-item-label Team record:
-        #team-record.personal-info-item-value 
-          a(href='#').label.label-info #{(team && team.stats ? team.stats.win : 0) || 0}-#{(team && team.stats ? team.stats.loss : 0) || 0}
+      .personal-info-item-label Team record:
+      #team-record.personal-info-item-value 
+        a(href='#', data-toggle='modal', data-target='#team-records-dlg').label.label-info #{(team && team.stats ? team.stats.win : 0) || 0}-#{(team && team.stats ? team.stats.loss : 0) || 0}
     .personal-info-item            
-        .personal-info-item-label Individual record:
-        .personal-info-item-value 
-          a(href='#').label.label-info #{(profile.stats ? profile.stats.win : 0 ) || 0}-#{(profile.stats ? profile.stats.loss : 0) || 0}
+      .personal-info-item-label Individual record:
+      #player-record.personal-info-item-value 
+        a(href='#', data-toggle='modal', data-target='#player-records-dlg').label.label-info #{(profile.stats ? profile.stats.win : 0 ) || 0}-#{(profile.stats ? profile.stats.loss : 0) || 0}
     .personal-info-item            
-        .personal-info-item-label Rank:
-        .personal-info-item-value #{profile.rank || 'N/A'}
+      .personal-info-item-label Rank:
+      .personal-info-item-value #{profile.rank || 'N/A'}
     
   #personal-wall.span6
     h1.player-nickname= profile.nickname
@@ -64,8 +64,23 @@ link(rel="stylesheet/less", type="text/css", href="/stylesheets/profile.less")
       input(name='image', type='file')
     .modal-footer
       input.btn.btn-primary(type='submit') Save
-#team-records-dlg.modal.hide
-  
+#team-records-dlg.modal.hide(data-teamid='#{team ? team._id : 0}')
+  .modal-header
+    a.close(data-dismiss='modal') x
+    h3 Team records
+  .modal-body
+    .records-container
+  .modal-footer
+    a.btn.btn-primary(href='#', data-toggle='modal', data-target='#team-records-dlg') Close
+#player-records-dlg.modal.hide(data-playerid='#{profile._id}')
+  .modal-header
+    a.close(data-dismiss='modal') x
+    h3 Player records
+  .modal-body
+    .records-container
+  .modal-footer    
+    a.btn.btn-primary(href='#', data-toggle='modal', data-target='#player-records-dlg') Close
+    
     
   
   

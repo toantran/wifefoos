@@ -3,6 +3,29 @@
 
   userSvc = require('../services/user');
 
+  exports.records = function(req, res, next) {
+    var playerid;
+    playerid = req.params.id;
+    if (!playerid) return res.send();
+    try {
+      return userSvc.getrecords(playerid, function(err, records) {
+        return res.send({
+          success: !(!(!err)),
+          records: records
+        });
+      });
+    } catch (e) {
+      console.trace(e);
+      return next(e);
+    }
+  };
+
+  exports.records.authenticated = true;
+
+  exports.records.methods = ['GET'];
+
+  exports.records.action = ':id/records';
+
   /*
     POST
     URL /profile/:id/removecomment

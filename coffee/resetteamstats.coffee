@@ -35,7 +35,7 @@ try
             , cb       
     (val, cb = ->) ->    
       console.time 'Getting all teams'
-      teamSvc.getAllTeams (err, teams) -> 
+      teamSvc.getAll false, (err, teams) -> 
         console.timeEnd 'Getting all teams'    
         if teams?
           utils.mapAsync teams, (team, iteratorCb) ->
@@ -53,6 +53,7 @@ try
         processMatch m for m in matches if matches?
         cb()  
   ], null, (err, result) ->
+    console.log err
     console.log 'DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE  '
 catch e
   console.log e

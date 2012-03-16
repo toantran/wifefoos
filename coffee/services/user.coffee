@@ -63,6 +63,33 @@ loadUserTeam = (teamid, callback) ->
       callback err, team
 
 
+exports.getrecords = (userid, callback = ->) ->
+  console.assert userid, 'userid cannot be null or 0'  
+  throw 'userid is null or empty' unless userid?
+  
+  try
+    utils.execute( newUserRepo.getById,  userid )
+    .then (err, user, cb = ->) ->
+      return callback(err) if err
+      
+      if user?.records?.length
+        teamsvc = require './team'
+        utils.mapAsync user?.records, (rec, iteratorcb = ->) ->
+            rec?.result = if rec?.data?.result is 'win' then 'W' else 'L'
+            rec?.teamid = rec?.data?.opponentid
+            teamsvc.getById rec?.data?.opponentid, (getteamerr, team) ->
+              rec?.teamname = team?.teamname
+              iteratorcb getteamerr, rec
+          , cb
+      else
+        cb()
+    .then (err, recs, cb = ->) ->
+      callback err, recs
+      
+  catch e
+    console.trace e
+    callback e  
+
 ###
 Authenticate a user login
 ###

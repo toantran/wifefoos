@@ -47,7 +47,7 @@ exports.seriesAsync = (fnArray = [], initVal, callback = ->) ->
   fns = fnArray.slice()
   val = initVal
   next = (prevErr, prevVal) ->
-    return callback(prevErr) if prevErr?
+    return callback(prevErr) if prevErr
     fn = fns.shift()
     if fn? and typeof fn is 'function'
       fn prevVal, next 

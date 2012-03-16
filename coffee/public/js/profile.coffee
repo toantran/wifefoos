@@ -1,6 +1,54 @@
 jQuery ($) ->
   makethis = -> @
   
+  makerow = (rec) ->
+    return null if not rec?
+    
+    dt = new Date(rec.createdat)
+    
+    $.el('div.row',{}, [
+      $.el('div.span3',{}, [dt.toLocaleDateString()]),
+      $.el('div.span2',{}, ['vs ',
+        $.el('a',{href: rec.teamid}, [rec.teamname]) 
+      ]),
+      $.el('div.span1',{}, [rec.result])
+    ])
+  
+  onplayerrecordwindowshow = ->
+    container = $(@).find '.records-container'
+    playerid = $(@).attr 'data-playerid'
+    
+    $.get("/profile/#{playerid}/records")
+    .success (data) ->
+      if data?.success
+        $(container).empty()
+        data?.records?.sort (rec1, rec2) -> 
+          dt1 = new Date(rec1?.createdat)
+          dt2 = new Date(rec2?.createdat)
+          dt2 - dt1
+        rows = ( $(container).append makerow( rec ) for rec in data?.records)            
+  
+  $('#player-records-dlg').on 'show', onplayerrecordwindowshow
+  
+  
+  onteamrecordwindowshow = ->
+    container = $(@).find '.records-container'
+    teamid = $(@).attr 'data-teamid'
+    
+    $.get("/team/#{teamid}/records")
+    .success (data) ->
+      if data?.success
+        $(container).empty()
+        data?.records?.sort (rec1, rec2) -> 
+          dt1 = new Date(rec1?.createdat)
+          dt2 = new Date(rec2?.createdat)
+          dt2 - dt1
+        rows = ( $(container).append makerow( rec ) for rec in data?.records)
+    
+  
+  $('#team-records-dlg').on 'show', onteamrecordwindowshow
+    
+  
   $('#upload-picture-dlg').modal
     backdrop: true
     keyboard: true
