@@ -115,7 +115,7 @@
           data.tpl = 'challenge';
           data.to = user != null ? user.username : void 0;
           data.playername = user != null ? user.nickname : void 0;
-          data.subject = 'You has been challenged';
+          data.subject = 'You have been challenged';
           data.html = createEmailContent('challenged', data);
           return emailSvc.sendmail(data);
         } else {
