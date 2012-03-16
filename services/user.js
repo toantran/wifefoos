@@ -988,11 +988,11 @@
         return cb(null, null);
       }
     }).then(function(err, challenges, cb) {
-      var allmatches, async, match, matches, matchsvc, _ref;
+      var allmatches, async, match, matches, matchsvc, _ref, _ref2, _ref3;
       if (cb == null) cb = function() {};
-      _this.team.challenges = challenges;
-      _this.user.challenges = challenges;
-      allmatches = (_ref = _this.team) != null ? _ref.matches : void 0;
+      if ((_ref = _this.team) != null) _ref.challenges = challenges;
+      if ((_ref2 = _this.user) != null) _ref2.challenges = challenges;
+      allmatches = (_ref3 = _this.team) != null ? _ref3.matches : void 0;
       if (allmatches != null) {
         matches = (function() {
           var _i, _len, _results;
@@ -1012,30 +1012,30 @@
         loadMatch = function(am, loadMatchCb) {
           if (loadMatchCb == null) loadMatchCb = function() {};
           return matchsvc.getById(am._id, function(loadMatchErr, fullMatch) {
-            var loadVote, team, vote, _fn, _fn2, _i, _j, _len, _len2, _ref2, _ref3;
+            var loadVote, team, vote, _fn, _fn2, _i, _j, _len, _len2, _ref4, _ref5;
             if (fullMatch != null) fullMatch.hometeam = _this.team;
             if ((fullMatch != null ? fullMatch.teams : void 0) != null) {
-              _ref2 = fullMatch != null ? fullMatch.teams : void 0;
+              _ref4 = fullMatch != null ? fullMatch.teams : void 0;
               _fn = function(team) {
-                var _ref3, _ref4;
-                if (!(team != null ? (_ref3 = team._id) != null ? _ref3.equals((_ref4 = _this.team) != null ? _ref4._id : void 0) : void 0 : void 0)) {
+                var _ref5, _ref6;
+                if (!(team != null ? (_ref5 = team._id) != null ? _ref5.equals((_ref6 = _this.team) != null ? _ref6._id : void 0) : void 0 : void 0)) {
                   return fullMatch.opponentteam = team;
                 }
               };
-              for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
-                team = _ref2[_i];
+              for (_i = 0, _len = _ref4.length; _i < _len; _i++) {
+                team = _ref4[_i];
                 _fn(team);
               }
             }
             if ((fullMatch != null ? fullMatch.votes : void 0) != null) {
-              _ref3 = fullMatch != null ? fullMatch.votes : void 0;
+              _ref5 = fullMatch != null ? fullMatch.votes : void 0;
               _fn2 = function(vote) {
                 if (String(vote != null ? vote.playerid : void 0) === String(_this.user._id)) {
                   return fullMatch.voted = true;
                 }
               };
-              for (_j = 0, _len2 = _ref3.length; _j < _len2; _j++) {
-                vote = _ref3[_j];
+              for (_j = 0, _len2 = _ref5.length; _j < _len2; _j++) {
+                vote = _ref5[_j];
                 _fn2(vote);
               }
               loadVote = function(vote, votecb) {

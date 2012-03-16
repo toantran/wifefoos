@@ -766,8 +766,8 @@ exports.getFullUser = (userid, callback = ->) ->
     else
       cb null, null    
   .then ( err, challenges, cb = ->) =>
-    @team.challenges = challenges
-    @user.challenges = challenges
+    @team?.challenges = challenges
+    @user?.challenges = challenges
     allmatches = @team?.matches
     # Load pending matches
     matches = (match for match in allmatches when match?.status is 'pending') if allmatches?
