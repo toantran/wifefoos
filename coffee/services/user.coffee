@@ -89,7 +89,7 @@ exports.notifyChallenge = (userid, data, callback = ->) ->
         data.tpl = 'challenge'
         data.to = user?.username
         data.playername = user?.nickname
-        data.subject = 'You has been challenged'
+        data.subject = 'You have been challenged'
         data.html = createEmailContent 'challenged', data
         emailSvc.sendmail data
       else
