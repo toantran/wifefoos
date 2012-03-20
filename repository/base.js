@@ -127,6 +127,7 @@
             return db.close();
           });
         } catch (e) {
+          db.close();
           console.trace(e);
           return callback(e);
         }
@@ -148,7 +149,8 @@
           return callback(null, cursor);
         } catch (e) {
           console.trace(e);
-          return callback(e);
+          callback(e);
+          return db.close();
         }
       });
     });
@@ -166,9 +168,13 @@
     }, function(readErr, cursor) {
       if (readErr) return callback(readErr);
       return cursor.toArray(function(toArrayErr, docs) {
+        var db;
         if (toArrayErr) return callback(toArrayErr);
         if (!(docs != null ? docs.length : void 0)) return callback('Not found');
-        return callback(null, docs[0]);
+        callback(null, docs[0]);
+        db = cursor.db;
+        cursor.close();
+        return db.close();
       });
     });
   };
@@ -190,6 +196,7 @@
             return callback.apply(this, arguments);
           });
         } catch (e) {
+          db.close();
           console.trace(e);
           if (callback != null) return callback(e);
         }
@@ -213,6 +220,7 @@
             return callback.apply(this, arguments);
           });
         } catch (e) {
+          db.close();
           console.trace(e);
           if (callback != null) return callback(e);
         }
@@ -229,7 +237,8 @@
     return this.getCollection(db, function(collectionErr, collection) {
       return checkError(collectionErr, errorFn, function() {
         collection.remove(criteria);
-        return callback();
+        callback();
+        return db.close();
       });
     });
   };

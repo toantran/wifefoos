@@ -39,17 +39,21 @@
     return baseRepo.read({
       username: username
     }, function(err, cursor) {
+      var db;
       if (err != null) {
         return callback(err);
       } else if (cursor != null) {
+        db = cursor.db;
         return cursor.toArray(function(toArrayErr, users) {
           if (toArrayErr != null) {
-            return callback(toArrayErr);
+            callback(toArrayErr);
           } else if (users != null ? users.length : void 0) {
-            return callback(null, users[0]);
+            callback(null, users[0]);
           } else {
-            return callback(null, null);
+            callback(null, null);
           }
+          cursor.close();
+          return db.close();
         });
       } else {
         return callback('DB read failed');

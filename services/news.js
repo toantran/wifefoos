@@ -11,7 +11,13 @@
       cursor.sort({
         createdat: -1
       });
-      return cursor.toArray(callback);
+      return cursor.toArray(function() {
+        var db;
+        db = cursor.db;
+        callback.apply(null, arguments);
+        cursor.close();
+        return db.close();
+      });
     });
   };
 
@@ -24,7 +30,13 @@
       cursor.sort({
         createdat: -1
       });
-      return cursor.toArray(callback);
+      return cursor.toArray(function() {
+        var db;
+        db = cursor.db;
+        callback.apply(null, arguments);
+        cursor.close();
+        return db.close();
+      });
     });
   };
 

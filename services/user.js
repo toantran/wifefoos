@@ -748,7 +748,13 @@
         if (readErr != null) {
           return callback(readErr);
         } else if (cursor != null) {
-          return cursor.toArray(callback);
+          return cursor.toArray(function() {
+            var db;
+            db = cursor.db;
+            callback.apply(null, arguments);
+            cursor.close();
+            return db.close();
+          });
         } else {
           return callback();
         }
@@ -802,7 +808,13 @@
       if (err) {
         return callback(err);
       } else {
-        return cursor.toArray(cb);
+        return cursor.toArray(function() {
+          var db;
+          db = cursor.db;
+          callback.apply(null, arguments);
+          cursor.close();
+          return db.close();
+        });
       }
     }).then(function(err, users, cb) {
       if (cb == null) cb = function() {};

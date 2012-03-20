@@ -30,6 +30,7 @@ exports.getByUsername = (username, callback = ->) ->
     if err?
       callback err
     else if cursor?
+      db = cursor.db
       cursor.toArray (toArrayErr, users) ->
         if toArrayErr?
           callback toArrayErr
@@ -37,6 +38,8 @@ exports.getByUsername = (username, callback = ->) ->
           callback null, users[0]
         else
           callback null, null
+        cursor.close()
+        db.close()
     else
       callback 'DB read failed'
       

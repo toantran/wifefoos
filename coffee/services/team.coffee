@@ -108,7 +108,12 @@ exports.getChallenge = getChallenge = (teamid, opponentid, callback = ->) ->
           teamid: opponentid
     , {}, (err, cursor) ->
       return callback(err) if err
-      cursor.toArray callback
+      cursor.toArray ->           
+        db = cursor.db
+        callback.apply null, arguments
+        cursor.close()
+        db.close()
+
   catch e
     console.trace e
     throw e    
@@ -627,7 +632,12 @@ exports.getAll = (availableOnly, callback = ->) ->
       if readErr?
         callback readErr
       else if cursor?
-        cursor.toArray callback
+        cursor.toArray ->           
+          db = cursor.db
+          callback.apply null, arguments
+          cursor.close()
+          db.close()
+
       else
         callback()
         

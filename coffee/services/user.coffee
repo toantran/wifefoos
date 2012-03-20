@@ -572,7 +572,12 @@ exports.getAllPlayers = (callback = ->) ->
       if readErr?
         callback readErr
       else if cursor?
-        cursor.toArray callback
+        cursor.toArray ->           
+          db = cursor.db
+          callback.apply null, arguments
+          cursor.close()
+          db.close()
+
       else
         callback()
         
@@ -616,7 +621,12 @@ exports.getUserByToken = (token, callback = ->) ->
     if err
       callback err
     else
-      cursor.toArray cb
+      cursor.toArray ->           
+        db = cursor.db
+        callback.apply null, arguments
+        cursor.close()
+        db.close()
+
   .then (err, users, cb = ->) ->
     if err
       callback err

@@ -4,13 +4,22 @@ exports.getNews = (callback = ->) ->
   newsrepo.read {}, (err, cursor) ->
     return callback(err) if err? or not cursor?
     cursor.sort createdat: -1
-    cursor.toArray callback    
+    cursor.toArray ->           
+      db = cursor.db
+      callback.apply null, arguments
+      cursor.close()
+      db.close()
     
 exports.getHighlights = (callback = ->) ->
   newsrepo.read {highlight: 1}, (err, cursor) ->
     return callback(err) if err? or not cursor?
     cursor.sort createdat: -1
-    cursor.toArray callback
+    cursor.toArray ->           
+      db = cursor.db
+      callback.apply null, arguments
+      cursor.close()
+      db.close()
+
     
     
 createNewsContent = (tpl, data) ->

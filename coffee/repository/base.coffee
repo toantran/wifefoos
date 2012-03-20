@@ -5,7 +5,7 @@ mongo = require 'mongodb'
 
 dbName = 'wifefoosdb'
 host = process.env['MONGO_NODE_DRIVER_HOST'] ? 'localhost'
-port = process.env['MONGO_NODE_DRIVER_PORT'] ? Connection.DEFAULT_PORT;
+port = process.env['MONGO_NODE_DRIVER_PORT'] ? Connection.DEFAULT_PORT
 
 exports.setCollectionName = (@collectionName) ->
 
@@ -89,6 +89,7 @@ repository::create = (doc, callback = ->) ->
           callback.apply this, arguments
           db.close()
       catch e
+        db.close()
         console.trace e
         callback e      
 
@@ -109,6 +110,7 @@ repository::read = (findArgs..., callback = ->) ->
       catch e
         console.trace e
         callback e
+        db.close()
         
 
 repository::getById = (docid, callback = ->) ->
@@ -122,6 +124,10 @@ repository::getById = (docid, callback = ->) ->
       return callback(toArrayErr) if toArrayErr
       return callback('Not found') unless docs?.length
       callback null, docs[0]
+      db = cursor.db
+      cursor.close()
+      db.close()
+      
 
 
 repository::update = (criteria, objNew, options = {}, callback ) ->
@@ -139,6 +145,7 @@ repository::update = (criteria, objNew, options = {}, callback ) ->
           db.close()
           callback.apply this, arguments
       catch e
+        db.close()
         console.trace e
         callback e if callback?
         
@@ -155,6 +162,7 @@ repository::save = (doc, callback = ->) ->
           db.close()
           callback.apply this, arguments
       catch e
+        db.close()
         console.trace e
         callback e if callback?        
       
@@ -168,7 +176,8 @@ repository::remove = (criteria, callback = ->) ->
   @getCollection db, (collectionErr, collection) ->
     checkError collectionErr, errorFn, ->
       collection.remove criteria
-      callback()    
+      callback()
+      db.close()    
     
 
 exports.repository = repository
