@@ -706,12 +706,14 @@ exports.getFullUser = (userid, callback = ->) ->
   console.assert userid, 'userid cannot be null or 0'
   throw 'userid cannot be null or 0' unless userid
   
+  console.time 'load userbyid'
   utils.execute( newUserRepo.getById, userid )  # load user
   .then (err, @user, cb = ->) =>
-    console.log 'load team'
+    console.timeEnd 'load userbyid'
     # load team
     return callback( err ) if err
     
+    console.time 'load team'
     if @user?.team?
       try
         teamRepo.getById @user?.team?._id, cb
@@ -721,13 +723,14 @@ exports.getFullUser = (userid, callback = ->) ->
     else 
       cb()
   .then (err, @team, cb = ->) =>   
-    console.log 'load posts'
+    console.timeEnd 'load team'
     # Load posts
     return callback( err ) if err    
+    
+    console.time 'load posts'
     @user?.team = @team
 
     if @user?.posts? and @user?.posts?.length
-      console.log 'load posts begin'
       try
         postGen = require './post'
         postGen.init()
@@ -740,7 +743,7 @@ exports.getFullUser = (userid, callback = ->) ->
       cb null, null
         
   .then (err, fullposts, cb = ->) =>
-    console.log 'load invites'    
+    console.timeEnd 'load posts'
     if fullposts?
       posts = (post for post in fullposts when post?.desc?)
     else
@@ -752,6 +755,8 @@ exports.getFullUser = (userid, callback = ->) ->
         
     @user?.posts = posts
     # Load invites
+
+    console.time 'load invites'
     try
       if @user?.invites and @user?.invites?.length
         utils.mapAsync @user?.invites, loadFullInvite, cb
@@ -761,12 +766,14 @@ exports.getFullUser = (userid, callback = ->) ->
       console.trace e
       cb e
   .then (err, invites, cb = ->) =>
-    console.log 'load challenges'
+    console.timeEnd 'load invites'
     return callback( err ) if err
     
     @user?.invites = invites
     
     # Load challenges
+    
+    console.time 'load challenges'
     if @team?.challenges?.length
       
       loadChallenge = (challenge, loadChallengeCallback = ->) ->
@@ -778,13 +785,14 @@ exports.getFullUser = (userid, callback = ->) ->
     else
       cb null, null    
   .then ( err, challenges, cb = ->) =>
-    console.log 'load matches'
+    console.timeEnd 'load challenges'
     @team?.challenges = challenges
     @user?.challenges = challenges
     allmatches = @team?.matches
     # Load pending matches
     matches = (match for match in allmatches when match?.status is 'pending') if allmatches?
     
+    console.time 'load matches'
     if matches?.length      
       matchsvc = require './match'
       async = require 'async'
@@ -822,6 +830,7 @@ exports.getFullUser = (userid, callback = ->) ->
     else
       callback null, @user
   .then ( err, matches, cb = ->) =>
+    console.timeEnd 'load matches'
     console.log 'load end'
     @user.matches = matches
     callback null, @user

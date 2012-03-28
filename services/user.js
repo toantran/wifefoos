@@ -913,12 +913,14 @@
     if (callback == null) callback = function() {};
     console.assert(userid, 'userid cannot be null or 0');
     if (!userid) throw 'userid cannot be null or 0';
+    console.time('load userbyid');
     return utils.execute(newUserRepo.getById, userid).then(function(err, user, cb) {
       var _ref, _ref2, _ref3;
       _this.user = user;
       if (cb == null) cb = function() {};
-      console.log('load team');
+      console.timeEnd('load userbyid');
       if (err) return callback(err);
+      console.time('load team');
       if (((_ref = _this.user) != null ? _ref.team : void 0) != null) {
         try {
           return teamRepo.getById((_ref2 = _this.user) != null ? (_ref3 = _ref2.team) != null ? _ref3._id : void 0 : void 0, cb);
@@ -933,11 +935,11 @@
       var postGen, _ref, _ref2, _ref3, _ref4, _ref5;
       _this.team = team;
       if (cb == null) cb = function() {};
-      console.log('load posts');
+      console.timeEnd('load team');
       if (err) return callback(err);
+      console.time('load posts');
       if ((_ref = _this.user) != null) _ref.team = _this.team;
       if ((((_ref2 = _this.user) != null ? _ref2.posts : void 0) != null) && ((_ref3 = _this.user) != null ? (_ref4 = _ref3.posts) != null ? _ref4.length : void 0 : void 0)) {
-        console.log('load posts begin');
         try {
           postGen = require('./post');
           postGen.init();
@@ -953,7 +955,7 @@
     }).then(function(err, fullposts, cb) {
       var post, posts, _ref, _ref2, _ref3, _ref4, _ref5;
       if (cb == null) cb = function() {};
-      console.log('load invites');
+      console.timeEnd('load posts');
       if (fullposts != null) {
         posts = (function() {
           var _i, _len, _results;
@@ -973,6 +975,7 @@
         });
       }
       if ((_ref = _this.user) != null) _ref.posts = posts;
+      console.time('load invites');
       try {
         if (((_ref2 = _this.user) != null ? _ref2.invites : void 0) && ((_ref3 = _this.user) != null ? (_ref4 = _ref3.invites) != null ? _ref4.length : void 0 : void 0)) {
           return utils.mapAsync((_ref5 = _this.user) != null ? _ref5.invites : void 0, loadFullInvite, cb);
@@ -986,9 +989,10 @@
     }).then(function(err, invites, cb) {
       var _ref, _ref2, _ref3, _ref4;
       if (cb == null) cb = function() {};
-      console.log('load challenges');
+      console.timeEnd('load invites');
       if (err) return callback(err);
       if ((_ref = _this.user) != null) _ref.invites = invites;
+      console.time('load challenges');
       if ((_ref2 = _this.team) != null ? (_ref3 = _ref2.challenges) != null ? _ref3.length : void 0 : void 0) {
         loadChallenge = function(challenge, loadChallengeCallback) {
           if (loadChallengeCallback == null) loadChallengeCallback = function() {};
@@ -1004,7 +1008,7 @@
     }).then(function(err, challenges, cb) {
       var allmatches, async, match, matches, matchsvc, _ref, _ref2, _ref3;
       if (cb == null) cb = function() {};
-      console.log('load matches');
+      console.timeEnd('load challenges');
       if ((_ref = _this.team) != null) _ref.challenges = challenges;
       if ((_ref2 = _this.user) != null) _ref2.challenges = challenges;
       allmatches = (_ref3 = _this.team) != null ? _ref3.matches : void 0;
@@ -1021,6 +1025,7 @@
           return _results;
         })();
       }
+      console.time('load matches');
       if (matches != null ? matches.length : void 0) {
         matchsvc = require('./match');
         async = require('async');
@@ -1077,6 +1082,7 @@
       }
     }).then(function(err, matches, cb) {
       if (cb == null) cb = function() {};
+      console.timeEnd('load matches');
       console.log('load end');
       _this.user.matches = matches;
       return callback(null, _this.user);
