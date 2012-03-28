@@ -749,11 +749,8 @@
           return callback(readErr);
         } else if (cursor != null) {
           return cursor.toArray(function() {
-            var db;
-            db = cursor.db;
             callback.apply(null, arguments);
-            cursor.close();
-            return db.close();
+            return cursor.close();
           });
         } else {
           return callback();
@@ -812,8 +809,7 @@
           var db;
           db = cursor.db;
           callback.apply(null, arguments);
-          cursor.close();
-          return db.close();
+          return cursor.close();
         });
       }
     }).then(function(err, users, cb) {
@@ -921,6 +917,7 @@
       var _ref, _ref2, _ref3;
       _this.user = user;
       if (cb == null) cb = function() {};
+      console.log('load team');
       if (err) return callback(err);
       if (((_ref = _this.user) != null ? _ref.team : void 0) != null) {
         try {
@@ -936,9 +933,11 @@
       var postGen, _ref, _ref2, _ref3, _ref4, _ref5;
       _this.team = team;
       if (cb == null) cb = function() {};
+      console.log('load posts');
       if (err) return callback(err);
       if ((_ref = _this.user) != null) _ref.team = _this.team;
       if ((((_ref2 = _this.user) != null ? _ref2.posts : void 0) != null) && ((_ref3 = _this.user) != null ? (_ref4 = _ref3.posts) != null ? _ref4.length : void 0 : void 0)) {
+        console.log('load posts begin');
         try {
           postGen = require('./post');
           postGen.init();
@@ -948,11 +947,13 @@
           return cb(e);
         }
       } else {
+        console.log('load no posts');
         return cb(null, null);
       }
     }).then(function(err, fullposts, cb) {
       var post, posts, _ref, _ref2, _ref3, _ref4, _ref5;
       if (cb == null) cb = function() {};
+      console.log('load invites');
       if (fullposts != null) {
         posts = (function() {
           var _i, _len, _results;
@@ -985,6 +986,7 @@
     }).then(function(err, invites, cb) {
       var _ref, _ref2, _ref3, _ref4;
       if (cb == null) cb = function() {};
+      console.log('load challenges');
       if (err) return callback(err);
       if ((_ref = _this.user) != null) _ref.invites = invites;
       if ((_ref2 = _this.team) != null ? (_ref3 = _ref2.challenges) != null ? _ref3.length : void 0 : void 0) {
@@ -1002,6 +1004,7 @@
     }).then(function(err, challenges, cb) {
       var allmatches, async, match, matches, matchsvc, _ref, _ref2, _ref3;
       if (cb == null) cb = function() {};
+      console.log('load matches');
       if ((_ref = _this.team) != null) _ref.challenges = challenges;
       if ((_ref2 = _this.user) != null) _ref2.challenges = challenges;
       allmatches = (_ref3 = _this.team) != null ? _ref3.matches : void 0;
@@ -1074,6 +1077,7 @@
       }
     }).then(function(err, matches, cb) {
       if (cb == null) cb = function() {};
+      console.log('load end');
       _this.user.matches = matches;
       return callback(null, _this.user);
     });

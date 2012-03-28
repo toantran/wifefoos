@@ -70,6 +70,7 @@
       };
       returnback = function(err) {
         var _ref;
+        if (err) console.trace(err);
         if (err) {
           return callback(err, post);
         } else {

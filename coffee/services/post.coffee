@@ -39,6 +39,7 @@ exports.loadComment = loadComment = (comment, callback = ->) ->
 
 exports.makePostGen = (user) ->
   (post, callback = ->) ->
+    
     return callback(null, post) unless post?
     
     setPictureUrl = (pictureurl) ->
@@ -48,6 +49,8 @@ exports.makePostGen = (user) ->
       post.desc = desc
     
     returnback = (err) ->
+    
+      console.trace err if err
       if err
         callback err, post
       else

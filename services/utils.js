@@ -125,4 +125,23 @@
     return wrapper;
   };
 
+  exports.bind = function(fn, scope, args, appendArgs) {
+    var method;
+    if (arguments.length === 2) {
+      return function() {
+        return fn.apply(scope, arguments);
+      };
+    }
+    method = fn;
+    return function() {
+      var callArgs, _ref;
+      callArgs = args != null ? args : arguments;
+      if (appendArgs === true) {
+        callArgs = arguments.slice(0);
+        callArgs = callArgs.concat(args);
+      }
+      return method.apply((_ref = scope != null ? scope : global) != null ? _ref : window, callArgs);
+    };
+  };
+
 }).call(this);

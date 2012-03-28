@@ -27,10 +27,8 @@ exports.getCompleteMatches = (callback = ->) ->
         callback readErr
       else if cursor?
         cursor.toArray ->           
-          db = cursor.db
           callback.apply null, arguments
           cursor.close()
-          db.close()
       else
         callback()
         
@@ -51,10 +49,8 @@ exports.getPendingExpiredMatches = (callback) ->
         callback readErr
       else if cursor?
         cursor.toArray ->           
-          db = cursor.db
           callback.apply null, arguments
           cursor.close()
-          db.close()
       else
         callback()
         

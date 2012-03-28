@@ -1,7 +1,7 @@
 baseDb = require('./base')
-baseRepo = new baseDb.repository('news')
+baseRepo = new baseDb.Repository('news')
 
-{Db, ObjectId, Timestamp, Connection, Server, checkError, errorHandler, getDb} = baseDb
+{Db, ObjectId, Timestamp, Connection, Server} = baseDb
 
 exports.create = () ->
   baseRepo.create.apply baseRepo, arguments
@@ -16,3 +16,5 @@ exports.remove = () ->
 exports.getById = () ->
   baseRepo.getById.apply baseRepo, arguments
 exports.ObjectId = ObjectId
+exports.closeDb = () ->
+  baseRepo.closeDb.apply baseRepo, arguments

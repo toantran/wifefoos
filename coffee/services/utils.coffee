@@ -89,7 +89,20 @@ exports.execute = (task, args...) ->
   return wrapper;
   
   
+exports.bind = (fn, scope, args, appendArgs) ->
+  if arguments.length is 2
+    return ->
+      fn.apply scope, arguments
+      
+  method = fn
   
+  -> 
+    callArgs = args ? arguments
+    if appendArgs is true
+      callArgs = arguments[0..]
+      callArgs = callArgs.concat args
+    
+    method.apply (scope ? global) ? window, callArgs        
   
   
       

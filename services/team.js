@@ -147,11 +147,8 @@
       }, {}, function(err, cursor) {
         if (err) return callback(err);
         return cursor.toArray(function() {
-          var db;
-          db = cursor.db;
           callback.apply(null, arguments);
-          cursor.close();
-          return db.close();
+          return cursor.close();
         });
       });
     } catch (e) {
@@ -880,11 +877,8 @@
           return callback(readErr);
         } else if (cursor != null) {
           return cursor.toArray(function() {
-            var db;
-            db = cursor.db;
             callback.apply(null, arguments);
-            cursor.close();
-            return db.close();
+            return cursor.close();
           });
         } else {
           return callback();

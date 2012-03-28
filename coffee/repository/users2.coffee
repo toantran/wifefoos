@@ -1,12 +1,7 @@
-#baseDb = require './base'
-#baseDb.setCollectionName 'users'
-#{getDb, checkError, getCollection, errorHandler, create, read, update, remove, getById, ObjectId} = baseDb
-#[exports.create, exports.read, exports.update, exports.remove, exports.getById, exports.ObjectId] = [create, read, update, remove, getById, ObjectId]
-
 baseDb = require('./base')
-baseRepo = new baseDb.repository('users')
+baseRepo = new baseDb.Repository('users')
 
-{Db, ObjectId, Timestamp, Connection, Server, checkError, errorHandler, getDb} = baseDb
+{Db, ObjectId, Timestamp, Connection, Server} = baseDb
 
 exports.create = () ->
   baseRepo.create.apply baseRepo, arguments
@@ -21,6 +16,8 @@ exports.remove = () ->
 exports.getById = () ->
   baseRepo.getById.apply baseRepo, arguments
 exports.ObjectId = ObjectId
+exports.closeDb = () ->
+  baseRepo.closeDb.apply baseRepo, arguments
    
 
 exports.getByUsername = (username, callback = ->) ->
@@ -30,7 +27,6 @@ exports.getByUsername = (username, callback = ->) ->
     if err?
       callback err
     else if cursor?
-      db = cursor.db
       cursor.toArray (toArrayErr, users) ->
         if toArrayErr?
           callback toArrayErr
@@ -39,7 +35,6 @@ exports.getByUsername = (username, callback = ->) ->
         else
           callback null, null
         cursor.close()
-        db.close()
     else
       callback 'DB read failed'
       

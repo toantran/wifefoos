@@ -573,11 +573,8 @@ exports.getAllPlayers = (callback = ->) ->
         callback readErr
       else if cursor?
         cursor.toArray ->           
-          db = cursor.db
           callback.apply null, arguments
           cursor.close()
-          db.close()
-
       else
         callback()
         
@@ -625,7 +622,6 @@ exports.getUserByToken = (token, callback = ->) ->
         db = cursor.db
         callback.apply null, arguments
         cursor.close()
-        db.close()
 
   .then (err, users, cb = ->) ->
     if err
@@ -712,6 +708,7 @@ exports.getFullUser = (userid, callback = ->) ->
   
   utils.execute( newUserRepo.getById, userid )  # load user
   .then (err, @user, cb = ->) =>
+    console.log 'load team'
     # load team
     return callback( err ) if err
     
@@ -724,11 +721,13 @@ exports.getFullUser = (userid, callback = ->) ->
     else 
       cb()
   .then (err, @team, cb = ->) =>   
+    console.log 'load posts'
     # Load posts
     return callback( err ) if err    
     @user?.team = @team
 
     if @user?.posts? and @user?.posts?.length
+      console.log 'load posts begin'
       try
         postGen = require './post'
         postGen.init()
@@ -737,9 +736,11 @@ exports.getFullUser = (userid, callback = ->) ->
         console.trace e
         cb e
     else
+      console.log 'load no posts'
       cb null, null
         
-  .then (err, fullposts, cb = ->) =>    
+  .then (err, fullposts, cb = ->) =>
+    console.log 'load invites'    
     if fullposts?
       posts = (post for post in fullposts when post?.desc?)
     else
@@ -760,6 +761,7 @@ exports.getFullUser = (userid, callback = ->) ->
       console.trace e
       cb e
   .then (err, invites, cb = ->) =>
+    console.log 'load challenges'
     return callback( err ) if err
     
     @user?.invites = invites
@@ -776,6 +778,7 @@ exports.getFullUser = (userid, callback = ->) ->
     else
       cb null, null    
   .then ( err, challenges, cb = ->) =>
+    console.log 'load matches'
     @team?.challenges = challenges
     @user?.challenges = challenges
     allmatches = @team?.matches
@@ -819,6 +822,7 @@ exports.getFullUser = (userid, callback = ->) ->
     else
       callback null, @user
   .then ( err, matches, cb = ->) =>
+    console.log 'load end'
     @user.matches = matches
     callback null, @user
     

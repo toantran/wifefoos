@@ -12,11 +12,8 @@
         createdat: -1
       });
       return cursor.toArray(function() {
-        var db;
-        db = cursor.db;
         callback.apply(null, arguments);
-        cursor.close();
-        return db.close();
+        return cursor.close();
       });
     });
   };
@@ -31,11 +28,8 @@
         createdat: -1
       });
       return cursor.toArray(function() {
-        var db;
-        db = cursor.db;
         callback.apply(null, arguments);
-        cursor.close();
-        return db.close();
+        return cursor.close();
       });
     });
   };

@@ -1,7 +1,7 @@
 baseDb = require('./base')
-baseRepo = new baseDb.repository('teams')
+baseRepo = new baseDb.Repository('teams')
 
-{Db, ObjectId, Timestamp, Connection, Server, checkError, errorHandler, getDb} = baseDb
+{Db, ObjectId, Timestamp, Connection, Server} = baseDb
 
 exports.create = () ->
   baseRepo.create.apply baseRepo, arguments
@@ -16,6 +16,8 @@ exports.remove = () ->
 exports.getById = () ->
   baseRepo.getById.apply baseRepo, arguments
 exports.ObjectId = ObjectId
+exports.closeDb = () ->
+  baseRepo.closeDb.apply baseRepo, arguments
 
 
 exports.removeChallenge = ( teamid, otherteamid, callback = ->) ->
